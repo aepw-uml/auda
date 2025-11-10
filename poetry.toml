@@ -1,0 +1,5 @@
+[virtualenvs]
+# Automatically create a virtual environment for the project if it doesn't exist
+create = true
+# Create the virtual environment inside the project directory (.venv)
+in-project = true

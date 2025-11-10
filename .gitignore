@@ -1,0 +1,17 @@
+# macOS system files
+.DS_Store
+
+# Python virtual environment (created by Poetry)
+.venv
+
+# Python cache directories
+__pycache__
+
+# Environment-specific variable files
+.env
+
+# Local files for the project
+/local
+
+# Cache directory
+/cache
