@@ -22,6 +22,11 @@ class TransformerISName:
     LOWER_TRIMMING_PERCENTAGE = 'lower_trimming_percentage'
     UPPER_TRIMMING_PERCENTAGE = 'upper_trimming_percentage'
 
+    # Split specific
+    SHUFFLE = 'shuffle'
+    TRAINING_FRACTION = 'training_fraction'
+    VALIDATION_FRACTION = 'validation_fraction'
+
 
 class TransformerOSName:
     SAMPLES = DatasetOSName.SAMPLES
@@ -38,6 +43,14 @@ class TransformerOSName:
 
     # Trimming specific
     TRIMMED_SAMPLES = 'trimmed_samples'
+
+    # Split specific
+    TRAIN_SAMPLES = 'train_samples'
+    VALIDATION_SAMPLES = 'validation_samples'
+    TEST_SAMPLES = 'test_samples'
+    NUM_TRAIN_SAMPLES = 'num_train_samples'
+    NUM_VALIDATION_SAMPLES = 'num_validation_samples'
+    NUM_TEST_SAMPLES = 'num_test_samples'
 
 
 TRANSFORMER_KIND = 'transformer'

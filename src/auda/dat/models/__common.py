@@ -42,9 +42,10 @@ class ModelOSName:
     MODEL_TYPE = 'model_type'
     MODEL = 'model'
 
-    # Polynomial regression and other models
+    # Polynomial regression specific
     INTERCEPT = 'intercept'
     COEFFICIENTS = 'coefficients'
+    COEFFICIENTS_EXPONENTS = 'coefficients_exponents'
 
     # Support vector regression specific
     REGULARIZATION_PARAMETER = ModelISName.REGULARIZATION_PARAMETER
@@ -99,3 +100,22 @@ def create_curve(x_curve: List[float | List[float]], y_curve: List[float]) -> Cu
         return [x] if isinstance(x, float) else cast(List[float], x)
 
     return [(to_float_list(x), y) for x, y in zip(x_curve, y_curve)]
+
+
+def powers_2d(max_degree: int) -> List[Tuple[int, int]]:
+    """
+    Generate all (i, j) with total degree i + j <= max_degree, ordered by total
+    degree ascending, and within the same total degree by i descending.
+
+    Example for degree = 2:
+        (0, 0),
+        (1, 0), (0, 1),
+        (2, 0), (1, 1), (0, 2)
+
+    Example for degree = 3:
+        (0, 0),
+        (1, 0), (0, 1),
+        (2, 0), (1, 1), (0, 2),
+        (3, 0), (2, 1), (1, 2), (0, 3)
+    """
+    return [(i, d - i) for d in range(max_degree + 1) for i in range(d, -1, -1)]

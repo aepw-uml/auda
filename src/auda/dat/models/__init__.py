@@ -5,6 +5,8 @@ from .__common import (
     ModelOSName,
     ModelType,
     create_curve,
+    powers_2d,
+    split_labeled_samples,
 )
 
 __all__ = [
@@ -14,4 +16,6 @@ __all__ = [
     'Curve',
     'create_curve',
     'MODEL_KIND',
+    'powers_2d',
+    'split_labeled_samples',
 ]
