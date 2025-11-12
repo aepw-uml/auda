@@ -72,4 +72,4 @@ class GdpPwDataset(Task):
         self.set_output(DatasetOSName.ORIGINAL_SAMPLES, samples)
         self.set_output(DatasetOSName.LABEL, 'Plastic Waste Generated (Metric Tons)')
         self.set_output(DatasetOSName.FEATURE_NAMES, ['GDP'])
-        self.set_output(DatasetOSName.UNITS, [['US Dollars'], 'Metric Tons'])
+        self.set_output(DatasetOSName.UNITS, ['US Dollars'])

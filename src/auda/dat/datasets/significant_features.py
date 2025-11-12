@@ -77,3 +77,15 @@ class SignificantFeaturesDataset(Task):
             ],
         )
         self.set_output(DatasetOSName.LABEL, 'Significant Features')
+        self.set_output(
+            DatasetOSName.UNITS,
+            [
+                None,
+                'US Dollars',
+                'Metric Tons',
+                'Kg/Person/Year',
+                'Metric Tons',
+                None,
+                None,
+            ],
+        )

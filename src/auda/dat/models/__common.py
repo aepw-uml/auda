@@ -43,6 +43,7 @@ class ModelOSName:
     MODEL = 'model'
 
     # Polynomial regression specific
+    DEGREE = ModelISName.DEGREE
     INTERCEPT = 'intercept'
     COEFFICIENTS = 'coefficients'
     COEFFICIENTS_EXPONENTS = 'coefficients_exponents'

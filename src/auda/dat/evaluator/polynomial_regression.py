@@ -5,12 +5,12 @@ from auda.dat.models import split_labeled_samples
 from auda.dat.transformers import standardize_x
 from auda.utils.pipeline import IOSpec, Task, task
 
-from .__common import EvaluatorISName, EvaluatorOSName
+from .__common import EVALUATOR_KIND, EvaluatorISName, EvaluatorOSName
 
 
 @task(
     id='MD-PR-2D-EVAL',
-    kind='model',
+    kind=EVALUATOR_KIND,
     description='Evaluates a trained 2D polynomial regression model on test samples.',
     input_specs={
         EvaluatorISName.TEST_SAMPLES: IOSpec(dtype=LabeledSamples),

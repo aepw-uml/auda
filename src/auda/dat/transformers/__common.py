@@ -23,7 +23,8 @@ class TransformerISName:
     UPPER_TRIMMING_PERCENTAGE = 'upper_trimming_percentage'
 
     # Split specific
-    SHUFFLE = 'shuffle'
+    SPLIT_SHUFFLE = 'split_shuffle'
+    SPLIT_SEED = 'split_seed'
     TRAINING_FRACTION = 'training_fraction'
     VALIDATION_FRACTION = 'validation_fraction'
 

@@ -18,6 +18,10 @@ from .__common import TRANSFORMER_KIND, TransformerISName, TransformerOSName
         TransformerISName.VALIDATION_FRACTION: IOSpec(
             dtype=float, required=False, default=0.0
         ),
+        TransformerISName.SPLIT_SHUFFLE: IOSpec(
+            dtype=bool, required=False, default=True
+        ),
+        TransformerISName.SPLIT_SEED: IOSpec(dtype=int, required=False, default=42),
     },
     output_specs={
         TransformerOSName.SAMPLES: IOSpec(dtype=LabeledSample),
@@ -44,6 +48,14 @@ class TrimmingTransformer(Task):
 
         samples = self.get_input(TransformerISName.SAMPLES)
         n_samples = len(samples)
+
+        # ---- Shuffle samples
+        split_shuffle = self.get_input(TransformerISName.SPLIT_SHUFFLE)
+        if split_shuffle:
+            import random
+
+            split_seed = self.get_input(TransformerISName.SPLIT_SEED)
+            random.Random(split_seed).shuffle(samples)
 
         n_training_samples = int(n_samples * training_fraction)
         n_validation_samples = int(n_samples * validation_fraction)

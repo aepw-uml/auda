@@ -18,7 +18,6 @@ from .__common import PLOTTER_KIND, PlotterOSName, extend_range
         PlotterISName.FEATURE_NAMES: IOSpec(dtype=List[str]),
         PlotterISName.UNITS: IOSpec(dtype=List[str]),
         PlotterISName.TITLE: IOSpec(dtype=str, required=False),
-        PlotterISName.INLIER_SAMPLES: IOSpec(dtype=LabeledSamples, required=False),
         PlotterISName.MODEL_TYPE: IOSpec(dtype=str),
         PlotterISName.MODEL: IOSpec(dtype=object),
         PlotterISName.SAMPLES: IOSpec(dtype=LabeledSamples),
@@ -44,14 +43,10 @@ class SupportVectorRegressionPlotter(Task):
 
         from auda.dat.models import create_curve
 
+        samples = self.get_input(PlotterISName.SAMPLES)
+
         # Create a figure and axis
         fig, ax = plt.subplots()
-
-        # ---- Sample Selection ----
-        samples = self.get_input(PlotterISName.SAMPLES)
-        inlier_samples = self.get_input(PlotterISName.INLIER_SAMPLES)
-        if inlier_samples:
-            samples = inlier_samples
 
         # ---- Scatter Original Samples ----
         x_true = [x for x, _ in samples]

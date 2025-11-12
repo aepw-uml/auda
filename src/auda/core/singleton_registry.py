@@ -15,6 +15,7 @@ class SingletonRegistry:
     def get(self, cls: Type[T]) -> T:
         """
         Return the singleton instance for `cls`, creating it if needed.
+
         Type-safe: if you pass `Type[Foo]`, you'll get `Foo`.
         """
         if cls not in self._singletons:

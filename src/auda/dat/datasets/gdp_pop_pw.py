@@ -77,6 +77,4 @@ class PwRelatedDataset(Task):
             DatasetOSName.FEATURE_NAMES,
             ['Year', 'GDP', 'Population', 'Urban Population', 'Rural Population'],
         )
-        self.set_output(
-            DatasetOSName.UNITS, [[None, 'US Dollars', None, None, None], 'Metric Tons']
-        )
+        self.set_output(DatasetOSName.UNITS, [None, 'US Dollars', None, None, None])

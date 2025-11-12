@@ -4,16 +4,17 @@ from .__common import (
     DatasetOSName,
     LabeledSample,
     LabeledSamples,
-    LabeledUnits,
     Samples,
     Unit,
     Units,
     UnlabeledSample,
     UnlabeledSamples,
-    UnlabeledUnits,
+    get_feature_label,
+    verify_feature_space_dimension,
 )
 
 __all__ = [
+    'DATASET_KIND',
     'DatasetISName',
     'DatasetOSName',
     'UnlabeledSample',
@@ -22,8 +23,7 @@ __all__ = [
     'LabeledSamples',
     'Samples',
     'Unit',
-    'UnlabeledUnits',
-    'LabeledUnits',
     'Units',
-    'DATASET_KIND',
+    'verify_feature_space_dimension',
+    'get_feature_label',
 ]

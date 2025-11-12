@@ -22,7 +22,6 @@ from .__common import (
     description='Trains a Polynomial Regression model to fit nonlinear trends.',
     input_specs={
         ModelISName.SAMPLES: IOSpec(dtype=LabeledSamples),
-        ModelOSName.INLIER_SAMPLES: IOSpec(dtype=LabeledSamples, required=False),
         ModelISName.DEGREE: IOSpec(dtype=int, required=False, default=4),
         ModelISName.X_MEAN: IOSpec(dtype=List[float]),
         ModelISName.X_STANDARD_DEVIATION: IOSpec(dtype=List[float]),
@@ -40,11 +39,7 @@ class PolynomialRegressorModel(Task):
         Performs polynomial regression using the Ordinary Least Squares (OLS) method.
         """
         degree: int = int(self.get_input(ModelISName.DEGREE))
-
         samples = self.get_input(ModelISName.SAMPLES)
-        inlier_samples = self.get_input(ModelISName.INLIER_SAMPLES)
-        if inlier_samples is not None:
-            samples = inlier_samples
 
         x, y = split_labeled_samples(samples)
         x = x.ravel()
@@ -72,12 +67,12 @@ class PolynomialRegressorModel(Task):
     description='Trains a 2D Polynomial Regression model with cross terms.',
     input_specs={
         ModelISName.SAMPLES: IOSpec(dtype=LabeledSamples),
-        ModelOSName.INLIER_SAMPLES: IOSpec(dtype=LabeledSamples, required=False),
         ModelISName.DEGREE: IOSpec(dtype=int, required=False, default=3),
         ModelISName.X_MEAN: IOSpec(dtype=List[float]),
         ModelISName.X_STANDARD_DEVIATION: IOSpec(dtype=List[float]),
     },
     output_specs={
+        ModelOSName.DEGREE: IOSpec(dtype=int),
         ModelOSName.MODEL_TYPE: IOSpec(dtype=str),
         ModelOSName.INTERCEPT: IOSpec(dtype=float),
         ModelOSName.COEFFICIENTS: IOSpec(dtype=List[float]),
@@ -91,14 +86,8 @@ class PolynomialRegressor2D(Task):
         Fits z = Σ_{i+j<=D} θ_{i,j} * x^i * y^j on standardized features,
         using OLS (pseudo-inverse). Intercept is θ_{0,0}.
         """
-        # ---- Params
         degree: int = int(self.get_input(ModelISName.DEGREE))
-
-        # ---- Data (support inliers if provided)
         samples = self.get_input(ModelISName.SAMPLES)
-        inlier_samples = self.get_input(ModelISName.INLIER_SAMPLES)
-        if inlier_samples is not None:
-            samples = inlier_samples
 
         X_raw, y = split_labeled_samples(samples)  # X_raw: (n, m)
         if X_raw.ndim != 2 or X_raw.shape[1] != 2:
@@ -134,6 +123,7 @@ class PolynomialRegressor2D(Task):
         coeff_exps = [list(t) for t in exps[1:]]
 
         # ---- Populate outputs
+        self.set_output(ModelOSName.DEGREE, degree)
         self.set_output(ModelOSName.MODEL_TYPE, ModelType.POLYNOMIAL_REGRESSION)
         self.set_output(ModelOSName.INTERCEPT, intercept)
         self.set_output(ModelOSName.COEFFICIENTS, coeffs)

@@ -73,4 +73,4 @@ class PopPwDataset(Task):
         self.set_output(DatasetOSName.ORIGINAL_SAMPLES, samples)
         self.set_output(DatasetOSName.LABEL, 'Plastic Waste Generated (Metric Tons)')
         self.set_output(DatasetOSName.FEATURE_NAMES, ['Population'])
-        self.set_output(DatasetOSName.UNITS, [[None], 'Metric Tons'])
+        self.set_output(DatasetOSName.UNITS, [None])
