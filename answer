@@ -1,5 +1,19 @@
+plot.png
 {
-  "prompt": "I want to check the trend of plastic waste generation in Japan between 2010 to 2020",
-  "answer": "{\n    \"model_name\": \"PR\",\n    \"feature_names\": [\"year\"],\n    \"units\": [\"year\"],\n    \"label\": \"plastic_waste_generated\",\n    \"title\": \"Trend of Plastic Waste Generation in Japan (2010-2020)\",\n    \"degree\": 3\n}",
-  "sql_statements": "SELECT year, plastic_waste_generated\nFROM d_waste_generation_management\nWHERE location = 'Japan' AND year BETWEEN 2010 AND 2020\nORDER BY year;"
+  "prompt": "I want to see the trend of plastic waste generation in Japan from 2008 on.",
+  "answer": "{\"model_name\": \"PR\", \"feature_names\": [\"year\"], \"target_name\": \"plastic_waste_generated\", \"units\": [\"year\"], \"label\": \"Plastic Waste Generated\", \"title\": \"Trend of Plastic Waste Generation in Japan from 2008 Onwards\", \"degree\": 2}",
+  "sql_statements": "SELECT year, plastic_waste_generated \nFROM d_waste_generation_management \nWHERE location = 'Japan' AND year >= 2008 \nORDER BY year;",
+  "model_requirements": {
+    "model_name": "PR",
+    "feature_names": [
+      "year"
+    ],
+    "target_name": "plastic_waste_generated",
+    "units": [
+      "year"
+    ],
+    "label": "Plastic Waste Generated",
+    "title": "Trend of Plastic Waste Generation in Japan from 2008 Onwards",
+    "degree": 2
+  }
 }

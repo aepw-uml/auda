@@ -15,11 +15,12 @@ $data
 Now, based on the provided data, you need to pick up one proper model, and return a JSON object string based on these rerquiements:
 
 1. Contains a "model_name" key.
-2. Contains a "feature_names" key, which is a list of feature names.
-3. Contains a "units" key, which is a list of units for features.
-4. Contains a "label" key, which is the string as a name of the target.
-5. Contains a "title" key, which is the title of the visualization.
-6. Contains other keys (parameters) that required by the specific model.
+2. Contains a "feature_names" key, which is a list of feature names. The feature names should be selected from the column names.
+3. Contains a "target_name" key, which is the name of the target selected from the column names. It should be an empty string if the model is unsupervised.
+4. Contains a "units" key, which is a list of units for features.
+5. Contains a "label" key, which is the string as a name of the target.
+6. Contains a "title" key, which is the title of the visualization.
+7. Contains other keys (parameters) that required by the specific model.
 
 Here are the models:
 

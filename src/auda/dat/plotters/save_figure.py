@@ -33,6 +33,8 @@ class SaveFigurePlotter(Task):
         dpi = self.get_input(PlotterISName.SAVE_DPI)
         transparent = bool(self.get_input(PlotterISName.SAVE_TRANSPARENT))
 
+        print(path)
+
         figure_path = project.results_dir / path
         os.makedirs(os.path.dirname(figure_path) or '.', exist_ok=True)
         fig.savefig(

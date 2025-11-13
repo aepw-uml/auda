@@ -14,5 +14,8 @@ class LlmOSName:
     ANSWER = 'answer'
     SQL_STATEMENTS = 'sql_statements'
 
+    # Analysis report specific
+    MODEL_REQUIREMENTS = 'model_requirements'
+
 
 LLM_KIND = 'llm'
