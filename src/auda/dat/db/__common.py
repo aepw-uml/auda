@@ -9,7 +9,7 @@ class DbISName:
 
 
 class DbOSName:
-    SQL_RESULTS = 'sql_results'
+    SQL_RESULTS_LIST = 'sql_results'
 
 
 DB_KIND = 'db'
@@ -22,9 +22,9 @@ class SqlResults(BaseModel):
     Attributes:
         sql: The SQL query that was executed.
         column_names: The names of the columns in the result set.
-        results: The rows returned by the SQL query, where each row is a list of values.
+        data: The rows returned by the SQL query, where each row is a list of values.
     """
 
     sql: str
     column_names: List[str]
-    results: List[List[Any]]
+    data: List[List[Any]]

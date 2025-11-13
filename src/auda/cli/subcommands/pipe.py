@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 import numpy as np
+from diskcache.core import json
 from typer import Argument, Option, Typer, echo
 
 from auda.dat import get_task_spec, run_pipeline
@@ -94,7 +95,7 @@ def run(
     else:
         match format:
             case 'json':
-                echo(outputs)
+                echo(json.dumps(outputs, indent=2))
             case 'table':
                 if not outputs:
                     return echo('(No outputs)')

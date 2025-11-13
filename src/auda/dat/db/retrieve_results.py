@@ -16,20 +16,24 @@ from .__common import DB_KIND, DbISName, DbOSName, SqlResults
         DbISName.SQL_STATEMENTS: IOSpec(dtype=str),
     },
     output_specs={
-        DbOSName.SQL_RESULTS: IOSpec(dtype=List[SqlResults]),
+        DbOSName.SQL_RESULTS_LIST: IOSpec(dtype=List[SqlResults]),
     },
 )
 class RetrieveResults(Task):
     @override
     def run(self) -> None:
-        sql_statements: List[str] = self.get_input(DbISName.SQL_STATEMENTS)
+        sql_statements: List[str] = [
+            stmt.strip()
+            for stmt in self.get_input(DbISName.SQL_STATEMENTS).split(';')
+            if stmt.strip() != ''
+        ]
         results: List[SqlResults] = [self.get_sql_result(sql) for sql in sql_statements]
 
-        self.set_output(DbOSName.SQL_RESULTS, results)
+        self.set_output(DbOSName.SQL_RESULTS_LIST, results)
 
     def get_sql_result(self, sql: str) -> SqlResults:
         """
-        Execute the given SQL statement and return the results.
+        Executes the given SQL statement and return the results.
 
         Args:
             sql: The SQL statement to execute.
@@ -45,5 +49,5 @@ class RetrieveResults(Task):
             return SqlResults(
                 sql=sql,
                 column_names=list(map(str, result.keys())),
-                results=[list(row) for row in result.fetchall()],
+                data=[list(row) for row in result.fetchall()],
             )

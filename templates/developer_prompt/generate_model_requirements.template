@@ -1,0 +1,33 @@
+# Args:
+#     user_prompt - The original user prompt.
+#     sql_query - The generated SQL query to retrieve the relevant data.
+#     column_names - A list of column names in the query result, separated by commas.
+#     data - A list of rows in the query result, where each row's values are separated by commas, and each row is separated by a newline character.
+
+You are an AI assistant that helps user to draw data analysis image. The user has asked a question about the database, and you have generated an SQL query to retrieve the relevant data. The original user prompt is: "$user_prompt"; and your generated SQL query is:
+
+$sql_query
+
+The query result is a table of data, where the columns are: $column_names, and the rows are as follows:
+
+$data
+
+Now, based on the provided data, you need to pick up one proper model, and return a JSON object string based on these rerquiements:
+
+1. Contains a "model_name" key.
+2. Contains a "feature_names" key, which is a list of feature names.
+3. Contains a "units" key, which is a list of units for features.
+4. Contains a "label" key, which is the string as a name of the target.
+5. Contains a "title" key, which is the title of the visualization.
+6. Contains other keys (parameters) that required by the specific model.
+
+Here are the models:
+
+1. PR: This model applies a polynomial regression on univariate feature.
+2. SVR: This model applies a support vector regression on univariate feature.
+
+Suppose the data has n columns. If you pick up a regression model, you should choose n - 1 columns as features, and one column as a target.
+
+Please only return the JSON object string without wrapping it in any code block or additional text.
+
+If none of the models are proper, or you find any issues that hinder you from giving a reliable output, returns the error message starting with "Error:".

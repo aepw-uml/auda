@@ -6,9 +6,13 @@ class LlmISName:
     # An alias for USER_PROMPT
     PROMPT = 'prompt'
 
+    SQL_QUERY = 'sql_query'
+    SQL_RESULTS_LIST = 'sql_results_list'
+
 
 class LlmOSName:
     ANSWER = 'answer'
+    SQL_STATEMENTS = 'sql_statements'
 
 
 LLM_KIND = 'llm'

@@ -34,8 +34,10 @@ class PlotterISName:
     PREDICTION_SAMPLES = PredictorOSName.PREDICTION_SAMPLES
 
     # Polynomial Regression specific
+    DEGREE = ModelOSName.DEGREE
     INTERCEPT = ModelOSName.INTERCEPT
     COEFFICIENTS = ModelOSName.COEFFICIENTS
+    COEFFICIENTS_EXPONENTS = ModelOSName.COEFFICIENTS_EXPONENTS
 
     # Support Vector Regression specific
     EPSILON = ModelISName.EPSILON

@@ -67,7 +67,7 @@ class SampleScatterPlotter(Task):
         PlotterISName.LABEL: IOSpec(dtype=str),
         PlotterISName.FEATURE_NAMES: IOSpec(dtype=List[str]),
         PlotterISName.UNITS: IOSpec(dtype=List[str]),
-        PlotterISName.TITLE: IOSpec(dtype=str, required=False),
+        PlotterISName.TITLE: IOSpec(dtype=str, required=False, default=''),
     },
     output_specs={
         PlotterOSName.FIGURE: IOSpec(dtype=object),
@@ -86,7 +86,7 @@ class SampleScatterPlotter3D(Task):
         feature_names: List[str] = self.get_input(PlotterISName.FEATURE_NAMES)
         units: List[str] = self.get_input(PlotterISName.UNITS)
         label: str = self.get_input(PlotterISName.LABEL)
-        title: str = self.get_input(PlotterISName.TITLE) or '3D Scatter Plot'
+        title: str = self.get_input(PlotterISName.TITLE)
 
         if len(feature_names) != 2:
             raise ValueError(
@@ -121,15 +121,24 @@ class SampleScatterPlotter3D(Task):
         y_label = get_feature_label(feature_names[1], units[1])
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
-        ax.set_zlabel(label, labelpad=10)
+        ax.set_zlabel(label, labelpad=5)
         ax.set_title(title, pad=18)
+        ax.zaxis.offsetText
 
         # ---- Improve layout and colorbar placement
-        fig.subplots_adjust(left=0.05, right=0.88, top=0.92, bottom=0.08)
-        cbar = fig.colorbar(sc, ax=ax, fraction=0.04, pad=0.08, shrink=0.85)
-        cbar.set_label(label, rotation=270, labelpad=16, va='center')
+        fig.subplots_adjust(left=0.05, right=0.84, top=0.92, bottom=0.08)
+        cbar = fig.colorbar(
+            sc,
+            ax=ax,
+            fraction=0.045,  # slightly wider space reserved
+            pad=0.12,  # more padding between plot and bar
+            shrink=0.9,  # full height
+        )
+        cbar.set_label(label, rotation=270, labelpad=20, va='center')
 
         ax.grid(True, alpha=0.3)
-        fig.tight_layout(rect=[0, 0, 0.90, 1])  # type: ignore
+
+        # Let tight_layout recompute margins after manual subplots_adjust
+        fig.tight_layout(rect=[0, 0, 0.88, 1])  # type: ignore
 
         self.set_output(PlotterOSName.FIGURE, fig)
