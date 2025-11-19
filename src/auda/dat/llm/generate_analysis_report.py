@@ -126,6 +126,7 @@ class GenerateAnalysisReport(Task):
                         DatasetOSName.LABEL: label,
                         PlotterISName.TITLE: title,
                         PlotterISName.SAVE_PATH: 'plot.png',
+                        **model_requirements,
                     },
                 )
             case 'SVR':
@@ -139,5 +140,6 @@ class GenerateAnalysisReport(Task):
                         DatasetOSName.LABEL: label,
                         PlotterISName.TITLE: title,
                         PlotterISName.SAVE_PATH: 'plot.png',
+                        **model_requirements,
                     },
                 )

@@ -24,8 +24,10 @@ Now, based on the provided data, you need to pick up one proper model, and retur
 
 Here are the models:
 
-1. PR: This model applies a polynomial regression on univariate feature.
+1. PR: This model applies a polynomial regression on univariate feature. Extra parameters: degree (integer).
 2. SVR: This model applies a support vector regression on univariate feature.
+
+Note: If the user specify Linear regression, please use polynomial regression and set the degree to 1.
 
 Suppose the data has n columns. If you pick up a regression model, you should choose n - 1 columns as features, and one column as a target.
 

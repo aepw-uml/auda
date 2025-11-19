@@ -12,7 +12,9 @@ $data_table_details
 
 Here are the list of countries available in the data table (separated by commas): $country_names.
 
-If you can write an SQL query to answer the user's question, you should just directly provide the SQL query without any additional explanation. You also should not wrap the SQL query in code block marks.
+Please only focus on the sentences that are related to SQL query. If the user ask you to perform any machine learning or other stuff, ignore it, because it will be handled in the next step.
+
+If you can write an SQL query (PostgreSQL dialect) to answer the user's question, you should just directly provide the SQL query without any additional explanation. You also should not wrap the SQL query in code block marks.
 
 If the user refers to a country name that not in the list of country names, you should check if any aliases or common misspellings exist for that country name. For instance, "United States" could be referred to as "USA", "US", or "America".
 
