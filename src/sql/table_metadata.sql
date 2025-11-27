@@ -1,3 +1,10 @@
+-- Copyright 2025 AUDA Contributors
+--
+-- This SQL file creates metadata for tables.
+-- Read the documentation for more details.
+
+--------------------------------------------------------------------------------
+
 TRUNCATE TABLE table_metadata RESTART IDENTITY;
 
 INSERT INTO table_metadata (name, type)

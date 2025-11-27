@@ -1,3 +1,10 @@
+-- Copyright 2025 AUDA Contributors
+--
+-- This SQL file creates a table that contains the metadata of data column.
+-- Read the documentation for more details.
+
+--------------------------------------------------------------------------------
+
 TRUNCATE TABLE data_column_metadata RESTART IDENTITY;
 
 INSERT INTO data_column_metadata (

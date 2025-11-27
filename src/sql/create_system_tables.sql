@@ -1,6 +1,6 @@
--- Copyright 2025 ADA Contributors
+-- Copyright 2025 AUDA Contributors
 --
--- This scripting file creates some system tables for the ADA application.
+-- This SQL file creates some system tables for the ADA application.
 -- Read the documentation for more details.
 
 --------------------------------------------------------------------------------
