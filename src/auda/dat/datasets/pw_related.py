@@ -60,10 +60,8 @@ class PwRelatedDataset(Task):
         # ---- Construct samples from the table result
         samples: LabeledSamples = []
         for row in table_result.data:
-            samples.append((row[:-1], row[5]))
-
-        # ---- Order the samples by years
-        samples.sort(key=lambda sample: sample[0][0])
+            # Note: the last column must be plastic waste generated
+            samples.append((row[:-1], row[-1]))
 
         # ---- Filter out the samples where the year is greater than the current year
         # These samples may come from some prediction reports
