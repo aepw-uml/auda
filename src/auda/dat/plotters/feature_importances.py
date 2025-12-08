@@ -15,7 +15,7 @@ from .__common import PLOTTER_KIND, PlotterISName, PlotterOSName
         PlotterISName.LABEL: IOSpec(dtype=str),
         PlotterISName.FEATURE_NAMES: IOSpec(dtype=List[str]),
         PlotterISName.UNITS: IOSpec(dtype=List[str]),
-        PlotterISName.TITLE: IOSpec(dtype=str, required=False),
+        PlotterISName.TITLE: IOSpec(dtype=str, required=False, default=''),
         PlotterISName.MODEL_TYPE: IOSpec(dtype=str),
         PlotterISName.FEATURE_IMPORTANCES: IOSpec(dtype=List[float]),
         PlotterISName.FEATURE_NAMES: IOSpec(dtype=List[str], required=False),
@@ -49,10 +49,11 @@ class FeatureImportancesPlotter(Task):
         sns.set_theme(style='whitegrid')
         fig, ax = plt.subplots(figsize=(8, 5))
 
+        title = self.get_input(PlotterISName.TITLE)
         bars = ax.barh(feature_names, feature_importances, color='cornflowerblue')
         ax.set_xlabel('Importance', fontsize=11)
         ax.set_ylabel('Features', fontsize=11)
-        ax.set_title('Random Forest Feature Importances', fontsize=13, pad=12)
+        ax.set_title(title, fontsize=13, pad=12)
         ax.invert_yaxis()  # highest importance on top
 
         # ---- Add percentage labels
