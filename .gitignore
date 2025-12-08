@@ -15,3 +15,6 @@ __pycache__
 
 # Cache directory
 /cache
+
+# Results directory
+/results
