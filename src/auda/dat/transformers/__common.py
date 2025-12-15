@@ -24,9 +24,13 @@ class TransformerISName:
 
     # Split specific
     SPLIT_SHUFFLE = 'split_shuffle'
-    SPLIT_SEED = 'split_seed'
+    SPLIT_SHUFFLE_SEED = 'split_seed'
     TRAINING_FRACTION = 'training_fraction'
     VALIDATION_FRACTION = 'validation_fraction'
+
+    TEST_SAMPLES = 'test_samples'
+    X_MEAN = 'x_mean'
+    X_STANDARD_DEVIATION = 'x_standard_deviation'
 
 
 class TransformerOSName:
@@ -46,12 +50,15 @@ class TransformerOSName:
     TRIMMED_SAMPLES = 'trimmed_samples'
 
     # Split specific
-    TRAIN_SAMPLES = 'train_samples'
+    TRAINING_SAMPLES = 'train_samples'
     VALIDATION_SAMPLES = 'validation_samples'
     TEST_SAMPLES = 'test_samples'
     NUM_TRAIN_SAMPLES = 'num_train_samples'
     NUM_VALIDATION_SAMPLES = 'num_validation_samples'
     NUM_TEST_SAMPLES = 'num_test_samples'
+
+    ORIGINAL_TEST_SAMPLES = ''
+    TEST_SAMPLES = ''
 
 
 TRANSFORMER_KIND = 'transformer'

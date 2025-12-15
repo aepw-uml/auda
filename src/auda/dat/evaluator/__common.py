@@ -8,7 +8,7 @@ EVALUATOR_KIND = 'evaluator'
 class EvaluatorISName:
     # Samples
     SAMPLES = ModelOSName.SAMPLES
-    TRAIN_SAMPLES = TransformerOSName.TRAIN_SAMPLES
+    TRAIN_SAMPLES = TransformerOSName.TRAINING_SAMPLES
     VALIDATION_SAMPLES = TransformerOSName.VALIDATION_SAMPLES
     TEST_SAMPLES = TransformerOSName.TEST_SAMPLES
 
@@ -22,6 +22,11 @@ class EvaluatorISName:
     COEFFICIENTS = ModelOSName.COEFFICIENTS
     COEFFICIENTS_EXPONENTS = ModelOSName.COEFFICIENTS_EXPONENTS
 
+    TRAINING_PIPE = 'training_pipe'
+    REGULARIZATION_PARAMETERS = 'regularization_parameters'
+    EPSILONS = 'epsilons'
+    INDICATOR = 'indicator'
+
 
 class EvaluatorOSName:
     # Polynomial regression specific
@@ -32,3 +37,13 @@ class EvaluatorOSName:
     ROOT_MEAN_SQUARED_ERROR = 'root_mean_squared_error'
     MEAN_ABSOLUTE_ERROR = 'mean_absolute_error'
     MEAN_ABSOLUTE_PERCENTAGE_ERROR = 'mean_absolute_percentage_error'
+
+    # Statistics
+    MAE = 'mae'
+    RMSE = 'rmse'
+    R2 = 'r2'
+    MAPE = 'mape'
+
+    BEST_REGULARIZATION_PARAMETER = 'best_regularization_parameter'
+    BEST_EPSILON = 'best_epsilon'
+    BEST_SCORE = 'best_score'

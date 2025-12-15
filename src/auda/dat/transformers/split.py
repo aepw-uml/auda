@@ -21,11 +21,13 @@ from .__common import TRANSFORMER_KIND, TransformerISName, TransformerOSName
         TransformerISName.SPLIT_SHUFFLE: IOSpec(
             dtype=bool, required=False, default=True
         ),
-        TransformerISName.SPLIT_SEED: IOSpec(dtype=int, required=False, default=42),
+        TransformerISName.SPLIT_SHUFFLE_SEED: IOSpec(
+            dtype=int, required=False, default=42
+        ),
     },
     output_specs={
         TransformerOSName.SAMPLES: IOSpec(dtype=LabeledSample),
-        TransformerOSName.TRAIN_SAMPLES: IOSpec(dtype=LabeledSample),
+        TransformerOSName.TRAINING_SAMPLES: IOSpec(dtype=LabeledSample),
         TransformerOSName.VALIDATION_SAMPLES: IOSpec(dtype=LabeledSample),
         TransformerOSName.TEST_SAMPLES: IOSpec(dtype=LabeledSample),
         TransformerOSName.NUM_TRAIN_SAMPLES: IOSpec(dtype=int),
@@ -54,7 +56,7 @@ class TrimmingTransformer(Task):
         if split_shuffle:
             import random
 
-            split_seed = self.get_input(TransformerISName.SPLIT_SEED)
+            split_seed = self.get_input(TransformerISName.SPLIT_SHUFFLE_SEED)
             random.Random(split_seed).shuffle(samples)
 
         n_training_samples = int(n_samples * training_fraction)
@@ -63,13 +65,13 @@ class TrimmingTransformer(Task):
         validation_samples = samples[
             n_training_samples : n_training_samples + n_validation_samples
         ]
-        testing_samples = samples[n_training_samples - n_validation_samples :]
+        test_samples = samples[n_training_samples - n_validation_samples :]
 
         # ---- Populate outputs
         self.set_output(TransformerOSName.SAMPLES, training_samples)
-        self.set_output(TransformerOSName.TRAIN_SAMPLES, training_samples)
+        self.set_output(TransformerOSName.TRAINING_SAMPLES, training_samples)
         self.set_output(TransformerOSName.VALIDATION_SAMPLES, validation_samples)
-        self.set_output(TransformerOSName.TEST_SAMPLES, testing_samples)
+        self.set_output(TransformerOSName.TEST_SAMPLES, test_samples)
         self.set_output(TransformerOSName.NUM_TRAIN_SAMPLES, n_training_samples)
         self.set_output(TransformerOSName.NUM_VALIDATION_SAMPLES, n_validation_samples)
-        self.set_output(TransformerOSName.NUM_TEST_SAMPLES, len(testing_samples))
+        self.set_output(TransformerOSName.NUM_TEST_SAMPLES, len(test_samples))

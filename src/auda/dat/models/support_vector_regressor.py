@@ -68,7 +68,7 @@ class SupportVectorRegressorModel(Task):
         y_std: np.ndarray = outputs[TransformerOSName.Y_STANDARDIZED]
 
         # ---- Model fitting (support vector regression)
-        svr_model = SVR(kernel='rbf', C=c, epsilon=epsilon, gamma='scale')
+        svr_model = SVR(kernel='rbf', C=c, epsilon=epsilon)
         svr_model.fit(x_scaled, y_std)
         support_indices = svr_model.support_.tolist()
         support_vectors_count = len(support_indices)

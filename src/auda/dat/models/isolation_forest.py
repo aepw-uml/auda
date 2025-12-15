@@ -50,8 +50,8 @@ class IsolationForestModel(Task):
         # anomalies
         scores = -isolation_forest.score_samples(data_standardized)
 
-        # ---- Determine threshold for anomalies (top 10% as anomalies)
-        threshold = np.quantile(scores, 0.90)
+        # ---- Determine threshold for anomalies (top 5% as anomalies)
+        threshold = np.quantile(scores, 0.99)
 
         # ---- Generate predictions based on the threshold
         pred = np.where(scores >= threshold, -1, 1)

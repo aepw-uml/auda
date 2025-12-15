@@ -2,6 +2,7 @@ from typing import Union, override
 
 from numpy import ndarray
 
+from auda.dat import run_pipeline
 from auda.dat.datasets import LabeledSamples, UnlabeledSamples
 from auda.utils.pipeline import IOSpec, Task, task
 
@@ -56,4 +57,40 @@ class StandardizationTransformer(Task):
 
         # ---- Populate outputs
         self.set_output(TransformerOSName.X_STANDARDIZED, x_standardized)
-        self.set_output(TransformerOSName.Y_STANDARDIZED, y_standardized)
+
+
+@task(
+    id='TF-Z-NORM-TEST',
+    kind=TRANSFORMER_KIND,
+    description='Standardizes features (and optionally labels) to zero mean and unit '
+    'variance (on test samples).',
+    input_specs={
+        TransformerISName.TEST_SAMPLES: IOSpec(dtype=LabeledSamples),
+        TransformerISName.X_MEAN: IOSpec(dtype=int),
+        TransformerISName.X_STANDARD_DEVIATION: IOSpec(dtype=int),
+    },
+    output_specs={
+        TransformerOSName.ORIGINAL_TEST_SAMPLES: IOSpec(dtype=LabeledSamples),
+        TransformerOSName.TEST_SAMPLES: IOSpec(dtype=LabeledSamples),
+    },
+)
+class TestStandardizationTransformer(Task):
+    @override
+    def run(self) -> None:
+        """
+        Standardizes the test samples to have zero mean and unit variance.
+        """
+        samples = self.get_input(TransformerISName.TEST_SAMPLES)
+        outputs, _ = run_pipeline(
+            ['TF-Z-NORM'],
+            {
+                TransformerISName.SAMPLES: samples,
+            },
+        )
+
+        # ---- Populate outputs
+        self.set_output(TransformerOSName.ORIGINAL_TEST_SAMPLES, samples)
+        self.set_output(
+            TransformerOSName.TEST_SAMPLES,
+            outputs[TransformerOSName.X_STANDARDIZED],
+        )
