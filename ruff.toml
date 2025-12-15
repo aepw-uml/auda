@@ -1,5 +1,5 @@
 # Configuration for Ruff, a Python linter and formatter
-line-length = 88
+line-length = 80
 
 [format]
 quote-style = "single"

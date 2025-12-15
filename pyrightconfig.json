@@ -2,5 +2,6 @@
   "__comment__": "Pyright configuration file",
   "venvPath": ".",
   "venv": ".venv",
-  "typeCheckingMode": "basic"
+  "typeCheckingMode": "basic",
+  "extraPaths": ["src/python"]
 }
