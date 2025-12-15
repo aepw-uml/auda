@@ -1,0 +1,13 @@
+{
+  "targets": {
+    "AUDA": {
+      "files": [".env"]
+    }
+  },
+  "default_target_name": "AUDA",
+  "root_directory": ".trick",
+  "passphrase_file_path": "~/.config/trick_passphrase.json",
+  "encryption": {
+    "iteration_count": 100000
+  }
+}
