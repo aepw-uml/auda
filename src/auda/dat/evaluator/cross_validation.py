@@ -83,7 +83,10 @@ class CrossValidationEvaluator(Task):
 
             maes.append(mean_absolute_error(y_true, y_pred))
             rmses.append(np.sqrt(mean_squared_error(y_true, y_pred)))
-            r2s.append(r2_score(y_true, y_pred))
+            if len(y_true) <= 1:
+                r2s.append(0.0)
+            else:
+                r2s.append(r2_score(y_true, y_pred))
 
             denom = np.where(np.abs(y_true) < 1e-8, np.nan, np.abs(y_true))
             mapes.append(float(np.nanmean(np.abs((y_true - y_pred) / denom) * 100.0)))

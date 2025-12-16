@@ -17,3 +17,17 @@
 #     Displays the generated figure interactively.
 auda pipe run DS-YEAR-PW ST-BASIC MD-IF MD-SVR PL-SVR SHOW \
     '--inputs=location=Japan'
+
+# Minimal MAPE
+# auda pipe run DS-YEAR-PW SVR-TUNER "--inputs=location=Japan;indicator=mape"
+auda pipe run DS-YEAR-PW ST-BASIC MD-IF MD-SVR PL-SVR SHOW \
+    '--inputs=location=Japan;regularization_parameter=46.272;epsilon=0.22'
+
+# Maximal 
+# auda pipe run DS-YEAR-PW SVR-TUNER "--inputs=location=Japan;indicator=r2"
+auda pipe run DS-YEAR-PW ST-BASIC MD-IF MD-SVR PL-SVR SHOW \
+    '--inputs=location=Japan;regularization_parameter=56.848;epsilon=0.535'
+
+# United States
+auda pipe run DS-YEAR-PW ST-BASIC MD-SVR PL-SVR SHOW \
+    '--inputs=location=United States;regularization_parameter=79.353;epsilon=0.044'
