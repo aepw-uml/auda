@@ -1,0 +1,417 @@
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from enum import Enum
+from importlib import import_module
+from pkgutil import iter_modules
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    MutableSequence,
+    Optional,
+    Type,
+)
+
+
+@dataclass()
+class IOSpec:
+    """Specification for a single input or output port.
+
+    Attributes:
+        name: The name of the port.
+        description: A human-readable description of the port.
+        dtype: The expected type for the value on this port.
+        required: Whether the port must be populated. For inputs, if True, an
+            error will be raised if no value is provided; for outputs, if True,
+            an error will be raised if no value is produced.
+        default: The default value for this port if no value is provided (only
+            applicable for input ports). If None, no default value is set.
+    """
+
+    name: str
+    description: str = ''
+    dtype: Any = Any
+    required: bool = True
+    default: Any = None
+
+    def update(
+        self,
+        description: str | None = None,
+        dtype: Any = None,
+        required: bool | None = None,
+        default: Any = None,
+    ) -> 'IOSpec':
+        """Returns a new IOSpec with updated attributes.
+
+        Note: the attribute `name` cannot be updated.
+
+        Args:
+            description: New description for this port.
+            dtype: New expected type for the value on this port.
+            required: New required status for this port.
+            default: New default value for this port.
+
+        Returns:
+            A new IOSpec instance with the updated attributes.
+        """
+
+        return IOSpec(
+            name=self.name,
+            description=description or self.description,
+            dtype=dtype or self.dtype,
+            required=self.required if required is None else required,
+            default=self.default if default is None else default,
+        )
+
+
+class Step(ABC):
+    """Abstract unit of work in a data-processing pipeline."""
+
+    def __init__(self, spec: 'StepSpec', pipeline: 'Pipeline') -> None:
+        """Initializes a step instance bound to a StepSpec instance.
+
+        Args:
+            spec: The declarative specification describing this step.
+            pipeline: The Pipeline instance this step is part of.
+        """
+
+        self.spec = spec
+        self.pipeline: Pipeline = pipeline
+        self._inputs: Dict[str, Any] = {}
+        self._outputs: Dict[str, Any] = {}
+
+    def set_input(self, name: str, value: Any) -> None:
+        """Assigns a single input value.
+
+        Args:
+            name: Input port name.
+            value: Value to assign to the input port.
+
+        Raises:
+            KeyError: If the input port is not defined in the spec.
+        """
+
+        self._inputs[name] = value
+
+    def get_input(self, name: str) -> Any:
+        """Retrieves an input value.
+
+        Args:
+            name: Input port name.
+
+        Returns:
+            The value associated with the port, or the default value set in the
+            port if the port is optional.
+
+        Raises:
+            KeyError: If the input port is not defined in the spec.
+            ValueError: If the input is required but not provided.
+        """
+
+        spec: Optional[IOSpec] = self.spec.input_spec_map.get(name)
+        if spec is None:
+            raise KeyError(f"Input port '{name}' is not defined in step spec.")
+
+        value: Any = self._inputs.get(name)
+        if value is None:
+            if spec.required:
+                raise ValueError(
+                    f"Input '{name}' is required but not provided."
+                )
+
+            return spec.default
+
+        return value
+
+    def set_output(self, name: str, value: Any) -> None:
+        """Assigns an output value.
+
+        Args:
+            name: Output port name.
+            value: Value to assign to the output port.
+
+        Raises:
+            KeyError: If the output port is not defined in the spec.
+            TypeError: If the value does not match the declared dtype.
+        """
+
+        port = self.spec.output_spec_map.get(name)
+        if port is None:
+            raise KeyError(f"Output '{name}' is not defined in step spec.")
+
+        self._outputs[name] = value
+
+    def get_output(self, name: str) -> Any:
+        """Retrieves an output value.
+
+        Args:
+            name: Output port name.
+
+        Returns:
+            The output value, or the default value set in the port if the port
+            is optional.
+
+        Raises:
+            KeyError: If the output port is not defined in the spec.
+            ValueError: If the output is required but has not been set.
+        """
+
+        port = self.spec.output_spec_map.get(name)
+        if port is None:
+            raise KeyError(f"Output '{name}' is not defined in step spec.")
+
+        value = self._outputs.get(name)
+        if value is None:
+            if port.required:
+                raise ValueError(f"Output '{name}' is required but not set.")
+            return None
+
+        return value
+
+    def set_inputs(self, inputs: Dict[str, Any]) -> None:
+        """Assigns multiple input values at once.
+
+        Args:
+            inputs: Mapping of input port names to values.
+
+        Raises:
+            KeyError: If any input port is not defined in the spec.
+        """
+
+        for name, value in inputs.items():
+            self.set_input(name, value)
+
+    def get_outputs(self) -> Dict[str, Any]:
+        """
+        Retrieves all output values as a dictionary.
+
+        This method will return a copy of the internal outputs dictionary.
+
+        Returns:
+            A mapping of output port names to their assigned values.
+        """
+
+        return self._outputs.copy()
+
+    @abstractmethod
+    def run(self, **inputs) -> Dict[Enum, Any] | None:
+        """Executes the step’s work.
+
+        Raises:
+            NotImplementedError: Must be implemented by subclasses.
+        """
+
+        raise NotImplementedError
+
+
+@dataclass(frozen=True)
+class StepSpec:
+    """
+    Declarative specification for constructing and validating a Step.
+
+    Describes the step’s identity, kind, human-readable description, concrete
+    implementation class, and I/O port specifications.
+
+    Attributes:
+        id: Unique identifier for the step within a pipeline or registry.
+        description: Human-readable summary of what the step does.
+        implementation: Concrete `Step` subclass implementing `run()`.
+        input_specs: Mapping of input port names to their `IOSpec`.
+        output_specs: Mapping of output port names to their `IOSpec`.
+    """
+
+    id: str
+    description: str
+    implementation: Type[Step]
+    input_spec_map: Dict[str, IOSpec] = field(default_factory=dict)
+    output_spec_map: Dict[str, IOSpec] = field(default_factory=dict)
+
+    def instantiate(self, pipeline: 'Pipeline') -> Step:
+        """Initializes a Step instance bound to this step spec.
+
+        Args:
+            pipeline: The Pipeline instance the step will be part of.
+
+        Returns:
+            A new instance of implementation defined in this step spec.
+        """
+
+        return self.implementation(self, pipeline)
+
+
+class Pipeline:
+    def __init__(self, step_specs: List[StepSpec]):
+        """Initializes a Pipeline instance.
+
+        Attributes:
+            step_specs: A list of StepSpec instances representing the steps in
+                the pipeline.
+            callbacks: A list of callable functions to be executed after the
+                pipeline run.
+            context: A dictionary for storing shared data across steps.
+        """
+
+        self._step_specs: List[StepSpec] = step_specs
+        self.callbacks: List[Callable[['Pipeline'], None]] = []
+
+        self.context: Dict[str, Any] = {}
+
+    def run(self, initial_inputs: Dict[Enum, Any] | None = None):
+        """Runs the pipeline by executing each step in sequence.
+
+        Args:
+            initial_inputs: A dictionary of initial inputs to the pipeline.
+        """
+
+        if initial_inputs is None:
+            initial_inputs = {}
+
+        steps: List[Step] = [
+            spec.instantiate(self) for spec in self._step_specs
+        ]
+
+        inputs = {key.value: value for key, value in initial_inputs.items()}
+
+        self.context.update(inputs)
+        for step in steps:
+            step.set_inputs(self.context)
+
+            inputs_args = {
+                key.lower(): value for key, value in self.context.items()
+            }
+            outputs = step.run(**inputs_args)
+
+            if outputs is not None:
+                for name, value in outputs.items():
+                    step.set_output(name.value, value)
+
+            self.context.update(step.get_outputs())
+
+    def schedule(self, callback: Callable[['Pipeline'], None]) -> None:
+        """Schedules a callback to be executed after the pipeline run.
+
+        Args:
+            callback: A callable function to be executed after the pipeline run.
+        """
+
+        self.callbacks.append(callback)
+
+    def execute_callbacks(self) -> None:
+        """Executes all scheduled callbacks."""
+
+        for callback in self.callbacks:
+            callback(self)
+
+
+# Registry for StepSpecs
+_step_specs: Dict[str, StepSpec] = {}
+
+
+def register(spec: StepSpec) -> None:
+    """Registers a StepSpec.
+
+    Args:
+        spec: The StepSpec to register.
+
+    Raises:
+        ValueError: If a StepSpec with the same ID is already registered.
+    """
+
+    if spec.id in _step_specs:
+        raise ValueError(f'Duplicate StepSpec ID: {spec.id}')
+
+    _step_specs[spec.id] = spec
+
+
+def get_all_step_specs() -> List[StepSpec]:
+    """Retrieves all registered StepSpecs."""
+
+    return list(_step_specs.values())
+
+
+def step(
+    *,
+    id: str,
+    description: str,
+    input_specs: List[IOSpec] | None = None,
+    output_specs: List[IOSpec] | None = None,
+):
+    """Decorates a Step subclass to register a step spec for it.
+
+    Args:
+        id: Unique identifier for the step within a pipeline or registry.
+        description: Human-readable summary of what the step does.
+        input_specs: Mapping of input port names to their IOSpec.
+        output_specs: Mapping of output port names to their IOSpec.
+    """
+
+    input_spec_map = {spec.name: spec for spec in (input_specs or [])}
+    output_spec_map = {spec.name: spec for spec in (output_specs or [])}
+
+    def _wrap(cls):
+        spec = StepSpec(
+            id=id,
+            description=description,
+            implementation=cls,
+            input_spec_map=input_spec_map,
+            output_spec_map=output_spec_map,
+        )
+        register(spec)
+
+        return cls
+
+    return _wrap
+
+
+def scan_package(path: MutableSequence[str], package_name: str) -> None:
+    """Scans a package for modules and subpackages to import.
+
+    This for loop will import all modules and subpackages in the specified
+    package except those whose names start with an underscore (_).
+
+    Args:
+        path: List of paths to scan for modules and subpackages.
+        package_name: The name of the package to scan.
+    """
+
+    for _, name, is_package in iter_modules(path, prefix=f'{package_name}.'):
+        if is_package and not name.startswith('_'):
+            package = import_module(name)
+
+            for _, module_name, _ in iter_modules(package.__path__, name + '.'):
+                if module_name.rsplit('.', 1)[-1].startswith('_'):
+                    continue
+
+                import_module(module_name)
+
+
+def get_step_spec_by_id(step_id: str) -> StepSpec:
+    """Retrieves a registered StepSpec by its ID.
+
+    Args:
+        step_id: The unique identifier of the step.
+
+    Returns:
+        The StepSpec associated with the given ID.
+    """
+
+    step_spec = _step_specs.get(step_id)
+
+    if step_spec is None:
+        raise ValueError(f'Step spec not found: {step_id}')
+
+    return step_spec
+
+
+def create_pipeline(step_id_list: List[str]) -> Pipeline:
+    """Creates a Pipeline instance from a list of StepSpec IDs.
+
+    Args:
+        step_id_list: A list of StepSpec IDs to include in the pipeline.
+
+    Returns:
+        A Pipeline instance containing the specified steps.
+    """
+
+    return Pipeline([get_step_spec_by_id(step_id) for step_id in step_id_list])
