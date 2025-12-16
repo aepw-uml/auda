@@ -11,7 +11,21 @@ from typing import (
     MutableSequence,
     Optional,
     Type,
+    cast,
 )
+
+
+def _to_plain_name(name: str | Enum) -> str:
+    """Converts a name (str or Enum) to its plain string representation.
+
+    Args:
+        name: The name to convert, either as a string or an Enum member.
+
+    Returns:
+        The string representation of the name.
+    """
+
+    return cast(str, name.value if isinstance(name, Enum) else name)
 
 
 @dataclass()
@@ -29,7 +43,7 @@ class IOSpec:
             applicable for input ports). If None, no default value is set.
     """
 
-    name: str
+    name: str | Enum
     description: str = ''
     dtype: Any = Any
     required: bool = True
@@ -63,6 +77,15 @@ class IOSpec:
             required=self.required if required is None else required,
             default=self.default if default is None else default,
         )
+
+    def optional(self, default: Any) -> 'IOSpec':
+        """Retrieves the default value for this port.
+
+        Returns:
+            The default value for this port.
+        """
+
+        return self.update(default=default, required=False)
 
 
 class Step(ABC):
@@ -257,36 +280,76 @@ class Pipeline:
 
         self.context: Dict[str, Any] = {}
 
-    def run(self, initial_inputs: Dict[Enum, Any] | None = None):
+    def run(
+        self,
+        step_inputs: List[Dict[Enum | str, Any]] | None = None,
+    ) -> None:
         """Runs the pipeline by executing each step in sequence.
 
         Args:
-            initial_inputs: A dictionary of initial inputs to the pipeline.
+            step_inputs: Optional list of dictionaries containing input values
+                for each step. Each dictionary corresponds to a step in the
+                pipeline. If provided, these inputs will override the values in
+                the pipeline context for the respective step.
+
+        Raises:
+            ValueError: If required inputs for any step are missing.
         """
 
-        if initial_inputs is None:
-            initial_inputs = {}
+        if step_inputs is None:
+            step_inputs = []
 
         steps: List[Step] = [
             spec.instantiate(self) for spec in self._step_specs
         ]
 
-        inputs = {key.value: value for key, value in initial_inputs.items()}
-
-        self.context.update(inputs)
-        for step in steps:
+        for i, step in enumerate(steps):
             step.set_inputs(self.context)
 
-            inputs_args = {
+            if len(step_inputs) > i and step_inputs[i]:
+                self.context.update(
+                    {
+                        _to_plain_name(name): value
+                        for name, value in step_inputs[i].items()
+                    }
+                )
+
+            # Traverse input specs to ensure required inputs are present
+            # Raise an error if a required input is missing; set default values
+            # for optional inputs that are not provided
+            for input_name, input_spec in step.spec.input_spec_map.items():
+                if input_name not in self.context:
+                    if input_spec.required:
+                        raise ValueError(
+                            f"Input '{input_name}' is required for step "
+                            f"'{step.spec.id}' but not provided."
+                        )
+                    else:
+                        self.context[input_name] = input_spec.default
+
+            input_args = {
                 key.lower(): value for key, value in self.context.items()
             }
-            outputs = step.run(**inputs_args)
+            outputs = step.run(**input_args)
 
             if outputs is not None:
                 for name, value in outputs.items():
                     step.set_output(name.value, value)
 
             self.context.update(step.get_outputs())
+
+            # Traverse output specs to ensure required outputs are present
+            # Raise an error if a required output is missing; set default values
+            # for optional outputs that are not produced
+            for output_name, output_spec in step.spec.output_spec_map.items():
+                if output_name not in self.context:
+                    if output_spec.required:
+                        raise ValueError(
+                            f"Output '{output_name}' is required for step "
+                            f"'{step.spec.id}' but was not produced."
+                        )
+                    else:
+                        self.context[output_name] = output_spec.default
 
     def schedule(self, callback: Callable[['Pipeline'], None]) -> None:
         """Schedules a callback to be executed after the pipeline run.
@@ -346,8 +409,13 @@ def step(
         output_specs: Mapping of output port names to their IOSpec.
     """
 
-    input_spec_map = {spec.name: spec for spec in (input_specs or [])}
-    output_spec_map = {spec.name: spec for spec in (output_specs or [])}
+    input_spec_map = {
+        _to_plain_name(spec.name): spec for spec in (input_specs or [])
+    }
+
+    output_spec_map = {
+        _to_plain_name(spec.name): spec for spec in (output_specs or [])
+    }
 
     def _wrap(cls):
         spec = StepSpec(
@@ -415,3 +483,53 @@ def create_pipeline(step_id_list: List[str]) -> Pipeline:
     """
 
     return Pipeline([get_step_spec_by_id(step_id) for step_id in step_id_list])
+
+
+# Maps from step ID prefixes to their kinds
+_prefix_kind_map: Dict[str, str] = {}
+
+# Default kind if no prefix matches
+UNKNOWN_KIND = 'Unknown'
+
+
+def add_kind(prefix: str, kind: str) -> None:
+    """Associates a kind with a step ID prefix.
+
+    Args:
+        prefix: The prefix of the step ID.
+        kind: The kind to associate with the prefix.
+    """
+
+    _prefix_kind_map[prefix] = kind
+
+
+def get_kind_by_id(step_id: str) -> str:
+    """Retrieves the kind associated with a step ID based on its prefix.
+
+    Args:
+        step_id: The unique identifier of the step.
+
+    Returns:
+        The kind associated with the step ID, or an empty string if no kind
+        is found.
+    """
+
+    for prefix, kind in _prefix_kind_map.items():
+        if step_id.startswith(prefix):
+            return kind
+
+    return UNKNOWN_KIND
+
+
+def get_kind(step_spec: StepSpec) -> str:
+    """Retrieves the kind associated with a StepSpec based on its ID prefix.
+
+    Args:
+        step_spec: The StepSpec instance.
+
+    Returns:
+        The kind associated with the StepSpec, or an empty string if no kind
+        is found.
+    """
+
+    return get_kind_by_id(step_spec.id)
