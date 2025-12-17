@@ -1,5 +1,6 @@
 import re
 from enum import Enum
+from shutil import get_terminal_size
 from typing import Any, Dict, List, Tuple
 
 from auda.step import *
@@ -86,12 +87,12 @@ def display_step_spec_info(
 def run_pipeline(
     step_strs: List[str] = Argument(..., help='List of steps in the pipeline.'),
     format: str = Option(
-        'table', '-f', '--format', help='Output format (table|json).'
+        'table', '-f', '--format', help='Output format (table|json|values).'
     ),
     output_names_str: str = Option(
         '', '-n', '--names', help='Output keys to display.'
     ),
-    lowercase_names: bool = Option(
+    uppercase_name: bool = Option(
         False,
         '-u',
         '--uppercase-names',
@@ -126,6 +127,7 @@ def run_pipeline(
     pipeline = create_pipeline(step_ids)
     pipeline.run(step_inputs=step_inputs)
 
+    # Select specified output keys
     names = (
         [name.upper() for name in output_names_str.split(KEYS_STR_DELIMITER)]
         if output_names_str != ''
@@ -135,24 +137,28 @@ def run_pipeline(
         pipeline.context
         if names == []
         else {
-            name: pipeline.context.get(name)
+            name: pipeline.context.get(name.upper())
             for name in names
             if name in pipeline.context.keys()
         }
     )
 
     # Convert output keys to lowercase if specified
-    if lowercase_names:
-        outputs = {
-            name.lower(): value for name, value in pipeline.context.items()
-        }
+    if not uppercase_name:
+        outputs = {name.lower(): value for name, value in outputs.items()}
+
+    # Remove all None values from outputs
+    outputs = {
+        name: value for name, value in outputs.items() if value is not None
+    }
 
     # Print outputs in the specified format
     match format:
         case 'json':
             import json
 
-            echo(json.dumps(outputs, indent=2))
+            # TODO: Implement a NumpyEncoder
+            echo(json.dumps(outputs))
         case 'table':
             if outputs == {}:
                 return
@@ -166,5 +172,10 @@ def run_pipeline(
                 table.append_row(name, value_str)
 
             echo(table)
+        case 'values':
+            for key, value in outputs.items():
+                echo(f'<{key}>')
+                echo(str(value))
+                echo('-' * get_terminal_size().columns)
         case _:
             echo(f'Unsupported format: {format}')
