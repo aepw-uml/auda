@@ -27,7 +27,7 @@ from .__data_tables import DataTableName, WasteGenerationManagementColumn
 class YearPlasticWaste(DatasetStep):
     @override
     def run(self, location: str) -> IOValueMap:
-        cache_key = 'DS-YEAR-PW:location=' + location
+        cache_key = self.get_cache_key(location=location)
         dataset = self.fetch_and_cache_dataset(cache_key, location)
 
         return {

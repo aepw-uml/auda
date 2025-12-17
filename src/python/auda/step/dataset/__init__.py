@@ -97,3 +97,17 @@ class DatasetStep(Step):
             save_dataset(cache_key, dataset)
 
         return dataset
+
+    def get_cache_key(self, **kwargs) -> str:
+        """Generates a cache key for the dataset.
+
+        Returns:
+            The cache key.
+        """
+        args_str = ''
+
+        if kwargs:
+            args_parts = [f'{k}={v}' for k, v in sorted(kwargs.items())]
+            args_str = ':' + ';'.join(args_parts)
+
+        return f'{self.spec.id}{args_str}'
