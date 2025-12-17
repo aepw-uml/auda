@@ -387,7 +387,7 @@ class Pipeline:
             callback(self)
 
 
-# Registry for StepSpecs
+# Registry for StepSpecs; maps from step ID to StepSpec
 _step_specs: Dict[str, StepSpec] = {}
 
 
@@ -477,12 +477,20 @@ def scan_package(path: MutableSequence[str], package_name: str) -> None:
 def get_step_spec_by_id(step_id: str) -> StepSpec:
     """Retrieves a registered StepSpec by its ID.
 
+    This function will attempt to dynamically import the module if the
+    `_module_name_getter` is set and returns a module name for the given step
+    ID.
+
     Args:
         step_id: The unique identifier of the step.
 
     Returns:
         The StepSpec associated with the given ID.
     """
+    if _module_name_getter is not None:
+        module_name = _module_name_getter(step_id)
+        if module_name is not None:
+            import_module(module_name)
 
     step_spec = _step_specs.get(step_id)
 
@@ -553,3 +561,18 @@ def get_kind(step_spec: StepSpec) -> str:
     """
 
     return get_kind_by_id(step_spec.id)
+
+
+_module_name_getter: Callable[[str], str | None] | None = None
+
+
+def set_module_name_getter(getter: Callable[[str], str | None]) -> None:
+    """Sets the function to retrieve module names for step IDs.
+
+    Args:
+        getter: A callable that takes a step ID and returns the corresponding
+            module name, or None if not found.
+    """
+
+    global _module_name_getter
+    _module_name_getter = getter
