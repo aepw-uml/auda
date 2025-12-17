@@ -4,8 +4,9 @@ from typing import override
 import numpy as np
 from auda.core import DatabaseName
 from auda.service.table_service import TableQueryParams, TableService
-from auda.step.spec import Spec
-from auda.utils.pipeline import IOValueMap, Step, step
+from auda.step.dataset import DatasetStep
+from auda.step.spec import Dataset, Spec
+from auda.utils.pipeline import IOValueMap, step
 
 from .__data_tables import DataTableName, WasteGenerationManagementColumn
 
@@ -23,10 +24,22 @@ from .__data_tables import DataTableName, WasteGenerationManagementColumn
         Spec.LABEL_UNITS,
     ],
 )
-class YearPlasticWaste(Step):
+class YearPlasticWaste(DatasetStep):
     @override
     def run(self, location: str) -> IOValueMap:
-        # ---- Fetch data from the database
+        cache_key = 'DS-YEAR-PW:location=' + location
+        dataset = self.fetch_and_cache_dataset(cache_key, location)
+
+        return {
+            Spec.DATASET.name: dataset,
+            Spec.FEATURE_NAMES.name: ['Year'],
+            Spec.LABEL_NAMES.name: ['Plastic Waste Generated'],
+            Spec.FEATURE_UNITS.name: [''],
+            Spec.LABEL_UNITS.name: ['Tonnes'],
+        }
+
+    @override
+    def fetch_dataset(self, location: str) -> Dataset:
         table_service = TableService(DatabaseName.AUDA)
         tables, table_metadata_map = table_service.prepare_tables(
             [DataTableName.WASTE_GENERATION_MANAGEMENT]
@@ -63,13 +76,6 @@ class YearPlasticWaste(Step):
             )
 
         years, wastes = zip(*pairs)
-        features = np.array([[y] for y in years], dtype=float)
-        labels = np.array(wastes, dtype=float)
-
-        return {
-            Spec.DATASET.name: (features, labels),
-            Spec.FEATURE_NAMES.name: ['Year'],
-            Spec.LABEL_NAMES.name: ['Plastic Waste Generated'],
-            Spec.FEATURE_UNITS.name: [''],
-            Spec.LABEL_UNITS.name: ['Tonnes'],
-        }
+        X = np.array([[year] for year in years], dtype=float)
+        y = np.array(wastes, dtype=float)
+        return (X, y)
