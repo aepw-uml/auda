@@ -21,7 +21,7 @@ from auda.utils.pipeline import IOValueMap, Step, step
 )
 class ZNorm(Step):
     @override
-    def run(self, standardize_y, on: str) -> IOValueMap:
+    def run(self, standardize_y: bool, on: str) -> IOValueMap:
         from sklearn.preprocessing import StandardScaler
 
         dataset: Tuple[np.ndarray, np.ndarray] | None = None

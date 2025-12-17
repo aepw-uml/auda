@@ -4,7 +4,7 @@ from typing import override
 import numpy as np
 from auda.core import DatabaseName
 from auda.service.table_service import TableQueryParams, TableService
-from auda.step.spec import Spec, SpecName
+from auda.step.spec import Spec
 from auda.utils.pipeline import IOValueMap, Step, step
 
 from .__data_tables import DataTableName, WasteGenerationManagementColumn
@@ -67,9 +67,9 @@ class YearPlasticWaste(Step):
         labels = np.array(wastes, dtype=float)
 
         return {
-            SpecName.DATASET: (features, labels),
-            SpecName.FEATURE_NAMES: ['Year'],
-            SpecName.LABEL_NAMES: ['Plastic Waste Generated'],
-            SpecName.FEATURE_UNITS: [''],
-            SpecName.LABEL_UNITS: ['Tonnes'],
+            Spec.DATASET.name: (features, labels),
+            Spec.FEATURE_NAMES.name: ['Year'],
+            Spec.LABEL_NAMES.name: ['Plastic Waste Generated'],
+            Spec.FEATURE_UNITS.name: [''],
+            Spec.LABEL_UNITS.name: ['Tonnes'],
         }

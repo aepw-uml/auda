@@ -1,7 +1,7 @@
 from typing import cast, override
 
 import numpy as np
-from auda.step.spec import Spec, SpecName
+from auda.step.spec import Spec
 from auda.utils.pipeline import IOValueMap, Step, step
 
 
@@ -41,14 +41,14 @@ class BasicStats(Step):
         y_maximum: np.ndarray = np.max(y)
 
         return {
-            SpecName.NUM_SAMPLES: num_samples,
-            SpecName.NUM_FEATURES: num_features,
-            SpecName.X_MEAN: x_mean,
-            SpecName.X_STD: x_std,
-            SpecName.X_MINIMUM: x_minimum,
-            SpecName.X_MAXIMUM: x_maximum,
-            SpecName.Y_MEAN: y_mean,
-            SpecName.Y_STD: y_std,
-            SpecName.Y_MINIMUM: y_minimum,
-            SpecName.Y_MAXIMUM: y_maximum,
+            Spec.NUM_SAMPLES.name: num_samples,
+            Spec.NUM_FEATURES.name: num_features,
+            Spec.X_MEAN.name: x_mean,
+            Spec.X_STD.name: x_std,
+            Spec.X_MINIMUM.name: x_minimum,
+            Spec.X_MAXIMUM.name: x_maximum,
+            Spec.Y_MEAN.name: y_mean,
+            Spec.Y_STD.name: y_std,
+            Spec.Y_MINIMUM.name: y_minimum,
+            Spec.Y_MAXIMUM.name: y_maximum,
         }
