@@ -82,7 +82,7 @@ class IOSpec:
             default=self.default if default is None else default,
         )
 
-    def optional(self, default: Any) -> 'IOSpec':
+    def optional(self, default: Any = None) -> 'IOSpec':
         """Retrieves the default value for this port.
 
         Returns:
@@ -108,7 +108,7 @@ class Step(ABC):
         self._inputs: IOValueObject = {}
         self._outputs: IOValueObject = {}
 
-    def set_input(self, name: str, value: Any) -> None:
+    def set_input(self, name: str | Enum, value: Any) -> None:
         """Assigns a single input value.
 
         Args:
@@ -119,9 +119,10 @@ class Step(ABC):
             KeyError: If the input port is not defined in the spec.
         """
 
+        name = _to_plain_name(name)
         self._inputs[name] = value
 
-    def get_input(self, name: str) -> Any:
+    def get_input(self, name: str | Enum) -> Any:
         """Retrieves an input value.
 
         Args:
@@ -136,6 +137,7 @@ class Step(ABC):
             ValueError: If the input is required but not provided.
         """
 
+        name = _to_plain_name(name)
         spec: Optional[IOSpec] = self.spec.input_spec_map.get(name)
         if spec is None:
             raise KeyError(f"Input port '{name}' is not defined in step spec.")
@@ -151,7 +153,7 @@ class Step(ABC):
 
         return value
 
-    def set_output(self, name: str, value: Any) -> None:
+    def set_output(self, name: str | Enum, value: Any) -> None:
         """Assigns an output value.
 
         Args:
@@ -163,13 +165,14 @@ class Step(ABC):
             TypeError: If the value does not match the declared dtype.
         """
 
+        name = _to_plain_name(name)
         port = self.spec.output_spec_map.get(name)
         if port is None:
             raise KeyError(f"Output '{name}' is not defined in step spec.")
 
         self._outputs[name] = value
 
-    def get_output(self, name: str) -> Any:
+    def get_output(self, name: str | Enum) -> Any:
         """Retrieves an output value.
 
         Args:
@@ -184,6 +187,7 @@ class Step(ABC):
             ValueError: If the output is required but has not been set.
         """
 
+        name = _to_plain_name(name)
         port = self.spec.output_spec_map.get(name)
         if port is None:
             raise KeyError(f"Output '{name}' is not defined in step spec.")
