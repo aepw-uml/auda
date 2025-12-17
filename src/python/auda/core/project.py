@@ -1,6 +1,8 @@
 from logging import DEBUG, INFO, WARNING, Logger, basicConfig, getLogger
 from pathlib import Path
 
+from diskcache import Cache
+
 from .constants import DatabaseName, Environment
 from .database import Database, DatabaseManager
 from .env import Env
@@ -41,6 +43,9 @@ class Project:
             username=self.env.PRISM_DB_USERNAME,
             password=self.env.PRISM_DB_PASSWORD,
         )
+
+        # Cache
+        self.cache = Cache(self.cache_dir)
 
         # Template manager
         self.template = TemplateManager(self.templates_dir)
