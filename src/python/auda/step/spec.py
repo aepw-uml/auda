@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List
+from typing import List, Tuple, Union
 
 from auda.utils.pipeline import IOSpec
 from numpy import ndarray
@@ -10,8 +10,8 @@ class SpecName(str, Enum):
     # Samples/Dataset                                                          #
     # =========================================================================#
 
-    # The original samples in the dataset
-    SAMPLES = 'SAMPLES'
+    # The dataset
+    DATASET = 'DATASET'
 
     # The number of samples in the dataset
     NUM_SAMPLES = 'NUM_SAMPLES'
@@ -31,6 +31,9 @@ class SpecName(str, Enum):
     # Units of the features
     FEATURE_UNITS = 'FEATURE_UNITS'
 
+    # Units of the labels
+    LABEL_UNITS = 'LABEL_UNITS'
+
     # =========================================================================#
     # Statistics                                                               #
     # =========================================================================#
@@ -41,11 +44,23 @@ class SpecName(str, Enum):
     # Standard deviation of the features
     X_STD = 'X_STD'
 
-    # Mean of the labels (regression tasks)
+    # Minimum values of the features
+    X_MINIMUM = 'X_MINIMUM'
+
+    # Maximum values of the features
+    X_MAXIMUM = 'X_MAXIMUM'
+
+    # Mean of the targets
     Y_MEAN = 'Y_MEAN'
 
-    # Standard deviation of the labels (regression tasks)
+    # Standard deviation of the targets
     Y_STD = 'Y_STD'
+
+    # Minimum values of the targets
+    Y_MINIMUM = 'Y_MINIMUM'
+
+    # Maximum values of the targets
+    Y_MAXIMUM = 'Y_MAXIMUM'
 
     # =========================================================================#
     # Splitting Data                                                           #
@@ -99,10 +114,10 @@ class SpecName(str, Enum):
     # =========================================================================#
 
     # The location associated with the samples
-    LOCATION = 'location'
+    LOCATION = 'LOCATION'
 
     # The year associated with the samples
-    YEAR = 'year'
+    YEAR = 'YEAR'
 
 
 class Spec(str, IOSpec):
@@ -110,15 +125,21 @@ class Spec(str, IOSpec):
     # Samples/Dataset                                                          #
     # =========================================================================#
 
-    SAMPLES = IOSpec(
-        name=SpecName.SAMPLES,
-        description='List of samples',
-        dtype=ndarray,
+    DATASET = IOSpec(
+        name=SpecName.DATASET,
+        description='Dataset containing the samples.',
+        dtype=Union[Tuple[ndarray, ndarray], ndarray],
     )
 
     NUM_SAMPLES = IOSpec(
         name=SpecName.NUM_SAMPLES,
         description='Number of samples',
+        dtype=int,
+    )
+
+    NUM_FEATURES = IOSpec(
+        name=SpecName.NUM_FEATURES,
+        description='Number of features',
         dtype=int,
     )
 
@@ -146,6 +167,12 @@ class Spec(str, IOSpec):
         dtype=List[str],
     )
 
+    LABEL_UNITS = IOSpec(
+        name=SpecName.LABEL_UNITS,
+        description='Units of the labels',
+        dtype=List[str],
+    )
+
     # =========================================================================#
     # Statistics                                                               #
     # =========================================================================#
@@ -162,6 +189,18 @@ class Spec(str, IOSpec):
         dtype=ndarray,
     )
 
+    X_MINIMUM = IOSpec(
+        name=SpecName.X_MINIMUM,
+        description='Minimum values of the features',
+        dtype=ndarray,
+    )
+
+    X_MAXIMUM = IOSpec(
+        name=SpecName.X_MAXIMUM,
+        description='Maximum values of the features',
+        dtype=ndarray,
+    )
+
     Y_MEAN = IOSpec(
         name=SpecName.Y_MEAN,
         description='Mean of the labels',
@@ -171,6 +210,18 @@ class Spec(str, IOSpec):
     Y_STD = IOSpec(
         name=SpecName.Y_STD,
         description='Standard deviation of the labels',
+        dtype=ndarray,
+    )
+
+    Y_MINIMUM = IOSpec(
+        name=SpecName.Y_MINIMUM,
+        description='Minimum values of the labels',
+        dtype=ndarray,
+    )
+
+    Y_MAXIMUM = IOSpec(
+        name=SpecName.Y_MAXIMUM,
+        description='Maximum values of the labels',
         dtype=ndarray,
     )
 
