@@ -8,7 +8,7 @@ class Table:
         self,
         headers: List[str] | None = None,
         bold_headers: bool = True,
-        fmt: str = 'plain',
+        fmt: str = 'simple',
     ) -> None:
         """Initializes a Table instance.
 
