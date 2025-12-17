@@ -1,3 +1,4 @@
+import inspect
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
@@ -13,6 +14,9 @@ from typing import (
     Type,
     cast,
 )
+
+IOValueMap = Dict[str | Enum, Any]
+IOValueObject = Dict[str, Any]
 
 
 def _to_plain_name(name: str | Enum) -> str:
@@ -101,8 +105,8 @@ class Step(ABC):
 
         self.spec = spec
         self.pipeline: Pipeline = pipeline
-        self._inputs: Dict[str, Any] = {}
-        self._outputs: Dict[str, Any] = {}
+        self._inputs: IOValueObject = {}
+        self._outputs: IOValueObject = {}
 
     def set_input(self, name: str, value: Any) -> None:
         """Assigns a single input value.
@@ -192,7 +196,7 @@ class Step(ABC):
 
         return value
 
-    def set_inputs(self, inputs: Dict[str, Any]) -> None:
+    def set_inputs(self, inputs: IOValueObject) -> None:
         """Assigns multiple input values at once.
 
         Args:
@@ -205,7 +209,7 @@ class Step(ABC):
         for name, value in inputs.items():
             self.set_input(name, value)
 
-    def get_outputs(self) -> Dict[str, Any]:
+    def get_outputs(self) -> IOValueObject:
         """
         Retrieves all output values as a dictionary.
 
@@ -218,7 +222,7 @@ class Step(ABC):
         return self._outputs.copy()
 
     @abstractmethod
-    def run(self, **inputs) -> Dict[Enum, Any] | None:
+    def run(self, **inputs) -> IOValueMap | None:
         """Executes the step’s work.
 
         Raises:
@@ -278,11 +282,11 @@ class Pipeline:
         self._step_specs: List[StepSpec] = step_specs
         self.callbacks: List[Callable[['Pipeline'], None]] = []
 
-        self.context: Dict[str, Any] = {}
+        self.context: IOValueObject = {}
 
     def run(
         self,
-        step_inputs: List[Dict[Enum | str, Any]] | None = None,
+        step_inputs: List[IOValueMap] | None = None,
     ) -> None:
         """Runs the pipeline by executing each step in sequence.
 
@@ -304,52 +308,64 @@ class Pipeline:
         ]
 
         for i, step in enumerate(steps):
-            step.set_inputs(self.context)
-
+            # Update the context with step-specific inputs if provided
             if len(step_inputs) > i and step_inputs[i]:
                 self.context.update(
                     {
-                        _to_plain_name(name): value
+                        _to_plain_name(name).upper(): value
                         for name, value in step_inputs[i].items()
                     }
                 )
 
-            # Traverse input specs to ensure required inputs are present
-            # Raise an error if a required input is missing; set default values
-            # for optional inputs that are not provided
-            for input_name, input_spec in step.spec.input_spec_map.items():
-                if input_name not in self.context:
-                    if input_spec.required:
-                        raise ValueError(
-                            f"Input '{input_name}' is required for step "
-                            f"'{step.spec.id}' but not provided."
-                        )
-                    else:
-                        self.context[input_name] = input_spec.default
+            self.run_step(step)
 
-            input_args = {
-                key.lower(): value for key, value in self.context.items()
-            }
-            outputs = step.run(**input_args)
+    def run_step(self, step: Step) -> None:
+        # Traverse input specs to ensure required inputs are present
+        # Raise an error if a required input is missing; set default values
+        # for optional inputs that are not provided
+        for input_name, input_spec in step.spec.input_spec_map.items():
+            if input_name not in self.context:
+                if input_spec.required:
+                    raise ValueError(
+                        f"Input '{input_name}' is required for step "
+                        f"'{step.spec.id}' but not provided."
+                    )
+                else:
+                    self.context[input_name] = input_spec.default
 
-            if outputs is not None:
-                for name, value in outputs.items():
-                    step.set_output(name.value, value)
+        step.set_inputs(self.context)
 
-            self.context.update(step.get_outputs())
+        # Prepare inputs arguments
+        input_args: IOValueObject = {}
+        parameters = inspect.signature(step.run).parameters
+        for name, param in parameters.items():
+            if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+                input_args[name] = step.get_input(name.upper())
 
-            # Traverse output specs to ensure required outputs are present
-            # Raise an error if a required output is missing; set default values
-            # for optional outputs that are not produced
-            for output_name, output_spec in step.spec.output_spec_map.items():
-                if output_name not in self.context:
-                    if output_spec.required:
-                        raise ValueError(
-                            f"Output '{output_name}' is required for step "
-                            f"'{step.spec.id}' but was not produced."
-                        )
-                    else:
-                        self.context[output_name] = output_spec.default
+        # Execute the step and collect outputs
+        outputs = step.run(**input_args)
+
+        # Set outputs
+        if outputs is not None:
+            for name, value in outputs.items():
+                step.set_output(_to_plain_name(name).upper(), value)
+
+        # Traverse output specs to ensure required outputs are present
+        # Raise an error if a required output is missing; set default values
+        # for optional outputs that are not produced
+        outputs = step.get_outputs()
+        for output_name, output_spec in step.spec.output_spec_map.items():
+            if output_name not in outputs:
+                if output_spec.required:
+                    raise ValueError(
+                        f"Output '{output_name}' is required for step "
+                        f"'{step.spec.id}' but was not produced."
+                    )
+                else:
+                    step.set_output(output_name, output_spec.default)
+
+        # Update the pipeline context with the step's outputs
+        self.context.update(step.get_outputs())
 
     def schedule(self, callback: Callable[['Pipeline'], None]) -> None:
         """Schedules a callback to be executed after the pipeline run.
