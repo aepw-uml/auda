@@ -12,6 +12,18 @@ from .template_manager import TemplateManager
 
 class Project:
     def __init__(self):
+        """Initializes a Project instance.
+
+        Attributes:
+            cache_dir: Directory for cached files.
+            results_dir: Directory for output files.
+            templates_dir: Directory for template files.
+            env: Environment configuration for the project.
+            singleton: Singleton registry.
+            database_manager: Database manager and database credentials.
+            cache: Cache instance for caching files.
+            template: Template manager for handling templates.
+        """
         # Cache directory storing cached files
         self.cache_dir: Path = Path.cwd() / 'cache'
 
@@ -49,6 +61,11 @@ class Project:
 
         # Template manager
         self.template = TemplateManager(self.templates_dir)
+
+        # Ensure directories
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.results_dir.mkdir(parents=True, exist_ok=True)
+        self.templates_dir.mkdir(parents=True, exist_ok=True)
 
     def get_logger(self, name: str) -> Logger:
         """
