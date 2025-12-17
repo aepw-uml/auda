@@ -12,7 +12,8 @@ from .__data_tables import DataTableName, WasteGenerationManagementColumn
 
 @step(
     id='DS-YEAR-PW',
-    description='Dataset containing yearly plastic waste statistics.',
+    description='Retrieves a dataset containing yearly plastic waste '
+    'generation statistics.',
     input_specs=[Spec.LOCATION],
     output_specs=[
         Spec.DATASET,

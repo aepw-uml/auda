@@ -4,6 +4,8 @@ from typing import List, Tuple, Union
 from auda.utils.pipeline import IOSpec
 from numpy import ndarray
 
+Dataset = Union[Tuple[ndarray, ndarray], ndarray]
+
 
 class SpecName(str, Enum):
     # =========================================================================#
@@ -119,6 +121,13 @@ class SpecName(str, Enum):
     # The year associated with the samples
     YEAR = 'YEAR'
 
+    # =========================================================================#
+    # Reference                                                                #
+    # =========================================================================#
+
+    # Tell the step which split to use
+    ON = 'ON'
+
 
 class Spec(str, IOSpec):
     # =========================================================================#
@@ -128,7 +137,7 @@ class Spec(str, IOSpec):
     DATASET = IOSpec(
         name=SpecName.DATASET,
         description='Dataset containing the samples.',
-        dtype=Union[Tuple[ndarray, ndarray], ndarray],
+        dtype=Dataset,
     )
 
     NUM_SAMPLES = IOSpec(
@@ -245,19 +254,19 @@ class Spec(str, IOSpec):
     TRAINIING_SET = IOSpec(
         name=SpecName.TRAINIING_SET,
         description='The training set',
-        dtype=ndarray,
+        dtype=Dataset,
     )
 
     VALIDATION_SET = IOSpec(
         name=SpecName.VALIDATION_SET,
         description='The validation set',
-        dtype=ndarray,
+        dtype=Dataset,
     )
 
     TEST_SET = IOSpec(
         name=SpecName.TEST_SET,
         description='The test set',
-        dtype=ndarray,
+        dtype=Dataset,
     )
 
     TRAINING_SET_PROPORTION = IOSpec(
@@ -294,8 +303,14 @@ class Spec(str, IOSpec):
     # Transformation                                                           #
     # =========================================================================#
 
-    STANDARDIZE_LABELS = IOSpec(
-        name=SpecName.STANDARDIZE_LABELS,
+    NORMALIZED_DATASET = IOSpec(
+        name='NORMALIZED_DATASET',
+        description='Normalized dataset',
+        dtype=Dataset,
+    )
+
+    STANDARDIZE_Y = IOSpec(
+        name='STANDARDIZE_Y',
         description='Whether to standardize the labels',
         dtype=bool,
     )
@@ -326,4 +341,14 @@ class Spec(str, IOSpec):
         name=SpecName.YEAR,
         description='The year associated with the samples',
         dtype=List[int],
+    )
+
+    # =========================================================================#
+    # Reference                                                                #
+    # =========================================================================#
+
+    ON = IOSpec(
+        name=SpecName.ON,
+        description='Tell the step which split to use',
+        dtype=str,
     )

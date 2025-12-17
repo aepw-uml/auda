@@ -4,3 +4,5 @@ scan_package(__path__, __name__)
 
 add_kind('DS', 'dataset')
 add_kind('MD', 'model')
+add_kind('ST', 'statistics')
+add_kind('TF', 'transformation')
