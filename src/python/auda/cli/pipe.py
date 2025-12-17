@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 from typing import Any, Dict, List, Tuple
 
@@ -21,7 +22,7 @@ KEYS_STR_DELIMITER = ','
 
 
 @app.command(name='list', help='Display all step specs.')
-def list_spec_specs(
+def list_step_specs(
     kind: str = Option('', '--kind', '-k', help='Step kind.'),
 ) -> None:
     table = Table(['ID', 'Kind', 'Description'])
@@ -38,7 +39,7 @@ def list_spec_specs(
 @app.command(
     name='info', help='Display specific information about a step spec.'
 )
-def check_info(
+def display_step_spec_info(
     spec_spec_id: str = Argument(help='The ID of the spec spec.'),
 ) -> None:
     spec_spec_id = spec_spec_id.upper()
@@ -82,7 +83,7 @@ def check_info(
 
 
 @app.command(name='run', help='Run a pipeline consisting of specified steps.')
-def run(
+def run_pipeline(
     step_strs: List[str] = Argument(..., help='List of steps in the pipeline.'),
     format: str = Option(
         'table', '-f', '--format', help='Output format (table|json).'
@@ -91,10 +92,10 @@ def run(
         '', '-n', '--names', help='Output keys to display.'
     ),
     lowercase_names: bool = Option(
-        True,
-        '-l',
-        '--lowercase-names',
-        help='Convert output keys to lowercase.',
+        False,
+        '-u',
+        '--uppercase-names',
+        help='Use original case for output keys.',
     ),
 ):
     def process_step_str(step_str: str) -> Tuple[str, Dict[Enum | str, Any]]:
@@ -156,9 +157,13 @@ def run(
             if outputs == {}:
                 return
 
-            table = Table()
+            table = Table(fmt='plain')
             for name, value in outputs.items():
-                table.append_row(name, str(value))
+                value_str = re.sub(r'\n\s*', ' ', str(value))
+                if len(value_str) > 50:
+                    value_str = value_str[:47] + '...'
+
+                table.append_row(name, value_str)
 
             echo(table)
         case _:
