@@ -26,6 +26,8 @@ KEYS_STR_DELIMITER = ','
 def list_step_specs(
     kind: str = Option('', '--kind', '-k', help='Step kind.'),
 ) -> None:
+    scan_package(STEP_PACKAGE_PATH, STEP_PACKAGE_NAME)
+
     table = Table(['ID', 'Kind', 'Description'])
     for step_spec in get_all_step_specs():
         step_spec_kind = get_kind(step_spec)
@@ -179,3 +181,6 @@ def run_pipeline(
                 echo('-' * get_terminal_size().columns)
         case _:
             echo(f'Unsupported format: {format}')
+
+    # Fire pipeline callbacks
+    pipeline.execute_callbacks()
