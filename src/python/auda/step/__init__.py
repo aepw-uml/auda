@@ -1,17 +1,27 @@
 from typing import Dict, cast
 
 from auda.core import auda
+from auda.step.spec import Dataset
 from auda.utils.pipeline import (
+    Step,
     add_kind,
     get_all_step_specs,
     scan_package,
     set_module_name_getter,
 )
 
+STEP_PACKAGE_PATH = __path__
+STEP_PACKAGE_NAME = __name__
 STEP_ID_MODULE_NAME_MAP_CACHE_KEY = 'step_id_module_name_cache'
 
 
 def module_name_getter(step_id: str) -> str | None:
+    """Gets module name for a given step ID.
+
+    Args:
+        step_id: Step ID.
+    """
+
     map: Dict[str, str] | None = cast(
         Dict[str, str] | None, auda.cache.get(STEP_ID_MODULE_NAME_MAP_CACHE_KEY)
     )
@@ -37,3 +47,22 @@ add_kind('DS', 'dataset')
 add_kind('MD', 'model')
 add_kind('ST', 'statistics')
 add_kind('TF', 'transformation')
+add_kind('EV', 'evaluation')
+add_kind('RG', 'regression')
+add_kind('PL', 'plotting')
+
+
+def get_dataset_from_step(step: Step, on: str) -> Dataset:
+    """Gets dataset from a step based on the 'on' parameter.
+
+    Args:
+        step: Step instance.
+        on: Name of the dataset to retrieve.
+    """
+
+    dataset: Dataset | None = step.get_input(on.upper(), check_port=False)
+
+    if dataset is None:
+        raise ValueError(f"No dataset found for '{on}'")
+
+    return dataset

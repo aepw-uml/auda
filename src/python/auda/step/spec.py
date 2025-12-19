@@ -3,7 +3,9 @@ from typing import List, Tuple, Union
 from auda.utils.pipeline import IOSpec
 from numpy import ndarray
 
-Dataset = Union[Tuple[ndarray, ndarray], ndarray]
+LabeledDataset = Tuple[ndarray, ndarray]
+UnlabeledDataset = ndarray
+Dataset = Union[LabeledDataset, UnlabeledDataset]
 
 
 class Spec(str, IOSpec):
@@ -205,6 +207,72 @@ class Spec(str, IOSpec):
     )
 
     # =========================================================================#
+    # Evaluation                                                               #
+    # =========================================================================#
+
+    MAE = IOSpec(
+        name='MAE',
+        description='Mean Absolute Error',
+        dtype=float,
+    )
+
+    RMSE = IOSpec(
+        name='RMSE',
+        description='Root Mean Square Error',
+        dtype=float,
+    )
+
+    R2 = IOSpec(
+        name='R2',
+        description='R-squared',
+        dtype=float,
+    )
+
+    MAPE = IOSpec(
+        name='MAPE',
+        description='Mean Absolute Percentage Error',
+        dtype=float,
+    )
+
+    # =========================================================================#
+    # Reference                                                                #
+    # =========================================================================#
+
+    ON = IOSpec(
+        name='ON',
+        description='Tell the step which split to use',
+        dtype=str,
+    )
+
+    PIPE = IOSpec(
+        name='PIPE',
+        description='The processing pipeline associated with the dataset',
+        dtype=str,
+    )
+
+    # =========================================================================#
+    # Model Specific                                                           #
+    # =========================================================================#
+
+    MODEL = IOSpec(
+        name='MODEL',
+        description='The model used in the pipeline.',
+        dtype=object,
+    )
+
+    TRAINING_MODEL = IOSpec(
+        name='TRAINING_MODEL',
+        description='The trained model after fitting to the training data.',
+        dtype=object,
+    )
+
+    KERNEL = IOSpec(
+        name='KERNEL',
+        description='Kernel type',
+        dtype=str,
+    )
+
+    # =========================================================================#
     # Dataset Specific                                                         #
     # =========================================================================#
 
@@ -221,11 +289,60 @@ class Spec(str, IOSpec):
     )
 
     # =========================================================================#
-    # Reference                                                                #
+    # Regression Models Specific                                               #
     # =========================================================================#
 
-    ON = IOSpec(
-        name='ON',
-        description='Tell the step which split to use',
+    C = IOSpec(
+        name='C',
+        description='Regularization parameter for regression models',
+        dtype=float,
+    )
+
+    EPSILON = IOSpec(
+        name='EPSILON',
+        description='Epsilon parameter for Support Vector Regression (SVR)',
+        dtype=float,
+    )
+
+    NUM_SUPPORT_VECTORS = IOSpec(
+        name='NUM_SUPPORT_VECTORS',
+        description='Number of support vectors in Support Vector Regression '
+        '(SVR) model',
+        dtype=int,
+    )
+
+    DUAL_COEFFICIENTS = IOSpec(
+        name='DUAL_COEFFICIENTS',
+        description='Dual coefficients of the support vectors in Support '
+        'Vector Regression (SVR) model',
+        dtype=List[float],
+    )
+
+    INTERCEPT = IOSpec(
+        name='INTERCEPT',
+        description='Intercept of the Support Vector Regression (SVR) model',
+        dtype=float,
+    )
+
+    GAMMA = IOSpec(
+        name='GAMMA',
+        description='Gamma parameter of the Support Vector Regression (SVR) '
+        'model',
+        dtype=float,
+    )
+
+    # =========================================================================#
+    # Matplotlib Specific                                                      #
+    # =========================================================================#
+
+    FIGURE = IOSpec(
+        name='FIGURE',
+        description='Generated figure',
+        dtype=object,
+    )
+
+    TITLE = IOSpec(
+        name='TITLE',
+        description='Title of the figure',
         dtype=str,
     )

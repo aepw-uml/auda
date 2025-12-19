@@ -1,6 +1,6 @@
-from typing import Tuple, override
+from typing import override
 
-import numpy as np
+from auda.step import get_dataset_from_step
 from auda.step.spec import Spec
 from auda.utils.pipeline import IOValueMap, Step, step
 
@@ -17,34 +17,34 @@ from auda.utils.pipeline import IOValueMap, Step, step
         Spec.VALIDATION_SET.optional(),
         Spec.TEST_SET.optional(),
     ],
-    output_specs=[Spec.NORMALIZED_DATASET],
+    output_specs=[
+        Spec.NORMALIZED_DATASET,
+        Spec.X_MEAN,
+        Spec.X_STD,
+        Spec.Y_MEAN,
+        Spec.Y_STD,
+    ],
 )
 class ZNorm(Step):
     @override
     def run(self, standardize_y: bool, on: str) -> IOValueMap:
         from sklearn.preprocessing import StandardScaler
 
-        dataset: Tuple[np.ndarray, np.ndarray] | None = None
+        X, y = get_dataset_from_step(self, on)
 
-        match on.upper():
-            case Spec.DATASET.name:
-                dataset = self.get_input(Spec.DATASET.name)
-            case Spec.TRAINIING_SET.name:
-                dataset = self.get_input(Spec.TRAINIING_SET.name)
-            case Spec.VALIDATION_SET.name:
-                dataset = self.get_input(Spec.VALIDATION_SET.name)
-            case Spec.TEST_SET.name:
-                dataset = self.get_input(Spec.TEST_SET.name)
+        x_scaler = StandardScaler()
+        X = x_scaler.fit_transform(X)
 
-        if dataset is None:
-            raise ValueError(f"No dataset found for '{on}'")
-
-        X, y = dataset
-        X = StandardScaler().fit_transform(X)
         if standardize_y:
-            y = StandardScaler().fit_transform(y.reshape(-1, 1)).flatten()
+            y_scaler = StandardScaler()
+            y = y_scaler.fit_transform(y.reshape(-1, 1)).flatten()
+        else:
+            y_scaler = None
 
-        # TODO: Should output the mean and standard deviation used for
         return {
             Spec.NORMALIZED_DATASET.name: (X, y),
+            Spec.X_MEAN.name: x_scaler.mean_,
+            Spec.X_STD.name: x_scaler.scale_,
+            Spec.Y_MEAN.name: y_scaler.mean_ if y_scaler else None,
+            Spec.Y_STD.name: y_scaler.scale_ if y_scaler else None,
         }
