@@ -10,7 +10,7 @@ from typing import (
     Dict,
     List,
     MutableSequence,
-    Optional,
+    Sequence,
     Type,
     cast,
 )
@@ -122,11 +122,12 @@ class Step(ABC):
         name = _to_plain_name(name)
         self._inputs[name] = value
 
-    def get_input(self, name: str | Enum) -> Any:
+    def get_input(self, name: str | Enum, check_port: bool = True) -> Any:
         """Retrieves an input value.
 
         Args:
             name: Input port name.
+            check_port: Whether to validate the input against the spec.
 
         Returns:
             The value associated with the port, or the default value set in the
@@ -138,18 +139,26 @@ class Step(ABC):
         """
 
         name = _to_plain_name(name)
-        spec: Optional[IOSpec] = self.spec.input_spec_map.get(name)
-        if spec is None:
+
+        if not check_port:
+            value: Any = self._inputs.get(name)
+            if value is None:
+                raise KeyError(f"Input port '{name}' is not set.")
+
+            return value
+
+        port: IOSpec | None = self.spec.input_spec_map.get(name)
+        if port is None:
             raise KeyError(f"Input port '{name}' is not defined in step spec.")
 
         value: Any = self._inputs.get(name)
         if value is None:
-            if spec.required:
+            if port.required:
                 raise ValueError(
                     f"Input '{name}' is required but not provided."
                 )
 
-            return spec.default
+            return port.default
 
         return value
 
@@ -172,11 +181,12 @@ class Step(ABC):
 
         self._outputs[name] = value
 
-    def get_output(self, name: str | Enum) -> Any:
+    def get_output(self, name: str | Enum, check_port=False) -> Any:
         """Retrieves an output value.
 
         Args:
             name: Output port name.
+            check_port: Whether to validate the output against the spec.
 
         Returns:
             The output value, or the default value set in the port if the port
@@ -188,6 +198,14 @@ class Step(ABC):
         """
 
         name = _to_plain_name(name)
+
+        if not check_port:
+            value: Any = self._inputs.get(name)
+            if value is None:
+                raise KeyError(f"Input port '{name}' is not set.")
+
+            return value
+
         port = self.spec.output_spec_map.get(name)
         if port is None:
             raise KeyError(f"Output '{name}' is not defined in step spec.")
@@ -284,9 +302,18 @@ class Pipeline:
         """
 
         self._step_specs: List[StepSpec] = step_specs
-        self.callbacks: List[Callable[['Pipeline'], None]] = []
+        self._callbacks: List[Callable[['Pipeline'], None]] = []
 
         self.context: IOValueObject = {}
+
+    def get_value(self, name: str | Enum) -> Any:
+        """Retrieves a value from the pipeline context.
+
+        Args:
+            name: The name of the value to retrieve.
+        """
+
+        return self.context.get(_to_plain_name(name))
 
     def run(
         self,
@@ -378,17 +405,20 @@ class Pipeline:
             callback: A callable function to be executed after the pipeline run.
         """
 
-        self.callbacks.append(callback)
+        self._callbacks.append(callback)
 
     def execute_callbacks(self) -> None:
         """Executes all scheduled callbacks."""
 
-        for callback in self.callbacks:
+        for callback in self._callbacks:
             callback(self)
 
 
 # Registry for StepSpecs; maps from step ID to StepSpec
 _step_specs: Dict[str, StepSpec] = {}
+
+# Registry for StepSpecs by their implementation class
+_step_specs_by_class: Dict[Type[Step], StepSpec] = {}
 
 
 def register(spec: StepSpec) -> None:
@@ -405,6 +435,7 @@ def register(spec: StepSpec) -> None:
         raise ValueError(f'Duplicate StepSpec ID: {spec.id}')
 
     _step_specs[spec.id] = spec
+    _step_specs_by_class[spec.implementation] = spec
 
 
 def get_all_step_specs() -> List[StepSpec]:
@@ -500,7 +531,25 @@ def get_step_spec_by_id(step_id: str) -> StepSpec:
     return step_spec
 
 
-def create_pipeline(step_id_list: List[str]) -> Pipeline:
+def get_step_spec_by_class(step_class: Type[Step]) -> StepSpec:
+    """Retrieves a registered StepSpec by its implementation class.
+
+    Args:
+        step_class: The implementation class of the step.
+
+    Returns:
+        The StepSpec associated with the given implementation class.
+    """
+
+    step_spec = _step_specs_by_class.get(step_class)
+
+    if step_spec is None:
+        raise ValueError(f'Step spec not found for class: {step_class}')
+
+    return step_spec
+
+
+def create_pipeline(step_id_list: Sequence[str | Type[Step]]) -> Pipeline:
     """Creates a Pipeline instance from a list of StepSpec IDs.
 
     Args:
@@ -510,7 +559,14 @@ def create_pipeline(step_id_list: List[str]) -> Pipeline:
         A Pipeline instance containing the specified steps.
     """
 
-    return Pipeline([get_step_spec_by_id(step_id) for step_id in step_id_list])
+    return Pipeline(
+        [
+            get_step_spec_by_id(step_id)
+            if isinstance(step_id, str)
+            else get_step_spec_by_class(step_id)
+            for step_id in step_id_list
+        ]
+    )
 
 
 # Maps from step ID prefixes to their kinds
