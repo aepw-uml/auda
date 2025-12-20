@@ -1,9 +1,7 @@
 from typing import Dict, cast
 
 from auda.core import auda
-from auda.step.spec import Dataset
 from auda.utils.pipeline import (
-    Step,
     add_kind,
     get_all_step_specs,
     scan_package,
@@ -50,21 +48,3 @@ add_kind('TF', 'transformation')
 add_kind('EV', 'evaluation')
 add_kind('RG', 'regression')
 add_kind('PL', 'plotting')
-
-
-def get_dataset_from_step(step: Step, on: str | Dataset) -> Dataset:
-    """Gets dataset from a step based on the 'on' parameter.
-
-    Args:
-        step: Step instance.
-        on: Name of the dataset to retrieve.
-    """
-    if not isinstance(on, str):
-        return cast(Dataset, on)
-
-    dataset: Dataset | None = step.get_input(on.upper(), check_port=False)
-
-    if dataset is None:
-        raise ValueError(f"No dataset found for '{on}'")
-
-    return dataset

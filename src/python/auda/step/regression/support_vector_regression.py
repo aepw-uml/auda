@@ -1,12 +1,12 @@
 from typing import override
 
 import numpy as np
-from auda.step import get_dataset_from_step
+from auda.step.dataset import DatasetStep
 from auda.step.plot import PlotStep
 from auda.step.plot.plot_curve import PlotCurve
 from auda.step.plot.plot_scatter_plot import PlotScatterPlot
 from auda.step.spec import Dataset, Spec
-from auda.utils.pipeline import IOValueMap, Step, step
+from auda.utils.pipeline import IOValueMap, step
 from sklearn.svm import SVR
 
 
@@ -30,7 +30,7 @@ from sklearn.svm import SVR
         Spec.GAMMA,
     ],
 )
-class SupportVectorRegression(Step):
+class SupportVectorRegression(DatasetStep):
     @override
     def run(
         self, on: str | Dataset, c: float, epsilon: float, kernel: str
@@ -40,7 +40,7 @@ class SupportVectorRegression(Step):
         c = float(c)
         epsilon = float(epsilon)
 
-        X, y = get_dataset_from_step(self, on)
+        X, y = self.get_dataset_from_on(on)
 
         svr_model = SVR(kernel=kernel, C=c, epsilon=epsilon)
         svr_model.fit(X, y)
@@ -77,7 +77,7 @@ class SupportVectorRegression(Step):
     ],
     output_specs=[Spec.FIGURE, Spec.AXES],
 )
-class SupportVectorRegressionPlotter(PlotStep):
+class SupportVectorRegressionPlotter(PlotStep, DatasetStep):
     @override
     def run(
         self,
@@ -97,7 +97,7 @@ class SupportVectorRegressionPlotter(PlotStep):
         EPSILON_TUBE_ALPHA = 0.25
         EPSILON_TUBE_LABEL = 'ε-tube'
 
-        X_true, y_true = get_dataset_from_step(self, on)
+        X_true, y_true = self.get_dataset_from_on(on)
         self.check_feature_dimension(X_true, expected_dimension=1)
 
         x_true = X_true.ravel()

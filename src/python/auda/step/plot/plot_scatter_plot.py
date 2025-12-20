@@ -1,6 +1,6 @@
 from typing import override
 
-from auda.step import get_dataset_from_step
+from auda.step.dataset import DatasetStep
 from auda.step.plot import PlotStep
 from auda.step.spec import Dataset, Spec
 from auda.utils.pipeline import IOValueMap, step
@@ -10,12 +10,9 @@ from auda.utils.pipeline import IOValueMap, step
     id='PL-SP',
     description='Plots scatter points of sample data.',
     input_specs=[
-        # ---- Figure and Axes (create if not provided)
         Spec.FIGURE.optional(),
         Spec.AXES.optional(),
-        # ---- Dataset to plot
         Spec.ON.optional(Spec.DATASET.name),
-        # ---- Scatter plot options
         Spec.SAMPLE_POINT_SIZE.optional(60),
         Spec.SAMPLE_POINT_COLOR.optional('cornflowerblue'),
         Spec.SAMPLE_POINT_EDGE_COLOR.optional('white'),
@@ -23,7 +20,7 @@ from auda.utils.pipeline import IOValueMap, step
     ],
     output_specs=[Spec.FIGURE, Spec.AXES],
 )
-class PlotScatterPlot(PlotStep):
+class PlotScatterPlot(PlotStep, DatasetStep):
     @override
     def run(
         self,
@@ -35,7 +32,7 @@ class PlotScatterPlot(PlotStep):
         sample_point_edge_color: str,
         sample_point_label: str,
     ) -> IOValueMap:
-        X, y = get_dataset_from_step(self, on)
+        X, y = self.get_dataset_from_on(on)
         self.check_feature_dimension(X, expected_dimension=1)
 
         # ---- Create scatter plot

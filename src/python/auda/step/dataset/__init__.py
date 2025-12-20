@@ -129,3 +129,20 @@ class DatasetStep(Step):
             args_str = ':' + ';'.join(args_parts)
 
         return f'{self.spec.id}{args_str}'
+
+    def get_dataset_from_on(self, on: str | Dataset) -> Dataset:
+        """Gets dataset from a step based on the 'on' parameter.
+
+        Args:
+            step: Step instance.
+            on: Name of the dataset to retrieve.
+        """
+        if not isinstance(on, str):
+            return cast(Dataset, on)
+
+        dataset: Dataset | None = self.get_input(on.upper(), check_port=False)
+
+        if dataset is None:
+            raise ValueError(f"No dataset found for '{on}'")
+
+        return dataset

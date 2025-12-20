@@ -1,6 +1,6 @@
 from typing import override
 
-from auda.step import get_dataset_from_step
+from auda.step.dataset import DatasetStep
 from auda.step.plot import PlotStep
 from auda.step.spec import Dataset, Spec
 from auda.utils.pipeline import IOValueMap, step
@@ -20,7 +20,7 @@ from auda.utils.pipeline import IOValueMap, step
     ],
     output_specs=[Spec.FIGURE, Spec.AXES],
 )
-class PlotCurve(PlotStep):
+class PlotCurve(PlotStep, DatasetStep):
     @override
     def run(
         self,
@@ -33,7 +33,7 @@ class PlotCurve(PlotStep):
         line_style: str,
     ) -> IOValueMap:
         figure, axes = self.create_plot_or_default(figure, axes)
-        x_curve, y_curve = get_dataset_from_step(self, on)
+        x_curve, y_curve = self.get_dataset_from_on(on)
 
         axes.plot(
             x_curve,
