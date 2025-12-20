@@ -10,6 +10,7 @@ from typing import (
     Dict,
     List,
     MutableSequence,
+    Self,
     Sequence,
     Tuple,
     Type,
@@ -17,7 +18,10 @@ from typing import (
     get_origin,
 )
 
+# Type aliases for input/output value mappings
 IOValueMap = Dict[str | Enum, Any]
+
+# Type alias for input/output value objects with string keys
 IOValueObject = Dict[str, Any]
 
 
@@ -328,7 +332,6 @@ class Pipeline:
 
         self._step_specs: List[StepSpec] = step_specs
         self._callbacks: List[Callable[['Pipeline'], None]] = []
-
         self.context: IOValueObject = {}
 
     def get_value(self, name: str | Enum) -> Any:
@@ -446,6 +449,17 @@ class Pipeline:
 
         for callback in self._callbacks:
             callback(self)
+
+    def reset(self) -> Self:
+        """Resets the pipeline context and clears scheduled callbacks."""
+
+        self._step_specs = [
+            get_step_spec_by_id(step_spec.id) for step_spec in self._step_specs
+        ]
+        self._callbacks.clear()
+        self.context.clear()
+
+        return self
 
     def convert_by_type(self, dtype: Type, value: Any) -> Any:
         """Converts a value to a specified type using single dispatch.
