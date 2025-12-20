@@ -28,8 +28,11 @@ def list_step_specs(
 ) -> None:
     scan_package(STEP_PACKAGE_PATH, STEP_PACKAGE_NAME)
 
+    all_step_specs = get_all_step_specs()
+    all_step_specs.sort(key=lambda spec: spec.id)
+
     table = Table(['ID', 'Kind', 'Description'])
-    for step_spec in get_all_step_specs():
+    for step_spec in all_step_specs:
         step_spec_kind = get_kind(step_spec)
         if kind and step_spec != kind:
             continue
