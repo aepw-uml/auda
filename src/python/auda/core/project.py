@@ -68,15 +68,12 @@ class Project:
         self.templates_dir.mkdir(parents=True, exist_ok=True)
 
     def get_logger(self, name: str) -> Logger:
-        """
-        Returns a logger instance with the specified name.
-        """
+        """Returns a logger instance with the specified name."""
 
         return getLogger(name)
 
     def setup_logging(self) -> None:
-        """
-        Sets up the logging configuration for the project.
+        """Sets up the logging configuration for the project.
 
         The logging level is determined based on the current environment:
             - DEBUG level for DEVELOPMENT, TESTING, and STAGING environments.

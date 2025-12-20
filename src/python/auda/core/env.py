@@ -41,7 +41,6 @@ class Env:
             dotenv_path: The path to the .env file; defaults to '.env'.
         """
 
-        # Load environment variables from the .env file
         load_dotenv(dotenv_path=dotenv_path)
 
         self.dotenv_path = dotenv_path

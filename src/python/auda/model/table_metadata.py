@@ -5,8 +5,7 @@ from .base_model import SABase
 
 
 class TableMetadata(SABase):
-    """
-    Represents a table in the database.
+    """Represents a table in the database.
 
     Args:
         id: Unique identifier for the table.

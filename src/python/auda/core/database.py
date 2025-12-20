@@ -7,9 +7,7 @@ from sqlalchemy.orm import Query, Session, sessionmaker
 
 
 class Database:
-    """
-    Represents a database connection and session manager using SQLAlchemy.
-    """
+    """Represents a database connection and session manager using SQLAlchemy."""
 
     def __init__(
         self,

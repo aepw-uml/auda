@@ -3,9 +3,7 @@ from string import Template
 
 
 class TemplateManager:
-    """
-    Manages template files stored in a specified directory.
-    """
+    """Manages template files stored in a specified directory."""
 
     def __init__(self, templates_dir: Path):
         """Initializes the TemplateManager.

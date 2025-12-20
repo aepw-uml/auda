@@ -89,8 +89,14 @@ class DataService:
     def gather_columns_by_table(
         self, rows: List[DataColumnMetadata]
     ) -> Dict[str, List[Tuple[str, object, str]]]:
-        """Returns a mapping: table_name -> list of (column_name, sqlatype,
-        comment).
+        """Gathers columns by their respective table names.
+
+        Args:
+            rows: A list of DataColumnMetadata objects.
+
+        Returns:
+            A dictionary mapping table names to lists of tuples, each
+            containing column name, SQLAlchemy type, and column comment.
         """
 
         sorted_rows = sorted(rows, key=lambda r: getattr(r, 'id', 0))

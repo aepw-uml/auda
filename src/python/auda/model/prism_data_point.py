@@ -7,8 +7,7 @@ from .base_model import SABase
 
 
 class PrismDataPoint(SABase):
-    """
-    Metadata for individual data points used in the PRISM system.
+    """Metadata for individual data points used in the PRISM system.
 
     Attributes:
         id: Unique UUID identifier generated via gen_random_uuid().
