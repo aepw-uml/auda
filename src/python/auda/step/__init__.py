@@ -52,13 +52,15 @@ add_kind('RG', 'regression')
 add_kind('PL', 'plotting')
 
 
-def get_dataset_from_step(step: Step, on: str) -> Dataset:
+def get_dataset_from_step(step: Step, on: str | Dataset) -> Dataset:
     """Gets dataset from a step based on the 'on' parameter.
 
     Args:
         step: Step instance.
         on: Name of the dataset to retrieve.
     """
+    if not isinstance(on, str):
+        return cast(Dataset, on)
 
     dataset: Dataset | None = step.get_input(on.upper(), check_port=False)
 
