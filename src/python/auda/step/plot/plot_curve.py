@@ -2,7 +2,7 @@ from typing import override
 
 from auda.step import get_dataset_from_step
 from auda.step.plot import PlotStep
-from auda.step.spec import Spec
+from auda.step.spec import Dataset, Spec
 from auda.utils.pipeline import IOValueMap, step
 
 
@@ -26,9 +26,9 @@ class PlotCurve(PlotStep):
         self,
         figure,
         axes,
-        on: str,
+        on: str | Dataset,
         line_color: str,
-        line_width: int,
+        line_width: float,
         line_label: str,
         line_style: str,
     ) -> IOValueMap:

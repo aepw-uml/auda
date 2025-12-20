@@ -1,14 +1,14 @@
 import re
-from enum import Enum
 from shutil import get_terminal_size
-from typing import Any, Dict, List, Tuple
+from typing import Dict, List
 
 from auda.step import *
 from auda.utils.pipeline import (
     IOSpec,
-    create_pipeline,
+    IOValueMap,
     get_all_step_specs,
     get_kind,
+    parse_step_str_list,
 )
 from auda.utils.table import Table
 from auda.utils.types import format_type
@@ -101,33 +101,8 @@ def run_pipeline(
         help='Use original case for output keys.',
     ),
 ):
-    def process_step_str(step_str: str) -> Tuple[str, Dict[Enum | str, Any]]:
-        inputs: Dict[Enum | str, Any] = {}
-        if STEP_STR_DELIMITER in step_str:
-            step_id, inputs_str = step_str.split(STEP_STR_DELIMITER, 1)
-            inputs_strs = inputs_str.split(INPUTS_STR_DELIMITER)
-
-            raw_inputs = {}
-            for input in inputs_strs:
-                sp = input.split(INPUTS_STR_KEY_VALUE_DELIMITER, 1)
-                raw_inputs[sp[0].upper()] = sp[1]
-
-            inputs.update(raw_inputs)
-        else:
-            step_id = step_str
-
-        return step_id, inputs
-
-    step_ids: List[str] = []
-    step_inputs: List[Dict[Enum | str, str]] = []
-    for step_str in step_strs:
-        step_id, inputs = process_step_str(step_str)
-        step_ids.append(step_id)
-        step_inputs.append(inputs)
-
-    step_ids = [step_id.upper() for step_id in step_ids]
-    pipeline = create_pipeline(step_ids)
-    pipeline.run(step_inputs=step_inputs)
+    pipeline, step_inputs = parse_step_str_list(step_strs)
+    pipeline.run(cast(List[IOValueMap], step_inputs))
 
     # Select specified output keys
     names = (

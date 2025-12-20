@@ -2,7 +2,7 @@ from typing import override
 
 from auda.step import get_dataset_from_step
 from auda.step.plot import PlotStep
-from auda.step.spec import Spec
+from auda.step.spec import Dataset, Spec
 from auda.utils.pipeline import IOValueMap, step
 
 
@@ -27,7 +27,7 @@ class PlotScatterPlot(PlotStep):
     @override
     def run(
         self,
-        on: str,
+        on: str | Dataset,
         figure,
         axes,
         sample_point_size: float,

@@ -11,8 +11,10 @@ from typing import (
     List,
     MutableSequence,
     Sequence,
+    Tuple,
     Type,
     cast,
+    get_origin,
 )
 
 IOValueMap = Dict[str | Enum, Any]
@@ -371,7 +373,12 @@ class Pipeline:
                     }
                 )
 
-            self.run_step(step)
+            try:
+                self.run_step(step)
+            except Exception as e:
+                raise RuntimeError(
+                    f"Error occurred while executing step '{step.spec.id}': {e}"
+                ) from e
 
     def run_step(self, step: Step) -> None:
         # Traverse input specs to ensure required inputs are present
@@ -394,7 +401,11 @@ class Pipeline:
         parameters = inspect.signature(step.run).parameters
         for name, param in parameters.items():
             if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-                input_args[name] = step.get_input(name.upper())
+                # input_args[name] = step.get_input(name.upper())
+
+                input_args[name] = self.convert_by_type(
+                    param.annotation, step.get_input(name.upper())
+                )
 
         # Execute the step and collect outputs
         outputs = step.run(**input_args)
@@ -435,6 +446,45 @@ class Pipeline:
 
         for callback in self._callbacks:
             callback(self)
+
+    def convert_by_type(self, dtype: Type, value: Any) -> Any:
+        """Converts a value to a specified type using single dispatch.
+
+        Args:
+            to: The target type to convert the value to.
+            value: The value to be converted.
+
+        Returns:
+            The converted value.
+        """
+        try:
+            if dtype is str:
+                return str(value)
+            if dtype is int:
+                return int(value)
+            elif dtype is float:
+                return float(value)
+            elif dtype is bool:
+                return bool(value)
+            elif get_origin(dtype) is list:
+                str_list = str(value).split(VALUES_DELIMITER)
+                item_type = dtype.__args__[0]
+                if item_type is str:
+                    return str_list
+                elif item_type is int:
+                    return [int(item) for item in str_list]
+                elif item_type is float:
+                    return [float(item) for item in str_list]
+                elif item_type is bool:
+                    return [bool(item) for item in str_list]
+                else:
+                    return str_list
+            else:
+                return value
+        except Exception as e:
+            raise ValueError(
+                f"Failed to convert value '{value}' to type '{dtype}': {e}"
+            ) from e
 
 
 # Registry for StepSpecs; maps from step ID to StepSpec
@@ -592,6 +642,87 @@ def create_pipeline(step_id_list: Sequence[str | Type[Step]]) -> Pipeline:
     )
 
 
+STEP_STRS_DELIMITER = ' '
+STEP_STR_PARAM_DELIMITER = ':'
+INPUTS_STR_DELIMITER = ';'
+INPUTS_STR_KEY_VALUE_DELIMITER = '='
+VALUES_DELIMITER = ','
+
+
+def create_step_str_list(pipe_str: str) -> List[str]:
+    """Creates a list of step strings from a pipeline string.
+
+    Args:
+        pipe_str: A string representing the pipeline, with step IDs
+            separated by spaces.
+
+    Returns:
+        A list of step ID strings.
+    """
+
+    return [
+        step_str.strip()
+        for step_str in pipe_str.split(STEP_STRS_DELIMITER)
+        if step_str
+    ]
+
+
+def process_step_str(step_str: str) -> Tuple[str, IOValueObject]:
+    """Processes a step string to extract the step ID and input values.
+
+    Args:
+        step_str: A string representing a step, potentially with input
+            parameters.
+
+    Returns:
+        A tuple containing the step ID and a dictionary of input values.
+    """
+
+    inputs: IOValueObject = {}
+
+    if STEP_STR_PARAM_DELIMITER in step_str:
+        step_id, inputs_str = step_str.split(STEP_STR_PARAM_DELIMITER, 1)
+        inputs_strs = inputs_str.split(INPUTS_STR_DELIMITER)
+
+        raw_inputs = {}
+        for input in inputs_strs:
+            sp = input.split(INPUTS_STR_KEY_VALUE_DELIMITER, 1)
+            raw_inputs[sp[0].upper()] = sp[1]
+
+        inputs.update(raw_inputs)
+    else:
+        step_id = step_str
+
+    return step_id, inputs
+
+
+def parse_step_str_list(
+    step_strs: List[str],
+) -> Tuple[Pipeline, List[IOValueObject]]:
+    """Creates a Pipeline instance from a list of step strings.
+
+    Step IDs are case-insensitive and will be normalized to uppercase.
+
+    Args:
+        step_strs: A list of step strings.
+
+    Returns:
+        A Pipeline instance containing the specified steps.
+    """
+
+    step_ids: List[str] = []
+    step_inputs: List[IOValueObject] = []
+    for step_str in step_strs:
+        step_id, inputs = process_step_str(step_str)
+        step_ids.append(step_id)
+        step_inputs.append(inputs)
+
+    # Normalize step IDs to uppercase
+    step_ids = [step_id.upper() for step_id in step_ids]
+
+    return create_pipeline(step_ids), step_inputs
+
+
 # Maps from step ID prefixes to their kinds
 _prefix_kind_map: Dict[str, str] = {}
 
@@ -642,6 +773,7 @@ def get_kind(step_spec: StepSpec) -> str:
     return get_kind_by_id(step_spec.id)
 
 
+# Function to retrieve module names for step IDs
 _module_name_getter: Callable[[str], str | None] | None = None
 
 

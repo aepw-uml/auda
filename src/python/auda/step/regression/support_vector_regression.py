@@ -32,7 +32,9 @@ from sklearn.svm import SVR
 )
 class SupportVectorRegression(Step):
     @override
-    def run(self, on: str, c, epsilon, kernel: str) -> IOValueMap:
+    def run(
+        self, on: str | Dataset, c: float, epsilon: float, kernel: str
+    ) -> IOValueMap:
         from sklearn.svm import SVR
 
         c = float(c)

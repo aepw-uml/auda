@@ -1,14 +1,15 @@
 from typing import cast, override
 
 import numpy as np
-from auda.step.spec import Spec
+from auda.step import get_dataset_from_step
+from auda.step.spec import Dataset, Spec
 from auda.utils.pipeline import IOValueMap, Step, step
 
 
 @step(
     id='ST-BASIC',
     description='Computes basic descriptive statistics of the input samples.',
-    input_specs=[Spec.DATASET],
+    input_specs=[Spec.ON],
     output_specs=[
         Spec.NUM_SAMPLES,
         Spec.NUM_FEATURES,
@@ -24,8 +25,8 @@ from auda.utils.pipeline import IOValueMap, Step, step
 )
 class BasicStats(Step):
     @override
-    def run(self, dataset: np.ndarray) -> IOValueMap:
-        X, y = dataset
+    def run(self, on: str | Dataset) -> IOValueMap:
+        X, y = get_dataset_from_step(self, on)
         y = cast(np.ndarray, y)
 
         # Statistics

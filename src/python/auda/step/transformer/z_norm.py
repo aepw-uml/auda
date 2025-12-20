@@ -2,7 +2,7 @@ from typing import Tuple, override
 
 import numpy as np
 from auda.step import get_dataset_from_step
-from auda.step.spec import Spec
+from auda.step.spec import Dataset, Spec
 from auda.utils.pipeline import IOValueMap, Step, step
 
 
@@ -28,7 +28,7 @@ from auda.utils.pipeline import IOValueMap, Step, step
 )
 class ZNorm(Step):
     @override
-    def run(self, standardize_y: bool, on: str) -> IOValueMap:
+    def run(self, on: str | Dataset, standardize_y: bool) -> IOValueMap:
         X, y = get_dataset_from_step(self, on)
         X, X_mean, X_std = self._z_normalize(X)
 
