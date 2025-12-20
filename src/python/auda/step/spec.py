@@ -99,13 +99,6 @@ class Spec(str, IOSpec):
         dtype=bool,
     )
 
-    SPLIT_SHUFFLE_SEED = IOSpec(
-        name='SPLIT_SHUFFLE_SEED',
-        description='The random seed for shuffling the samples before '
-        'splitting',
-        dtype=int,
-    )
-
     TRAINIING_SET = IOSpec(
         name='TRAINING_SET',
         description='The training set',
@@ -207,6 +200,62 @@ class Spec(str, IOSpec):
     MAPE = IOSpec(
         name='MAPE',
         description='Mean Absolute Percentage Error',
+        dtype=float,
+    )
+
+    NUM_K_FOLDS = IOSpec(
+        name='NUM_K_FOLDS',
+        description='Number of folds for K-Fold Cross Validation',
+        dtype=int,
+    )
+
+    # =========================================================================#
+    # REPRODUCIBILITY                                                          #
+    # =========================================================================#
+
+    SEED = IOSpec(
+        name='SEED',
+        description='The random seed for reproducible results',
+        dtype=int,
+    )
+
+    # =========================================================================#
+    # ANOMALY DETECTION                                                        #
+    # =========================================================================#
+
+    ISOLATION_FOREST_THRESHOLD = IOSpec(
+        name='ISOLATION_FOREST_THRESHOLD',
+        description='Threshold for Isolation Forest to classify anomalies',
+        dtype=float,
+    )
+
+    INLIER_INDEXES = IOSpec(
+        name='INLIER_INDEXES',
+        description='Indexes of inlier samples',
+        dtype=List[int],
+    )
+
+    OUTLIER_INDEXES = IOSpec(
+        name='OUTLIER_INDEXES',
+        description='Indexes of outlier samples',
+        dtype=List[int],
+    )
+
+    INLIER_DATASET = IOSpec(
+        name='INLIER_DATASET',
+        description='Dataset containing inlier samples',
+        dtype=Dataset,
+    )
+
+    ANOMALY_SCORES = IOSpec(
+        name='ANOMALY_SCORES',
+        description='Anomaly scores for each sample',
+        dtype=ndarray,
+    )
+
+    CONTAMINATION_RATE = IOSpec(
+        name='CONTAMINATION_RATE',
+        description='Proportion of outliers in the dataset',
         dtype=float,
     )
 
