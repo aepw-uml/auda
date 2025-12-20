@@ -92,13 +92,13 @@ class Spec(str, IOSpec):
     Y_MEAN = IOSpec(
         name='Y_MEAN',
         description='Mean of the labels',
-        dtype=ndarray,
+        dtype=Union[ndarray, float],
     )
 
     Y_STD = IOSpec(
         name='Y_STD',
         description='Standard deviation of the labels',
-        dtype=ndarray,
+        dtype=Union[ndarray, float],
     )
 
     Y_MINIMUM = IOSpec(
@@ -240,8 +240,8 @@ class Spec(str, IOSpec):
 
     ON = IOSpec(
         name='ON',
-        description='Tell the step which split to use',
-        dtype=str,
+        description='Tell the step which dataset to use',
+        dtype=Union[str, Dataset],
     )
 
     PIPE = IOSpec(
@@ -341,8 +341,62 @@ class Spec(str, IOSpec):
         dtype=object,
     )
 
+    AXES = IOSpec(
+        name='AXES',
+        description='Matplotlib Axes object',
+        dtype=object,
+    )
+
     TITLE = IOSpec(
         name='TITLE',
         description='Title of the figure',
+        dtype=str,
+    )
+
+    SAMPLE_POINT_SIZE = IOSpec(
+        name='SAMPLE_POINT_SIZE',
+        description='Size of the sample points in the plot',
+        dtype=float,
+    )
+
+    SAMPLE_POINT_COLOR = IOSpec(
+        name='SAMPLE_POINT_COLOR',
+        description='Color of the sample points in the plot',
+        dtype=str,
+    )
+
+    SAMPLE_POINT_EDGE_COLOR = IOSpec(
+        name='SAMPLE_POINT_EDGE_COLOR',
+        description='Edge color of the sample points in the plot',
+        dtype=str,
+    )
+
+    SAMPLE_POINT_LABEL = IOSpec(
+        name='SAMPLE_POINT_LABEL',
+        description='Label for the sample points in the plot',
+        dtype=str,
+    )
+
+    LINE_COLOR = IOSpec(
+        name='LINE_COLOR',
+        description='Color of the line in the plot',
+        dtype=str,
+    )
+
+    LINE_WIDTH = IOSpec(
+        name='LINE_WIDTH',
+        description='Width of the line in the plot',
+        dtype=float,
+    )
+
+    LINE_LABEL = IOSpec(
+        name='LINE_LABEL',
+        description='Label for the line in the plot',
+        dtype=str,
+    )
+
+    LINE_STYLE = IOSpec(
+        name='LINE_STYLE',
+        description='Style of the line in the plot',
         dtype=str,
     )
