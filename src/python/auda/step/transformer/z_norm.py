@@ -1,5 +1,6 @@
-from typing import override
+from typing import Tuple, override
 
+import numpy as np
 from auda.step import get_dataset_from_step
 from auda.step.spec import Spec
 from auda.utils.pipeline import IOValueMap, Step, step
@@ -10,7 +11,7 @@ from auda.utils.pipeline import IOValueMap, Step, step
     description='Applies Z-Normalization to the dataset features and/or to '
     'the targets.',
     input_specs=[
-        Spec.ON,
+        Spec.ON.optional(Spec.DATASET.name),
         Spec.STANDARDIZE_Y.optional(True),
         Spec.DATASET.optional(),
         Spec.TRAINIING_SET.optional(),
@@ -21,30 +22,35 @@ from auda.utils.pipeline import IOValueMap, Step, step
         Spec.NORMALIZED_DATASET,
         Spec.X_MEAN,
         Spec.X_STD,
-        Spec.Y_MEAN,
-        Spec.Y_STD,
+        Spec.Y_MEAN.optional(),
+        Spec.Y_STD.optional(),
     ],
 )
 class ZNorm(Step):
     @override
     def run(self, standardize_y: bool, on: str) -> IOValueMap:
-        from sklearn.preprocessing import StandardScaler
-
         X, y = get_dataset_from_step(self, on)
-
-        x_scaler = StandardScaler()
-        X = x_scaler.fit_transform(X)
+        X, X_mean, X_std = self._z_normalize(X)
 
         if standardize_y:
-            y_scaler = StandardScaler()
-            y = y_scaler.fit_transform(y.reshape(-1, 1)).flatten()
+            y_scaled, y_mean, y_std = self._z_normalize(y)
         else:
-            y_scaler = None
+            y_scaled = None
 
         return {
-            Spec.NORMALIZED_DATASET.name: (X, y),
-            Spec.X_MEAN.name: x_scaler.mean_,
-            Spec.X_STD.name: x_scaler.scale_,
-            Spec.Y_MEAN.name: y_scaler.mean_ if y_scaler else None,
-            Spec.Y_STD.name: y_scaler.scale_ if y_scaler else None,
+            Spec.NORMALIZED_DATASET.name: (X, y_scaled if standardize_y else y),
+            Spec.X_MEAN.name: X_mean,
+            Spec.X_STD.name: X_std,
+            Spec.Y_MEAN.name: y_mean if standardize_y else None,
+            Spec.Y_STD.name: y_std if standardize_y else None,
         }
+
+    def _z_normalize(
+        self, data: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        mean = np.mean(data, axis=0)
+        std = np.std(data, axis=0)
+        std_replaced = np.where(std == 0, 1, std)
+        normalized_data = (data - mean) / std_replaced
+
+        return normalized_data, mean, std
