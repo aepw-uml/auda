@@ -8,7 +8,7 @@ from auda.utils.pipeline import IOValueMap, step
 
 @step(
     id='PL-Curve',
-    description='Generates a curve plot from given x and y data.',
+    description='Plots a curve plot from given x and y data.',
     input_specs=[
         Spec.FIGURE.optional(),
         Spec.AXES.optional(),

@@ -8,9 +8,7 @@ from auda.utils.pipeline import Step, step
 @step(
     id='PL-SAVE-FIGURE',
     description='Saves the generated figure to a file.',
-    input_specs=[
-        Spec.FIGURE,
-    ],
+    input_specs=[Spec.FIGURE],
 )
 class SaveFigurePlotter(Step):
     @override

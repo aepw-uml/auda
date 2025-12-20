@@ -31,34 +31,10 @@ class Spec(str, IOSpec):
         dtype=int,
     )
 
-    FEATURE_NAMES = IOSpec(
-        name='FEATURE_NAMES',
-        description='Names of the features',
-        dtype=List[str],
-    )
-
-    LABEL_NAMES = IOSpec(
-        name='LABEL_NAMES',
-        description='Names of the labels',
-        dtype=List[str],
-    )
-
-    TARGET_CLASSES = IOSpec(
-        name='TARGET_CLASSES',
-        description='Names of the target classes',
-        dtype=List[str],
-    )
-
-    FEATURE_UNITS = IOSpec(
-        name='FEATURE_UNITS',
-        description='Units of the features',
-        dtype=List[str],
-    )
-
-    LABEL_UNITS = IOSpec(
-        name='LABEL_UNITS',
-        description='Units of the labels',
-        dtype=List[str],
+    DATASET_SCEHMA = IOSpec(
+        name='DATASET_SCEHMA',
+        description='Schema of the dataset',
+        dtype=dict,
     )
 
     # =========================================================================#

@@ -4,7 +4,7 @@ from typing import override
 import numpy as np
 from auda.core import DatabaseName
 from auda.service.table_service import TableQueryParams, TableService
-from auda.step.dataset import DatasetStep
+from auda.step.dataset import DatasetSchema, DatasetStep
 from auda.step.spec import Dataset, Spec
 from auda.utils.pipeline import IOValueMap, step
 
@@ -16,13 +16,7 @@ from .__data_tables import DataTableName, WasteGenerationManagementColumn
     description='Retrieves a dataset containing yearly plastic waste '
     'generation statistics.',
     input_specs=[Spec.LOCATION],
-    output_specs=[
-        Spec.DATASET,
-        Spec.FEATURE_NAMES,
-        Spec.LABEL_NAMES,
-        Spec.FEATURE_UNITS,
-        Spec.LABEL_UNITS,
-    ],
+    output_specs=[Spec.DATASET, Spec.DATASET_SCEHMA],
 )
 class YearPlasticWaste(DatasetStep):
     @override
@@ -32,10 +26,12 @@ class YearPlasticWaste(DatasetStep):
 
         return {
             Spec.DATASET.name: dataset,
-            Spec.FEATURE_NAMES.name: ['Year'],
-            Spec.LABEL_NAMES.name: ['Plastic Waste Generated'],
-            Spec.FEATURE_UNITS.name: [''],
-            Spec.LABEL_UNITS.name: ['Tonnes'],
+            Spec.DATASET_SCEHMA.name: DatasetSchema(
+                feature_names=['Year'],
+                label_names=['Plastic Waste Generated'],
+                feature_units=[''],
+                label_units=['Tonnes'],
+            ),
         }
 
     @override
@@ -78,4 +74,5 @@ class YearPlasticWaste(DatasetStep):
         years, wastes = zip(*pairs)
         X = np.array([[year] for year in years], dtype=float)
         y = np.array(wastes, dtype=float)
+
         return (X, y)

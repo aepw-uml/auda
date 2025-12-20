@@ -71,10 +71,7 @@ class SupportVectorRegression(Step):
         Spec.X_STD,
         Spec.Y_MEAN.optional(0.0),
         Spec.Y_STD.optional(1.0),
-        Spec.FEATURE_NAMES,
-        Spec.FEATURE_UNITS,
-        Spec.LABEL_NAMES,
-        Spec.LABEL_UNITS,
+        Spec.DATASET_SCEHMA,
     ],
     output_specs=[Spec.FIGURE, Spec.AXES],
 )

@@ -1,4 +1,4 @@
-from typing import List, override
+from typing import override
 
 from auda.step import get_dataset_from_step
 from auda.step.plot import PlotStep
@@ -8,18 +8,13 @@ from auda.utils.pipeline import IOValueMap, step
 
 @step(
     id='PL-SP',
-    description='plots scatter points of sample data.',
+    description='Plots scatter points of sample data.',
     input_specs=[
         # ---- Figure and Axes (create if not provided)
         Spec.FIGURE.optional(),
         Spec.AXES.optional(),
         # ---- Dataset to plot
         Spec.ON.optional(Spec.DATASET.name),
-        Spec.FEATURE_NAMES.optional(),
-        Spec.LABEL_NAMES.optional(),
-        Spec.FEATURE_UNITS.optional(),
-        Spec.LABEL_UNITS.optional(),
-        Spec.TITLE.optional(''),
         # ---- Scatter plot options
         Spec.SAMPLE_POINT_SIZE.optional(60),
         Spec.SAMPLE_POINT_COLOR.optional('cornflowerblue'),
@@ -35,11 +30,6 @@ class PlotScatterPlot(PlotStep):
         on: str,
         figure,
         axes,
-        feature_names: List[str] | None,
-        label_names: List[str] | None,
-        feature_units: List[str] | None,
-        label_units: List[str] | None,
-        title: str,
         sample_point_size: float,
         sample_point_color: str,
         sample_point_edge_color: str,
@@ -61,15 +51,15 @@ class PlotScatterPlot(PlotStep):
         )
 
         # ---- Set labels
-        if feature_names and feature_units and label_names and label_units:
-            feature_labels = self.combine_names_units(
-                feature_names, feature_units
-            )
-            label_labels = self.combine_names_units(label_names, label_units)
-            axes.set_xlabel(feature_labels[0])
-            axes.set_ylabel(label_labels[0])
+        # if feature_names and feature_units and label_names and label_units:
+        #     feature_labels = self.combine_names_units(
+        #         feature_names, feature_units
+        #     )
+        #     label_labels = self.combine_names_units(label_names, label_units)
+        #     axes.set_xlabel(feature_labels[0])
+        #     axes.set_ylabel(label_labels[0])
 
-        if title:
-            axes.set_title(title)
+        # if title:
+        #     axes.set_title(title)
 
         return self.regular_output(figure, axes)
