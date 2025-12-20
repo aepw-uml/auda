@@ -91,6 +91,18 @@ class IOSpec:
 
         return self.update(default=default, required=False)
 
+    def desc(self, description: str) -> 'IOSpec':
+        """Returns a new IOSpec with an updated description.
+
+        Args:
+            description: New description for this port.
+
+        Returns:
+            A new IOSpec instance with the updated description.
+        """
+
+        return self.update(description=description)
+
 
 class Step(ABC):
     """Abstract unit of work in a data-processing pipeline."""
@@ -252,6 +264,17 @@ class Step(ABC):
         """
 
         raise NotImplementedError
+
+    def single_dispatch(
+        self, to: str | Type, inputs: IOValueMap
+    ) -> IOValueMap | None:
+        """Alias for `run()` to support dispatching.
+
+        Raises:
+            NotImplementedError: Must be implemented by subclasses.
+        """
+
+        return create_pipeline([to]).run([inputs])
 
 
 @dataclass(frozen=True)
