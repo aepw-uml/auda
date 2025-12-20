@@ -1,7 +1,7 @@
 from typing import override
 
 import numpy as np
-from auda.step.dataset import DatasetStep
+from auda.step.dataset import DatasetBasedStep
 from auda.step.plot import PlotStep
 from auda.step.plot.plot_curve import PlotCurve
 from auda.step.plot.plot_scatter_plot import PlotScatterPlot
@@ -30,7 +30,7 @@ from sklearn.svm import SVR
         Spec.GAMMA,
     ],
 )
-class SupportVectorRegression(DatasetStep):
+class SupportVectorRegression(DatasetBasedStep):
     @override
     def run(
         self, on: str | Dataset, c: float, epsilon: float, kernel: str
@@ -77,7 +77,7 @@ class SupportVectorRegression(DatasetStep):
     ],
     output_specs=[Spec.FIGURE, Spec.AXES],
 )
-class SupportVectorRegressionPlotter(PlotStep, DatasetStep):
+class SupportVectorRegressionPlotter(PlotStep, DatasetBasedStep):
     @override
     def run(
         self,

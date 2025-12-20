@@ -1,7 +1,7 @@
 from typing import cast, override
 
 import numpy as np
-from auda.step.dataset import DatasetStep
+from auda.step.dataset import DatasetBasedStep
 from auda.step.spec import Dataset, Spec
 from auda.utils.pipeline import IOValueMap, step
 
@@ -23,7 +23,7 @@ from auda.utils.pipeline import IOValueMap, step
         Spec.Y_MAXIMUM,
     ],
 )
-class BasicStats(DatasetStep):
+class BasicStats(DatasetBasedStep):
     @override
     def run(self, on: str | Dataset) -> IOValueMap:
         X, y = self.get_dataset_from_on(on)

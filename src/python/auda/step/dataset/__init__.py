@@ -130,6 +130,8 @@ class DatasetStep(Step):
 
         return f'{self.spec.id}{args_str}'
 
+
+class DatasetBasedStep(Step):
     def get_dataset_from_on(self, on: str | Dataset) -> Dataset:
         """Gets dataset from a step based on the 'on' parameter.
 
