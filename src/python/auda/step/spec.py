@@ -1,11 +1,13 @@
-from typing import List, Tuple, Union
+from typing import List, Literal, Tuple, Union
 
-from auda.utils.pipeline import IOSpec
+from auda.utils.pipeline import IOSpec, Pipeline
 from numpy import ndarray
 
 LabeledDataset = Tuple[ndarray, ndarray]
 UnlabeledDataset = ndarray
 Dataset = Union[LabeledDataset, UnlabeledDataset]
+
+Interval = Tuple[float, float]
 
 
 class Spec(str, IOSpec):
@@ -271,8 +273,8 @@ class Spec(str, IOSpec):
 
     PIPE = IOSpec(
         name='PIPE',
-        description='The processing pipeline associated with the dataset',
-        dtype=str,
+        description='The sub pipeline to be executed',
+        dtype=str | Pipeline,
     )
 
     # =========================================================================#
@@ -295,6 +297,59 @@ class Spec(str, IOSpec):
         name='KERNEL',
         description='Kernel type',
         dtype=str,
+    )
+
+    # =========================================================================#
+    # Tuning Specific                                                          #
+    # =========================================================================#
+
+    METRIC = IOSpec(
+        name='METRIC',
+        description='Metric used for hyperparameter tuning',
+        dtype=Literal['mae', 'rmse', 'r2', 'mape'],
+    )
+
+    EXPECT_HIGHER = IOSpec(
+        name='EXPECT_HIGHER',
+        description='Whether higher metric values are better',
+        dtype=bool,
+    )
+
+    SAMPLING_INTERVALS = IOSpec(
+        name='SAMPLING_INTERVALS',
+        description='Sampling intervals for hyperparameter tuning.',
+        dtype=List[List[Interval]],
+    )
+
+    NUM_ITERATIONS = IOSpec(
+        name='NUM_ITERATIONS',
+        description='Number of iterations for hyperparameter tuning',
+        dtype=int,
+    )
+
+    HYPERPARAMETER_NAMES = IOSpec(
+        name='HYPERPARAMETER_NAMES',
+        description='Names of the hyperparameters being tuned',
+        dtype=List[str],
+    )
+
+    HYPERPARAMETERS_SCORE_LIST = IOSpec(
+        name='HYPERPARAMETERS_SCORE_LIST',
+        description='List of hyperparameter sets and their corresponding '
+        'scores',
+        dtype=List[Tuple[List[float], float]],
+    )
+
+    BEST_HYPERPARAMETERS = IOSpec(
+        name='BEST_HYPERPARAMETERS',
+        description='Best hyperparameters found during tuning',
+        dtype=List[float],
+    )
+
+    BEST_SCORE = IOSpec(
+        name='BEST_SCORE',
+        description='Best score achieved during hyperparameter tuning',
+        dtype=float,
     )
 
     # =========================================================================#

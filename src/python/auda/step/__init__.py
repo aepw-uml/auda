@@ -2,7 +2,10 @@ from typing import Dict, cast
 
 from auda.core import auda
 from auda.utils.pipeline import (
+    Pipeline,
     add_kind,
+    create_pipeline,
+    create_step_str_list,
     get_all_step_specs,
     scan_package,
     set_module_name_getter,
@@ -48,3 +51,22 @@ add_kind('TF', 'transformation')
 add_kind('EV', 'evaluation')
 add_kind('RG', 'regression')
 add_kind('PL', 'plotting')
+add_kind('AD', 'anomaly_detection')
+add_kind('HT', 'hyperparameter_tuning')
+
+
+def create_pipeline_from_pipe(pipe: str | Pipeline) -> Pipeline:
+    """Creates a Pipeline object from a given pipe input.
+
+    Args:
+        pipe: Pipe input, either a pipeline string or a Pipeline instance.
+
+    Returns:
+        A Pipeline instance.
+    """
+
+    if isinstance(pipe, Pipeline):
+        return pipe
+    else:
+        step_str_list = create_step_str_list(pipe)
+        return create_pipeline(step_str_list)
