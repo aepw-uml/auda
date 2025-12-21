@@ -11,11 +11,9 @@ from typing import (
     List,
     MutableSequence,
     Self,
-    Sequence,
     Tuple,
     Type,
     cast,
-    get_origin,
 )
 
 # Type aliases for input/output value mappings
@@ -280,7 +278,7 @@ class Step(ABC):
             NotImplementedError: Must be implemented by subclasses.
         """
 
-        return create_pipeline([to]).run([inputs])
+        return Pipeline([to], [inputs]).run()
 
 
 @dataclass(frozen=True)
@@ -319,19 +317,43 @@ class StepSpec:
 
 
 class Pipeline:
-    def __init__(self, step_specs: List[StepSpec]):
+    def __init__(
+        self,
+        step_specs: List[StepSpec | str | Type],
+        step_inputs: List[IOValueMap] | List[IOValueObject] | None = None,
+    ) -> None:
         """Initializes a Pipeline instance.
+
+        Args:
+            step_specs: A list of StepSpec instances representing the steps in
+                the pipeline.
+            step_inputs: A list of input value objects for each step in the
+                pipeline.
 
         Attributes:
             step_specs: A list of StepSpec instances representing the steps in
                 the pipeline.
             callbacks: A list of callable functions to be executed after the
                 pipeline run.
+            step_inputs: A list of input value objects for each step in the
+                pipeline.
             context: A dictionary for storing shared data across steps.
         """
+        self._step_specs: List[StepSpec] = []
+        for step_spec in step_specs:
+            if isinstance(step_spec, StepSpec):
+                self._step_specs.append(step_spec)
+            elif isinstance(step_spec, str):
+                self._step_specs.append(get_step_spec_by_id(step_spec))
+            elif issubclass(step_spec, Step):
+                self._step_specs.append(get_step_spec_by_class(step_spec))
+            else:
+                raise ValueError(f'Invalid step spec type: {type(step_spec)}')
 
-        self._step_specs: List[StepSpec] = step_specs
         self._callbacks: List[Callable[['Pipeline'], None]] = []
+        self._step_inputs: List[IOValueMap] = (
+            [] if step_inputs is None else cast(List[IOValueMap], step_inputs)
+        )
         self.context: IOValueObject = {}
 
     def get_value(self, name: str | Enum) -> Any:
@@ -343,10 +365,7 @@ class Pipeline:
 
         return self.context.get(_to_plain_name(name))
 
-    def run(
-        self,
-        step_inputs: List[IOValueMap] | None = None,
-    ) -> None:
+    def run(self, initial_inputs: IOValueMap | None = None) -> None:
         """Runs the pipeline by executing each step in sequence.
 
         Args:
@@ -359,8 +378,14 @@ class Pipeline:
             ValueError: If required inputs for any step are missing.
         """
 
-        if step_inputs is None:
-            step_inputs = []
+        step_inputs: List[IOValueMap] = self._step_inputs.copy()
+        if len(step_inputs) < len(self._step_specs):
+            step_inputs.extend(
+                [{} for _ in range(len(self._step_specs) - len(step_inputs))]
+            )
+
+        if initial_inputs:
+            step_inputs[0] = {**step_inputs[0], **initial_inputs}
 
         steps: List[Step] = [
             spec.instantiate(self) for spec in self._step_specs
@@ -368,13 +393,12 @@ class Pipeline:
 
         for i, step in enumerate(steps):
             # Update the context with step-specific inputs if provided
-            if len(step_inputs) > i and step_inputs[i]:
-                self.context.update(
-                    {
-                        _to_plain_name(name).upper(): value
-                        for name, value in step_inputs[i].items()
-                    }
-                )
+            self.context.update(
+                {
+                    _to_plain_name(name).upper(): value
+                    for name, value in step_inputs[i].items()
+                }
+            )
 
             try:
                 self.run_step(step)
@@ -480,19 +504,24 @@ class Pipeline:
                 return float(value)
             elif dtype is bool:
                 return bool(value)
-            elif get_origin(dtype) is list:
-                str_list = str(value).split(VALUES_DELIMITER)
-                item_type = dtype.__args__[0]
-                if item_type is str:
-                    return str_list
-                elif item_type is int:
-                    return [int(item) for item in str_list]
-                elif item_type is float:
-                    return [float(item) for item in str_list]
-                elif item_type is bool:
-                    return [bool(item) for item in str_list]
-                else:
-                    return str_list
+            # elif get_origin(dtype) is list:
+            # item_type = dtype.__args__[0]
+            # str_list = (
+            #     cast(List[str], value)
+            #     if value is list
+            #     else str(value).split(VALUES_DELIMITER)
+            # )
+            #
+            # if item_type is str:
+            #     return str_list
+            # elif item_type is int:
+            #     return [int(item) for item in str_list]
+            # elif item_type is float:
+            #     return [float(item) for item in str_list]
+            # elif item_type is bool:
+            #     return [bool(item) for item in str_list]
+            # else:
+            #     return value
             else:
                 return value
         except Exception as e:
@@ -636,31 +665,13 @@ def get_step_spec_by_class(step_class: Type[Step]) -> StepSpec:
     return step_spec
 
 
-def create_pipeline(step_id_list: Sequence[str | Type[Step]]) -> Pipeline:
-    """Creates a Pipeline instance from a list of StepSpec IDs.
-
-    Args:
-        step_id_list: A list of StepSpec IDs to include in the pipeline.
-
-    Returns:
-        A Pipeline instance containing the specified steps.
-    """
-
-    return Pipeline(
-        [
-            get_step_spec_by_id(step_id)
-            if isinstance(step_id, str)
-            else get_step_spec_by_class(step_id)
-            for step_id in step_id_list
-        ]
-    )
-
-
 STEP_STRS_DELIMITER = ' '
 STEP_STR_PARAM_DELIMITER = ':'
 INPUTS_STR_DELIMITER = ';'
 INPUTS_STR_KEY_VALUE_DELIMITER = '='
 VALUES_DELIMITER = ','
+LEFT_BRACE = '('
+RIGHT_BRACE = ')'
 
 
 def create_step_str_list(pipe_str: str) -> List[str]:
@@ -673,11 +684,10 @@ def create_step_str_list(pipe_str: str) -> List[str]:
     Returns:
         A list of step ID strings.
     """
-
     return [
-        step_str.strip()
-        for step_str in pipe_str.split(STEP_STRS_DELIMITER)
-        if step_str
+        step_str
+        for step_str in pipe_str.strip().split(STEP_STRS_DELIMITER)
+        if step_str.strip() != ''
     ]
 
 
@@ -710,9 +720,7 @@ def process_step_str(step_str: str) -> Tuple[str, IOValueObject]:
     return step_id, inputs
 
 
-def parse_step_str_list(
-    step_strs: List[str],
-) -> Tuple[Pipeline, List[IOValueObject]]:
+def create_pipeline(step_strs: List[str]) -> Pipeline:
     """Creates a Pipeline instance from a list of step strings.
 
     Step IDs are case-insensitive and will be normalized to uppercase.
@@ -721,7 +729,7 @@ def parse_step_str_list(
         step_strs: A list of step strings.
 
     Returns:
-        A Pipeline instance containing the specified steps.
+        A Pipeline instance.
     """
 
     step_ids: List[str] = []
@@ -734,7 +742,7 @@ def parse_step_str_list(
     # Normalize step IDs to uppercase
     step_ids = [step_id.upper() for step_id in step_ids]
 
-    return create_pipeline(step_ids), step_inputs
+    return Pipeline(cast(List[str | StepSpec | Type], step_ids), step_inputs)
 
 
 # Maps from step ID prefixes to their kinds

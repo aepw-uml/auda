@@ -5,10 +5,9 @@ from typing import Dict, List
 from auda.step import *
 from auda.utils.pipeline import (
     IOSpec,
-    IOValueMap,
+    create_pipeline,
     get_all_step_specs,
     get_kind,
-    parse_step_str_list,
 )
 from auda.utils.table import Table
 from auda.utils.types import format_type
@@ -103,9 +102,9 @@ def run_pipeline(
         '--uppercase-names',
         help='Use original case for output keys.',
     ),
-):
-    pipeline, step_inputs = parse_step_str_list(step_strs)
-    pipeline.run(cast(List[IOValueMap], step_inputs))
+) -> None:
+    pipepine = create_pipeline(step_strs)
+    pipepine.run()
 
     # Select specified output keys
     names = (
@@ -114,15 +113,14 @@ def run_pipeline(
         else []
     )
     outputs = (
-        pipeline.context
+        pipepine.context
         if names == []
         else {
-            name: pipeline.context.get(name.upper())
+            name: pipepine.context.get(name.upper())
             for name in names
-            if name in pipeline.context.keys()
+            if name in pipepine.context.keys()
         }
     )
-
     # Convert output keys to lowercase if specified
     if not uppercase_name:
         outputs = {name.lower(): value for name, value in outputs.items()}
@@ -161,4 +159,4 @@ def run_pipeline(
             echo(f'Unsupported format: {format}')
 
     # Fire pipeline callbacks
-    pipeline.execute_callbacks()
+    pipepine.execute_callbacks()
