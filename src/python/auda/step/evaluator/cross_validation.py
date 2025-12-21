@@ -1,13 +1,13 @@
-from typing import List, cast, override
+from typing import List, override
 
 import numpy as np
+from auda.step import create_pipeline_from_pipe
 from auda.step.dataset import DatasetBasedStep
 from auda.step.evaluator import mae, mape, mse, r2
 from auda.step.spec import Dataset, Spec
 from auda.utils.pipeline import (
     IOValueMap,
-    create_step_str_list,
-    parse_step_str_list,
+    Pipeline,
     step,
 )
 
@@ -26,7 +26,11 @@ from auda.utils.pipeline import (
 class CrossValidationEvaluator(DatasetBasedStep):
     @override
     def run(
-        self, on: str | Dataset, seed: int, num_k_folds: int, pipe: str
+        self,
+        on: str | Dataset,
+        seed: int,
+        num_k_folds: int,
+        pipe: str | Pipeline,
     ) -> IOValueMap:
         X, y = self.get_dataset_from_on(on)
         n = X.shape[0]
@@ -51,11 +55,8 @@ class CrossValidationEvaluator(DatasetBasedStep):
         r2s: List[float] = []
         mapes: List[float] = []
 
-        # Parse pipeline string
-        step_str_list = create_step_str_list(pipe)
-        pipeline, step_inputs = parse_step_str_list(step_str_list)
-        step_inputs = cast(List[IOValueMap], step_inputs)
-        step_inputs[0] = {**step_inputs[0], **self._inputs}
+        # Create a pipeline
+        pipeline = create_pipeline_from_pipe(pipe)
 
         folds = np.array_split(np.arange(n), num_k_folds)
         for fold_idx in range(num_k_folds):
@@ -69,11 +70,13 @@ class CrossValidationEvaluator(DatasetBasedStep):
                 [y[folds[j]] for j in range(num_k_folds) if j != fold_idx]
             )
 
-            fold_step_inputs: List[IOValueMap] = step_inputs[:]
-            fold_step_inputs[0][Spec.TRAINIING_SET.name] = (X_train, y_train)
-            fold_step_inputs[0][Spec.ON.name] = Spec.TRAINIING_SET.name
-
-            pipeline.reset().run(step_inputs)
+            pipeline.reset().run(
+                {
+                    **self._inputs,
+                    Spec.TRAINIING_SET.name: (X_train, y_train),
+                    Spec.ON.name: Spec.TRAINIING_SET.name,
+                }
+            )
             model = pipeline.get_value(Spec.MODEL.name)
 
             # Make predictions

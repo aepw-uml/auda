@@ -55,13 +55,15 @@ def r2(y_true: np.ndarray, y_pred: np.ndarray) -> float:
         R-squared value.
     """
 
-    ss_total = np.sum((y_true - np.mean(y_true)) ** 2)
-    ss_residual = np.sum((y_true - y_pred) ** 2)
+    y_mean = np.mean(y_true)
+    sum_of_square_total = np.sum((y_true - y_mean) ** 2)
 
-    if ss_total == 0:
+    if sum_of_square_total == 0:
         return 0.0
 
-    return 1 - (ss_residual / ss_total)
+    sum_of_square_residual = np.sum((y_true - y_pred) ** 2)
+
+    return 1 - (sum_of_square_residual / sum_of_square_total)
 
 
 def mape(
