@@ -47,10 +47,12 @@ def list_step_specs(
 def display_step_spec_info(
     spec_spec_id: str = Argument(help='The ID of the spec spec.'),
 ) -> None:
+    scan_package(STEP_PACKAGE_PATH, STEP_PACKAGE_NAME)
+    all_step_specs = get_all_step_specs()
+
     spec_spec_id = spec_spec_id.upper()
-    spec_specs = get_all_step_specs()
     step_spec = next(
-        (spec for spec in spec_specs if spec.id == spec_spec_id), None
+        (spec for spec in all_step_specs if spec.id == spec_spec_id), None
     )
     if not step_spec:
         return echo(f'Step spec with ID {spec_spec_id} not found.')
@@ -72,7 +74,8 @@ def display_step_spec_info(
     def echo_spec_map(spec_map: Dict[str, IOSpec]) -> None:
         if not spec_map:
             echo(' ' * 4 + '(none)')
-        for name, spec in input_spec_map.items():
+        for name, spec in spec_map.items():
+            # TODO: update this format
             name = name.lower()
             type_str = format_type(spec.dtype)
             extra = '' if spec.required else f', default={spec.default}'

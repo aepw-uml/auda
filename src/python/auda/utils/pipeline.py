@@ -14,6 +14,7 @@ from typing import (
     Tuple,
     Type,
     cast,
+    get_origin,
 )
 
 # Type aliases for input/output value mappings
@@ -504,24 +505,27 @@ class Pipeline:
                 return float(value)
             elif dtype is bool:
                 return bool(value)
-            # elif get_origin(dtype) is list:
-            # item_type = dtype.__args__[0]
-            # str_list = (
-            #     cast(List[str], value)
-            #     if value is list
-            #     else str(value).split(VALUES_DELIMITER)
-            # )
-            #
-            # if item_type is str:
-            #     return str_list
-            # elif item_type is int:
-            #     return [int(item) for item in str_list]
-            # elif item_type is float:
-            #     return [float(item) for item in str_list]
-            # elif item_type is bool:
-            #     return [bool(item) for item in str_list]
-            # else:
-            #     return value
+            elif get_origin(dtype) is list and value is str:
+                item_type = dtype.__args__[0]
+
+                if item_type is str:
+                    return str(value).split(VALUES_DELIMITER)
+                elif item_type is int:
+                    return [
+                        int(item) for item in str(value).split(VALUES_DELIMITER)
+                    ]
+                elif item_type is float:
+                    return [
+                        float(item)
+                        for item in str(value).split(VALUES_DELIMITER)
+                    ]
+                elif item_type is bool:
+                    return [
+                        bool(item)
+                        for item in str(value).split(VALUES_DELIMITER)
+                    ]
+                else:
+                    return value
             else:
                 return value
         except Exception as e:

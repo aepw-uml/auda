@@ -315,8 +315,8 @@ class Spec(str, IOSpec):
         dtype=bool,
     )
 
-    SAMPLING_INTERVALS = IOSpec(
-        name='SAMPLING_INTERVALS',
+    SEARCH_SPACE = IOSpec(
+        name='SEARCH_SPACE',
         description='Sampling intervals for hyperparameter tuning.',
         dtype=List[List[Interval]],
     )
@@ -350,6 +350,26 @@ class Spec(str, IOSpec):
         name='BEST_SCORE',
         description='Best score achieved during hyperparameter tuning',
         dtype=float,
+    )
+
+    HYPERPARAMETER_DOMAINS = IOSpec(
+        name='HYPERPARAMETER_DOMAINS',
+        description='Domains of the hyperparameters being tuned',
+        dtype=List[Interval],
+    )
+
+    ELITE_FRACTIONS = IOSpec(
+        name='ELITE_FRACTIONS',
+        description='Fractions of top-performing hyperparameter sets to '
+        'consider as elite for each stage',
+        dtype=List[float],
+    )
+
+    REFINEMENT_WIDTHS = IOSpec(
+        name='REFINEMENT_WIDTHS',
+        description='Widths for refining the search space around elite '
+        'hyperparameter sets for each stage',
+        dtype=List[List[float]],
     )
 
     # =========================================================================#
