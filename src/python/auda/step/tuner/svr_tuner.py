@@ -7,7 +7,9 @@ from auda.step.regression.support_vector_regression import (
 )
 from auda.step.spec import Spec
 from auda.step.transformer.z_norm import ZNorm
-from auda.step.tuner.random_tuner import RandomTuner
+from auda.step.tuner.multi_stage_random_search_tuner import (
+    MultiStageRandomSearchTuner,
+)
 from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
 
 
@@ -19,7 +21,10 @@ from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
         Spec.METRIC,
         Spec.EXPECT_HIGHER.optional(),
         Spec.SEED.optional(42),
-        Spec.SAMPLING_INTERVALS.optional([[(0.01, 100.0)], [(0.001, 1.0)]]),
+        Spec.SEARCH_SPACE.optional([[(0.1, 100.0)], [(0.001, 1.0)]]),
+        Spec.NUM_ITERATIONS.optional(100),
+        Spec.ELITE_FRACTIONS.optional([0.1, 0.05]),
+        Spec.REFINEMENT_WIDTHS.optional([[10, 0.2], [1, 0.05]]),
     ],
     output_specs=[Spec.BEST_SCORE, Spec.BEST_HYPERPARAMETERS],
 )
@@ -38,6 +43,7 @@ class SvrTuner(Step):
     def get_hyperparameters_score_list(
         self, seed: int
     ) -> List[Tuple[List[float], float]]:
+        # ZNorm -> IsolationForest -> SVR
         cross_validation_pipeline = Pipeline(
             [
                 ZNorm,
@@ -50,13 +56,15 @@ class SvrTuner(Step):
                 {Spec.ON.name: Spec.INLIER_DATASET.name},
             ],
         )
+
+        # CrossValidationEvaluator (ZNorm -> IsolationForest -> SVR)
         random_tuner_pipeline = Pipeline(
             [CrossValidationEvaluator],
             [{Spec.PIPE.name: cross_validation_pipeline, Spec.SEED.name: seed}],
         )
 
         pipeline = Pipeline(
-            [RandomTuner],
+            [MultiStageRandomSearchTuner],
             [
                 {
                     **self._inputs,
@@ -64,6 +72,10 @@ class SvrTuner(Step):
                     Spec.HYPERPARAMETER_NAMES.name: [
                         Spec.C.name,
                         Spec.EPSILON.name,
+                    ],
+                    Spec.HYPERPARAMETER_DOMAINS.name: [
+                        (0.1, 100.0),  # C
+                        (0.001, 1.0),  # Epsilon
                     ],
                 }
             ],

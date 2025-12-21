@@ -13,14 +13,14 @@ from auda.utils.pipeline import (
 
 
 @step(
-    id='HT-RT',
+    id='HT-RS',
     description='Randomly tunes hyperparameters for anomaly detection models.',
     input_specs=[
         Spec.ON.optional(Spec.DATASET.name),
         Spec.METRIC,
         Spec.EXPECT_HIGHER.optional(),
         Spec.SEED.optional(42),
-        Spec.SAMPLING_INTERVALS,
+        Spec.SEARCH_SPACE,
         Spec.NUM_ITERATIONS.optional(100),
         Spec.PIPE,
         Spec.HYPERPARAMETER_NAMES,
@@ -29,7 +29,7 @@ from auda.utils.pipeline import (
         Spec.HYPERPARAMETERS_SCORE_LIST,
     ],
 )
-class RandomTuner(DatasetBasedStep):
+class RandomSearchTuner(DatasetBasedStep):
     @override
     def run(
         self,
@@ -37,7 +37,7 @@ class RandomTuner(DatasetBasedStep):
         metric: Literal['mae', 'rmse', 'r2', 'mape'],
         expect_higher: bool | None,
         seed: int,
-        sampling_intervals: List[List[Interval]],
+        search_space: List[List[Interval]],
         num_iterations: int,
         pipe: str | Pipeline,
         hyperparameter_names: List[str],
@@ -49,7 +49,7 @@ class RandomTuner(DatasetBasedStep):
 
         dataset = self.get_dataset_from_on(on)
         rng = Random(seed)
-        num_hp = len(sampling_intervals)
+        num_hp = len(search_space)
 
         pipeline = create_pipeline_from_pipe(pipe)
 
@@ -57,7 +57,7 @@ class RandomTuner(DatasetBasedStep):
         for i in range(num_iterations):
             hp_values = [
                 self._select_random_hyperparameter(intervals, rng)
-                for intervals in sampling_intervals
+                for intervals in search_space
             ]
 
             hp_map = {
