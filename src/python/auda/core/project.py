@@ -7,7 +7,6 @@ from .constants import DatabaseName, Environment
 from .database import Database, DatabaseManager
 from .env import Env
 from .singleton_registry import SingletonRegistry
-from .template_manager import TemplateManager
 
 
 class Project:
@@ -29,9 +28,6 @@ class Project:
 
         # Results directory storing output files
         self.results_dir: Path = Path.cwd() / 'results'
-
-        # Template directory storing template files
-        self.templates_dir: Path = Path.cwd() / 'templates'
 
         # Environment configuration for the project
         self.env = Env()
@@ -59,13 +55,9 @@ class Project:
         # Cache
         self.cache = Cache(self.cache_dir)
 
-        # Template manager
-        self.template = TemplateManager(self.templates_dir)
-
         # Ensure directories
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.results_dir.mkdir(parents=True, exist_ok=True)
-        self.templates_dir.mkdir(parents=True, exist_ok=True)
 
     def get_logger(self, name: str) -> Logger:
         """Returns a logger instance with the specified name."""
