@@ -1,4 +1,4 @@
-from typing import List, Tuple, override
+from typing import override
 
 from auda.step.anomaly.isolation_forest import IsolationForest
 from auda.step.evaluator.cross_validation import CrossValidationEvaluator
@@ -24,25 +24,19 @@ from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
         Spec.SEARCH_SPACE.optional([[(0.1, 100.0)], [(0.001, 1.0)]]),
         Spec.NUM_ITERATIONS.optional(100),
         Spec.ELITE_FRACTIONS.optional([0.1, 0.05]),
-        Spec.REFINEMENT_WIDTHS.optional([[10, 0.2], [1, 0.05]]),
+        Spec.REFINEMENT_WIDTHS.optional([[10, 0.2], [2, 0.05]]),
     ],
-    output_specs=[Spec.BEST_SCORE, Spec.BEST_HYPERPARAMETERS],
+    output_specs=[
+        Spec.BEST_SCORE,
+        Spec.BEST_HYPERPARAMETERS,
+        Spec.HYPERPARAMETERS_SCORE_LISTS,
+    ],
 )
 class SvrTuner(Step):
     @override
-    def run(self, seed: int) -> IOValueMap:
-        # Stage 0 (Coarse Search)
-        hp_score_list = self.get_hyperparameters_score_list(seed)
-        best_hp, best_score = hp_score_list[0]
-
-        return {
-            Spec.BEST_SCORE.name: best_score,
-            Spec.BEST_HYPERPARAMETERS.name: best_hp,
-        }
-
-    def get_hyperparameters_score_list(
-        self, seed: int
-    ) -> List[Tuple[List[float], float]]:
+    def run(
+        self, seed: int, metric: str, expect_higher: bool | None
+    ) -> IOValueMap:
         # ZNorm -> IsolationForest -> SVR
         cross_validation_pipeline = Pipeline(
             [
@@ -54,6 +48,7 @@ class SvrTuner(Step):
                 {Spec.SEED.name: seed},
                 {Spec.ON.name: Spec.NORMALIZED_DATASET.name},
                 {Spec.ON.name: Spec.INLIER_DATASET.name},
+                {Spec.ON.name: Spec.NORMALIZED_DATASET.name},
             ],
         )
 
@@ -83,4 +78,19 @@ class SvrTuner(Step):
 
         pipeline.run()
 
-        return pipeline.get_value(Spec.HYPERPARAMETERS_SCORE_LIST.name)
+        if expect_higher is None:
+            expect_higher = metric.lower() == 'r2'
+
+        hp_score_list = pipeline.get_value(
+            Spec.HYPERPARAMETERS_SCORE_LIST.name
+        )[:]
+        hp_score_list.sort(key=lambda x: x[1], reverse=expect_higher)
+        best_hp, best_score = hp_score_list[0]
+
+        return {
+            Spec.BEST_SCORE.name: best_score,
+            Spec.BEST_HYPERPARAMETERS.name: best_hp,
+            Spec.HYPERPARAMETERS_SCORE_LISTS.name: pipeline.get_value(
+                Spec.HYPERPARAMETERS_SCORE_LISTS.name
+            ),
+        }

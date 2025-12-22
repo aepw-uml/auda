@@ -87,8 +87,6 @@ class RandomSearchTuner(DatasetBasedStep):
                 f'{hp_names_values_str}: score={score:.3f}'
             )
 
-        hp_score_list.sort(key=lambda item: item[1], reverse=expect_higher)
-
         return {Spec.HYPERPARAMETERS_SCORE_LIST.name: hp_score_list}
 
     def _select_random_hyperparameter(

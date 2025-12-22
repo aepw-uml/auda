@@ -372,6 +372,13 @@ class Spec(str, IOSpec):
         dtype=List[List[float]],
     )
 
+    HYPERPARAMETERS_SCORE_LISTS = IOSpec(
+        name='HYPERPARAMETERS_SCORE_LISTS',
+        description='List of hyperparameter sets and their corresponding '
+        'scores for each stage',
+        dtype=List[List[Tuple[List[float], float]]],
+    )
+
     # =========================================================================#
     # Dataset Specific                                                         #
     # =========================================================================#
