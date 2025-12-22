@@ -2,7 +2,7 @@ from typing import override
 
 from auda.step.anomaly.isolation_forest import IsolationForest
 from auda.step.evaluator.cross_validation import CrossValidationEvaluator
-from auda.step.regression.support_vector_regression import (
+from auda.step.model.support_vector_regression import (
     SupportVectorRegression,
 )
 from auda.step.spec import Spec

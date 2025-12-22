@@ -11,7 +11,7 @@ from sklearn.svm import SVR
 
 
 @step(
-    id='RG-SVR',
+    id='MD-SVR',
     description='Trains a Support Vector Regression (SVR) model for '
     'predictive analysis.',
     input_specs=[
@@ -73,7 +73,7 @@ class SupportVectorRegression(DatasetBasedStep):
         Spec.X_STD,
         Spec.Y_MEAN.optional(0.0),
         Spec.Y_STD.optional(1.0),
-        Spec.DATASET_SCEHMA,
+        Spec.DATASET_SCHEMA,
     ],
     output_specs=[Spec.FIGURE, Spec.AXES],
 )

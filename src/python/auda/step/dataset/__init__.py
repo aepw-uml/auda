@@ -21,9 +21,9 @@ class DatasetSchema:
     """
 
     feature_names: list[str]
-    label_names: list[str]
-    feature_units: list[str]
-    label_units: list[str]
+    feature_units: list[str | None]
+    label_names: list[str] | None = None
+    label_units: list[str | None] | None = None
 
 
 def save_dataset(name: str, dataset: Dataset) -> None:
