@@ -16,7 +16,7 @@ from .__data_tables import DataTableName, WasteGenerationManagementColumn
     description='Retrieves a dataset containing yearly plastic waste '
     'generation statistics.',
     input_specs=[Spec.LOCATION],
-    output_specs=[Spec.DATASET, Spec.DATASET_SCEHMA],
+    output_specs=[Spec.DATASET, Spec.DATASET_SCHEMA],
 )
 class YearPlasticWaste(DatasetStep):
     @override
@@ -26,7 +26,7 @@ class YearPlasticWaste(DatasetStep):
 
         return {
             Spec.DATASET.name: dataset,
-            Spec.DATASET_SCEHMA.name: DatasetSchema(
+            Spec.DATASET_SCHEMA.name: DatasetSchema(
                 feature_names=['Year'],
                 label_names=['Plastic Waste Generated'],
                 feature_units=[''],

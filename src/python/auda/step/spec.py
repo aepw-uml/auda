@@ -33,8 +33,8 @@ class Spec(str, IOSpec):
         dtype=int,
     )
 
-    DATASET_SCEHMA = IOSpec(
-        name='DATASET_SCEHMA',
+    DATASET_SCHEMA = IOSpec(
+        name='DATASET_SCHEMA',
         description='Schema of the dataset',
         dtype=dict,
     )
@@ -297,6 +297,12 @@ class Spec(str, IOSpec):
         name='KERNEL',
         description='Kernel type',
         dtype=str,
+    )
+
+    CORRELATION_MATRIX = IOSpec(
+        name='CORRELATION_MATRIX',
+        description='Correlation matrix among input features',
+        dtype=ndarray,
     )
 
     # =========================================================================#
