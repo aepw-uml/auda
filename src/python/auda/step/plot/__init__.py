@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 import numpy as np
 from auda.utils.pipeline import Step
@@ -43,7 +43,7 @@ class PlotStep(Step):
         return plt.subplots()
 
     def combine_names_units(
-        self, names: List[str], units: List[str]
+        self, names: List[str], units: List[str | None]
     ) -> List[str]:
         """Combine names and units into formatted strings.
 
@@ -74,3 +74,25 @@ class PlotStep(Step):
         from auda.step.spec import Spec
 
         return {Spec.FIGURE.name: fig, Spec.AXES.name: ax}
+
+    def extend_range(
+        self,
+        lower_bound: float,
+        upper_bound: float,
+        margin_ratio: float = 0.05,
+    ) -> Tuple[float, float]:
+        """Expands a numeric range by a relative margin on both sides.
+
+        Args:
+            lower_bound: The minimum x-value of the range.
+            upper_bound: The maximum x-value of the range.
+            margin_ratio: Fraction of the range to extend on each side.
+
+        Returns:
+            A tuple of (extended_lower, extended_upper).
+        """
+
+        span = upper_bound - lower_bound
+        margin = margin_ratio * span
+
+        return lower_bound - margin, upper_bound + margin

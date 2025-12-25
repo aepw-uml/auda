@@ -13,6 +13,7 @@ from auda.utils.pipeline import IOValueMap, step
         Spec.FIGURE.optional(),
         Spec.AXES.optional(),
         Spec.ON,
+        Spec.Z_ORDER.optional(0),
         Spec.LINE_COLOR.optional('orange'),
         Spec.LINE_WIDTH.optional(2.5),
         Spec.LINE_LABEL.optional('Fitting Curve'),
@@ -27,6 +28,7 @@ class PlotCurve(PlotStep, DatasetBasedStep):
         figure,
         axes,
         on: str | Dataset,
+        z_order: int,
         line_color: str,
         line_width: float,
         line_label: str,
@@ -42,7 +44,7 @@ class PlotCurve(PlotStep, DatasetBasedStep):
             lw=line_width,
             label=line_label,
             linestyle=line_style,
-            zorder=3,
+            zorder=z_order,
         )
 
         return self.regular_output(figure, axes)

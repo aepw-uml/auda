@@ -482,6 +482,12 @@ class Spec(str, IOSpec):
         dtype=str,
     )
 
+    Z_ORDER = IOSpec(
+        name='Z_ORDER',
+        description='Z-order for plot elements',
+        dtype=int,
+    )
+
     SAMPLE_POINT_SIZE = IOSpec(
         name='SAMPLE_POINT_SIZE',
         description='Size of the sample points in the plot',
@@ -528,4 +534,32 @@ class Spec(str, IOSpec):
         name='LINE_STYLE',
         description='Style of the line in the plot',
         dtype=str,
+    )
+
+    GRID_ALPHA = IOSpec(
+        name='GRID_ALPHA',
+        description='Alpha transparency for the grid lines in the plot',
+        dtype=float,
+    )
+
+    LEGEND_LOCATION = IOSpec(
+        name='LEGEND_LOCATION',
+        description='Location of the legend in the plot',
+        dtype=str,
+    )
+
+    TIGHT_LAYOUT = IOSpec(
+        name='TIGHT_LAYOUT',
+        description='Whether to use tight layout for the plot',
+        dtype=bool,
+    )
+
+    # =========================================================================#
+    # Plot Specific                                                            #
+    # =========================================================================#
+
+    CURVE_EXTEND_MARGIN_RATIO = IOSpec(
+        name='CURVE_EXTEND_MARGIN_RATIO',
+        description='Margin ratio to extend the curve beyond the data range',
+        dtype=float,
     )

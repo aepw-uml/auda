@@ -6,9 +6,9 @@ from auda.step.model import ModelBasedStep
 from auda.step.plot import PlotStep
 from auda.step.plot.plot_curve import PlotCurve
 from auda.step.plot.plot_scatter_plot import PlotScatterPlot
+from auda.step.plot.plot_set import PlotSet
 from auda.step.spec import Dataset, Spec
 from auda.utils.pipeline import IOValueMap, step
-from sklearn.svm import SVR
 
 
 @step(
@@ -81,13 +81,15 @@ class SupportVectorRegressionPredictor(ModelBasedStep):
     @override
     def run(
         self,
-        model: SVR,
+        model,
         x_pred_values: List[float],
         x_mean: np.ndarray,
         x_std: np.ndarray,
         y_mean: float,
         y_std: float,
     ) -> IOValueMap:
+        from sklearn.svm import SVR
+
         self.verify_model(model, SVR)
 
         # ---- Standardize prediction inputs
@@ -115,6 +117,8 @@ class SupportVectorRegressionPredictor(ModelBasedStep):
         Spec.Y_MEAN.optional(0.0),
         Spec.Y_STD.optional(1.0),
         Spec.DATASET_SCHEMA,
+        Spec.PRED_DATASET.optional(),
+        Spec.CURVE_EXTEND_MARGIN_RATIO.optional(0.05),
     ],
     output_specs=[Spec.FIGURE, Spec.AXES],
 )
@@ -125,14 +129,20 @@ class SupportVectorRegressionPlotter(
     def run(
         self,
         on: str | Dataset,
-        model: SVR,
+        model,
         x_mean: np.ndarray,
         x_std: np.ndarray,
         y_mean: float,
         y_std: float,
+        pred_dataset: Dataset | None,
+        curve_extend_margin_ratio: float,
     ) -> IOValueMap:
+        from matplotlib.pyplot import axvspan
+        from sklearn.svm import SVR
+
         SAMPLE_POINT_SIZE = 60
         ORIGINAL_SAMPLE_COLOR = 'cornflowerblue'
+        PREDICTED_SAMPLE_COLOR = 'green'
         SUPPORT_VECTOR_EDGE_COLOR = 'black'
         LINE_COLOR = 'orange'
         LINE_LABEL = 'SVR Fit'
@@ -147,10 +157,17 @@ class SupportVectorRegressionPlotter(
 
         x_true = X_true.ravel()
 
+        # ---- Create x_all for later use
+        if pred_dataset is not None:
+            x_pred, _ = pred_dataset
+            x_all = np.concatenate([x_true, x_pred.ravel()])
+        else:
+            x_all = x_true
+
         # ---- Create a plot
         figure, axes = self.create_plot_or_default()
 
-        # ---- Scatter original samples
+        # ---- Plot original data points
         self.single_dispatch(
             PlotScatterPlot,
             {
@@ -158,13 +175,13 @@ class SupportVectorRegressionPlotter(
                 Spec.ON.name: on,
                 Spec.FIGURE.name: figure,
                 Spec.AXES.name: axes,
-                Spec.SAMPLE_POINT_SIZE.name: SAMPLE_POINT_SIZE + 20,
+                Spec.SAMPLE_POINT_SIZE.name: SAMPLE_POINT_SIZE,
                 Spec.SAMPLE_POINT_COLOR.name: ORIGINAL_SAMPLE_COLOR,
                 Spec.SAMPLE_POINT_LABEL.name: 'Original Samples',
             },
         )
 
-        # ---- Scatter support vectors
+        # ---- Plot support vectors
         support_indices = model.support_.tolist()
         x_support = x_true[support_indices]
         y_support = y_true[support_indices]
@@ -183,8 +200,28 @@ class SupportVectorRegressionPlotter(
             },
         )
 
+        # ---- Plot predicted data points (if given)
+        if pred_dataset is not None:
+            x_pred, y_pred = pred_dataset
+            self.single_dispatch(
+                PlotScatterPlot,
+                {
+                    **self._inputs,
+                    Spec.ON.name: (x_pred, y_pred),
+                    Spec.FIGURE.name: figure,
+                    Spec.AXES.name: axes,
+                    Spec.SAMPLE_POINT_SIZE.name: SAMPLE_POINT_SIZE,
+                    Spec.SAMPLE_POINT_COLOR.name: PREDICTED_SAMPLE_COLOR,
+                    Spec.SAMPLE_POINT_LABEL.name: 'Predictions',
+                },
+            )
+
         # ---- Plot the SVR curve
-        x_min, x_max = x_true.min(), x_true.max()
+        x_min, x_max = x_all.min(), x_all.max()
+        x_min, x_max = self.extend_range(
+            x_min, x_max, curve_extend_margin_ratio
+        )
+
         x_mean_scalar = x_mean[0]
         x_curve = np.linspace(x_min, x_max, 300).reshape(-1, 1)
         x_curve_std = (x_curve - x_mean_scalar) / x_std
@@ -218,8 +255,26 @@ class SupportVectorRegressionPlotter(
             zorder=2,
         )
 
-        axes.grid(True, alpha=0.25)
-        axes.legend()
-        figure.tight_layout()
+        # ---- Highlight Forecast Region
+        if pred_dataset is not None:
+            last_train_year = float(x_true.max())
+
+            axvspan(
+                last_train_year,
+                axes.get_xlim()[1],
+                color='gray',
+                alpha=0.15,
+                label='Forecast Region',
+            )
+
+        self.single_dispatch(
+            PlotSet,
+            {
+                Spec.GRID_ALPHA.name: 0.25,
+                **self._inputs,
+                Spec.FIGURE.name: figure,
+                Spec.AXES.name: axes,
+            },
+        )
 
         return self.regular_output(figure, axes)
