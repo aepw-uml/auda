@@ -150,7 +150,6 @@ class SupportVectorRegressionPlotter(Task):
                 color='orange',
             )
 
-            print(x_pred)
             ax.plot(
                 x_curve_std,
                 y_curve_std,

@@ -23,10 +23,10 @@ auda pipe run DS-YEAR-PW ST-BASIC MD-IF MD-SVR PL-SVR SHOW \
 auda pipe run DS-YEAR-PW ST-BASIC MD-IF MD-SVR PL-SVR SHOW \
     '--inputs=location=Japan;regularization_parameter=46.272;epsilon=0.22'
 
-# Maximal 
+# Maximal R2 
 # auda pipe run DS-YEAR-PW SVR-TUNER "--inputs=location=Japan;indicator=r2"
 auda pipe run DS-YEAR-PW ST-BASIC MD-IF MD-SVR PL-SVR SHOW \
-    '--inputs=location=Japan;regularization_parameter=56.848;epsilon=0.535'
+    '--inputs=location=Japan;regularization_parameter=56.848;epsilon=0.321'
 
 # United States
 auda pipe run DS-YEAR-PW ST-BASIC MD-SVR PL-SVR SHOW \
