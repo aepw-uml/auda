@@ -1,7 +1,8 @@
-from typing import override
+from typing import List, override
 
 import numpy as np
 from auda.step.dataset import DatasetBasedStep
+from auda.step.model import ModelBasedStep
 from auda.step.plot import PlotStep
 from auda.step.plot.plot_curve import PlotCurve
 from auda.step.plot.plot_scatter_plot import PlotScatterPlot
@@ -63,6 +64,46 @@ class SupportVectorRegression(DatasetBasedStep):
 
 
 @step(
+    id='PD-SVR',
+    description='Generates predictions using a trained Support Vector '
+    'Regression model.',
+    input_specs=[
+        Spec.MODEL,
+        Spec.X_PRED_VALUES,
+        Spec.X_MEAN,
+        Spec.X_STD,
+        Spec.Y_MEAN.optional(0.0),
+        Spec.Y_STD.optional(1.0),
+    ],
+    output_specs=[Spec.PRED_DATASET],
+)
+class SupportVectorRegressionPredictor(ModelBasedStep):
+    @override
+    def run(
+        self,
+        model: SVR,
+        x_pred_values: List[float],
+        x_mean: np.ndarray,
+        x_std: np.ndarray,
+        y_mean: float,
+        y_std: float,
+    ) -> IOValueMap:
+        self.verify_model(model, SVR)
+
+        # ---- Standardize prediction inputs
+        x_pred = np.array(x_pred_values, dtype=float).reshape(-1, 1)
+        x_pred_std = (x_pred - x_mean) / x_std
+
+        # ---- Generate predictions and reverse standardization
+        y_pred_std = model.predict(x_pred_std.reshape(-1, 1))
+        y_pred = y_pred_std * y_std + y_mean
+
+        return {
+            Spec.PRED_DATASET.name: (x_pred, y_pred),
+        }
+
+
+@step(
     id='PL-SVR',
     description='Generates plots for Support Vector Regression (SVR) model '
     'results.',
@@ -77,7 +118,9 @@ class SupportVectorRegression(DatasetBasedStep):
     ],
     output_specs=[Spec.FIGURE, Spec.AXES],
 )
-class SupportVectorRegressionPlotter(PlotStep, DatasetBasedStep):
+class SupportVectorRegressionPlotter(
+    PlotStep, DatasetBasedStep, ModelBasedStep
+):
     @override
     def run(
         self,
@@ -96,6 +139,8 @@ class SupportVectorRegressionPlotter(PlotStep, DatasetBasedStep):
         EPSILON_TUBE_COLOR = 'orange'
         EPSILON_TUBE_ALPHA = 0.25
         EPSILON_TUBE_LABEL = 'ε-tube'
+
+        self.verify_model(model, SVR)
 
         X_true, y_true = self.get_dataset_from_on(on)
         self.check_feature_dimension(X_true, expected_dimension=1)

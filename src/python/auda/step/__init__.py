@@ -53,6 +53,7 @@ add_kind('MD', 'model')
 add_kind('PL', 'plotting')
 add_kind('AD', 'anomaly_detection')
 add_kind('HT', 'hyperparameter_tuning')
+add_kind('PD', 'prediction')
 
 
 def create_pipeline_from_pipe(pipe: str | Pipeline) -> Pipeline:

@@ -496,6 +496,7 @@ class Pipeline:
         Returns:
             The converted value.
         """
+
         try:
             if dtype is str:
                 return str(value)
@@ -505,7 +506,7 @@ class Pipeline:
                 return float(value)
             elif dtype is bool:
                 return bool(value)
-            elif get_origin(dtype) is list and value is str:
+            elif get_origin(dtype) is list and isinstance(value, str):
                 item_type = dtype.__args__[0]
 
                 if item_type is str:

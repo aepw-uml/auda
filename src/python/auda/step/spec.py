@@ -306,6 +306,22 @@ class Spec(str, IOSpec):
     )
 
     # =========================================================================#
+    # Prediction specific                                                      #
+    # =========================================================================#
+
+    X_PRED_VALUES = IOSpec(
+        name='X_PRED_VALUES',
+        description='Input feature values for prediction',
+        dtype=List[float],
+    )
+
+    PRED_DATASET = IOSpec(
+        name='PRED_DATASET',
+        description='Dataset of predictions',
+        dtype=Dataset,
+    )
+
+    # =========================================================================#
     # Tuning Specific                                                          #
     # =========================================================================#
 
