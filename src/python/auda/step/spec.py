@@ -317,6 +317,12 @@ class Spec(str, IOSpec):
         dtype=ndarray,
     )
 
+    COEFFICIENTS = IOSpec(
+        name='COEFFICIENTS',
+        description='Coefficients of the regression model',
+        dtype=ndarray,
+    )
+
     # =========================================================================#
     # Prediction specific                                                      #
     # =========================================================================#
@@ -461,7 +467,7 @@ class Spec(str, IOSpec):
 
     INTERCEPT = IOSpec(
         name='INTERCEPT',
-        description='Intercept of the Support Vector Regression (SVR) model',
+        description='Intercept of regression models',
         dtype=float,
     )
 
