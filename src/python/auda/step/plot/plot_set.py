@@ -13,9 +13,9 @@ from auda.utils.pipeline import step
         Spec.FIGURE.optional(),
         Spec.AXES.optional(),
         Spec.DATASET_SCHEMA.optional(),
-        Spec.TITLE.optional(''),
+        Spec.TITLE.optional(),
         Spec.GRID_ALPHA.optional(),
-        Spec.LEGEND_LOCATION.optional('best'),
+        Spec.LEGEND_LOCATION.optional(),
         Spec.TIGHT_LAYOUT.optional(True),
     ],
     output_specs=[Spec.FIGURE, Spec.AXES],
@@ -27,7 +27,7 @@ class PlotSet(PlotStep):
         figure,
         axes,
         dataset_schema: DatasetSchema | None,
-        title: str,
+        title: str | None,
         grid_alpha: float | None,
         legend_location: str | None,
         tight_layout: bool,
@@ -35,6 +35,7 @@ class PlotSet(PlotStep):
         figure, axes = self.create_plot_or_default(figure, axes)
 
         # ---- Set labels
+        # TODO: generalize to 3D plots
         if dataset_schema is not None:
             feature_names = dataset_schema.feature_names
             feature_units = dataset_schema.feature_units

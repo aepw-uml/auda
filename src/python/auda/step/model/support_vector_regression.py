@@ -271,6 +271,7 @@ class SupportVectorRegressionPlotter(
             PlotSet,
             {
                 Spec.GRID_ALPHA.name: 0.25,
+                Spec.LEGEND_LOCATION.name: 'best',
                 **self._inputs,
                 Spec.FIGURE.name: figure,
                 Spec.AXES.name: axes,

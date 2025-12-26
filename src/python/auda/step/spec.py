@@ -311,6 +311,12 @@ class Spec(str, IOSpec):
         dtype=bool,
     )
 
+    FEATURE_IMPORTANCES = IOSpec(
+        name='FEATURE_IMPORTANCES',
+        description='Feature importances from the model',
+        dtype=ndarray,
+    )
+
     # =========================================================================#
     # Prediction specific                                                      #
     # =========================================================================#
