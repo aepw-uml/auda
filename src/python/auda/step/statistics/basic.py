@@ -9,7 +9,7 @@ from auda.utils.pipeline import IOValueMap, step
 @step(
     id='ST-BASIC',
     description='Computes basic descriptive statistics of the input samples.',
-    input_specs=[Spec.ON],
+    input_specs=[Spec.ON.optional(Spec.DATASET.name)],
     output_specs=[
         Spec.NUM_SAMPLES,
         Spec.NUM_FEATURES,

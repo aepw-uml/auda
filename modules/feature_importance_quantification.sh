@@ -1,0 +1,4 @@
+
+auda pipe run DS-MAJOR-FEATURES MD-CM PL-CM PL-SHOW
+
+auda pipe run DS-PW-RELATED MD-IF MD-RF PL-FI SHOW

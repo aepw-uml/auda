@@ -18,7 +18,6 @@ from .__data_tables import (
     id='DS-MAJOR-FEATURES',
     description='Collects samples containing key demographic and waste '
     'management indicators.',
-    input_specs=[],
     output_specs=[Spec.DATASET, Spec.DATASET_SCHEMA],
 )
 class SignificantFeaturesDataset(DatasetStep):
