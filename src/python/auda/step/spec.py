@@ -305,6 +305,12 @@ class Spec(str, IOSpec):
         dtype=ndarray,
     )
 
+    USE_ANOMALY_DETECTION = IOSpec(
+        name='USE_ANOMALY_DETECTION',
+        description='Whether to use user-defined anomaly detection',
+        dtype=bool,
+    )
+
     # =========================================================================#
     # Prediction specific                                                      #
     # =========================================================================#

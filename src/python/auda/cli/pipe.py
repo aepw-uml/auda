@@ -6,6 +6,8 @@ from auda.step import *
 from auda.utils.pipeline import (
     IOSpec,
     create_pipeline,
+    create_step_str_list,
+    define_pipeline,
     get_all_step_specs,
     get_kind,
 )
@@ -75,13 +77,17 @@ def display_step_spec_info(
         if not spec_map:
             echo(' ' * 4 + '(none)')
         for name, spec in spec_map.items():
-            # TODO: update this format
             name = name.lower()
-            type_str = format_type(spec.dtype)
-            extra = '' if spec.required else f', default={spec.default}'
-            required = f' (required: {spec.required}{extra})'
+            description = spec.description
+            required = spec.required
+            default = str(spec.default)
 
-            echo(f'{" " * 4}- {name}: {type_str}{required}')
+            type_str = format_type(spec.dtype)
+
+            echo(f'{" " * 4}- {name}: {description}')
+            echo(f'{" " * 8}Type: {type_str}')
+            echo(f'{" " * 8}Required: {required}')
+            echo(f'{" " * 8}Default: {default}')
 
     echo('\nInput Specs:')
     echo_spec_map(input_spec_map)
@@ -105,7 +111,12 @@ def run_pipeline(
         '--uppercase-names',
         help='Use original case for output keys.',
     ),
+    pipe: List[str] = Option([], '-p', '--pipe', help='Define pipelines.'),
 ) -> None:
+    for p in pipe:
+        step_str_list = create_step_str_list(p.strip())
+        define_pipeline(create_pipeline(step_str_list))
+
     pipepine = create_pipeline(step_strs)
     pipepine.run()
 

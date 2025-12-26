@@ -98,11 +98,14 @@ class MultiStageRandomSearchTuner(RandomSearchTuner):
 
         num_hyperparameters = len(search_space)
 
-        pipeline = Pipeline(
-            [RandomSearchTuner],
-            [{**self._inputs, Spec.SEARCH_SPACE.name: search_space}],
+        pipeline = (
+            Pipeline()
+            .append(
+                RandomSearchTuner,
+                {**self._inputs, Spec.SEARCH_SPACE.name: search_space},
+            )
+            .run()
         )
-        pipeline.run()
         hp_score_list = pipeline.get_value(Spec.HYPERPARAMETERS_SCORE_LIST.name)
 
         expect_higher = self.get_input(Spec.EXPECT_HIGHER.name)

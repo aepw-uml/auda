@@ -25,6 +25,7 @@ from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
         Spec.NUM_ITERATIONS.optional(100),
         Spec.ELITE_FRACTIONS.optional([0.1, 0.05]),
         Spec.REFINEMENT_WIDTHS.optional([[10, 0.2], [2, 0.05]]),
+        Spec.USE_ANOMALY_DETECTION.optional(True),
     ],
     output_specs=[
         Spec.BEST_SCORE,
@@ -35,32 +36,46 @@ from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
 class SvrTuner(Step):
     @override
     def run(
-        self, seed: int, metric: str, expect_higher: bool | None
+        self,
+        seed: int,
+        metric: str,
+        expect_higher: bool | None,
+        use_anomaly_detection: bool,
     ) -> IOValueMap:
         # ZNorm -> IsolationForest -> SVR
-        cross_validation_pipeline = Pipeline(
-            [
-                ZNorm,
-                IsolationForest,
-                SupportVectorRegression,
-            ],
-            [
-                {Spec.SEED.name: seed},
-                {Spec.ON.name: Spec.NORMALIZED_DATASET.name},
-                {Spec.ON.name: Spec.INLIER_DATASET.name},
-                {Spec.ON.name: Spec.NORMALIZED_DATASET.name},
-            ],
-        )
+        if use_anomaly_detection:
+            cross_validation_pipeline = (
+                Pipeline()
+                .append(ZNorm, {Spec.SEED.name: seed})
+                .append(
+                    IsolationForest,
+                    {Spec.ON.name: Spec.NORMALIZED_DATASET.name},
+                )
+                .append(
+                    SupportVectorRegression,
+                    {Spec.ON.name: Spec.INLIER_DATASET.name},
+                )
+            )
+        else:
+            cross_validation_pipeline = (
+                Pipeline()
+                .append(ZNorm, {Spec.SEED.name: seed})
+                .append(
+                    SupportVectorRegression,
+                    {Spec.ON.name: Spec.NORMALIZED_DATASET.name},
+                )
+            )
 
         # CrossValidationEvaluator (ZNorm -> IsolationForest -> SVR)
-        random_tuner_pipeline = Pipeline(
-            [CrossValidationEvaluator],
-            [{Spec.PIPE.name: cross_validation_pipeline, Spec.SEED.name: seed}],
+        random_tuner_pipeline = Pipeline().append(
+            CrossValidationEvaluator,
+            {Spec.PIPE.name: cross_validation_pipeline, Spec.SEED.name: seed},
         )
 
-        pipeline = Pipeline(
-            [MultiStageRandomSearchTuner],
-            [
+        pipeline = (
+            Pipeline()
+            .append(
+                MultiStageRandomSearchTuner,
                 {
                     **self._inputs,
                     Spec.PIPE.name: random_tuner_pipeline,
@@ -72,11 +87,10 @@ class SvrTuner(Step):
                         (0.1, 100.0),  # C
                         (0.001, 1.0),  # Epsilon
                     ],
-                }
-            ],
+                },
+            )
+            .run()
         )
-
-        pipeline.run()
 
         if expect_higher is None:
             expect_higher = metric.lower() == 'r2'

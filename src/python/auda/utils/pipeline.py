@@ -270,9 +270,7 @@ class Step(ABC):
 
         raise NotImplementedError
 
-    def single_dispatch(
-        self, to: str | Type, inputs: IOValueMap
-    ) -> IOValueMap | None:
+    def single_dispatch(self, to: str | Type, inputs: IOValueMap) -> 'Pipeline':
         """Alias for `run()` to support dispatching.
 
         Raises:
@@ -320,7 +318,7 @@ class StepSpec:
 class Pipeline:
     def __init__(
         self,
-        step_specs: List[StepSpec | str | Type],
+        step_specs: List[StepSpec | str | Type] | None = None,
         step_inputs: List[IOValueMap] | List[IOValueObject] | None = None,
     ) -> None:
         """Initializes a Pipeline instance.
@@ -340,16 +338,12 @@ class Pipeline:
                 pipeline.
             context: A dictionary for storing shared data across steps.
         """
-        self._step_specs: List[StepSpec] = []
-        for step_spec in step_specs:
-            if isinstance(step_spec, StepSpec):
-                self._step_specs.append(step_spec)
-            elif isinstance(step_spec, str):
-                self._step_specs.append(get_step_spec_by_id(step_spec))
-            elif issubclass(step_spec, Step):
-                self._step_specs.append(get_step_spec_by_class(step_spec))
-            else:
-                raise ValueError(f'Invalid step spec type: {type(step_spec)}')
+        if step_specs is None:
+            self._step_specs = []
+        else:
+            self._step_specs: List[StepSpec] = [
+                self.get_step_specs(step_spec) for step_spec in step_specs
+            ]
 
         self._callbacks: List[Callable[['Pipeline'], None]] = []
         self._step_inputs: List[IOValueMap] = (
@@ -366,7 +360,7 @@ class Pipeline:
 
         return self.context.get(_to_plain_name(name))
 
-    def run(self, initial_inputs: IOValueMap | None = None) -> None:
+    def run(self, initial_inputs: IOValueMap | None = None) -> Self:
         """Runs the pipeline by executing each step in sequence.
 
         Args:
@@ -374,6 +368,9 @@ class Pipeline:
                 for each step. Each dictionary corresponds to a step in the
                 pipeline. If provided, these inputs will override the values in
                 the pipeline context for the respective step.
+
+        Returns:
+            The Pipeline instance after execution.
 
         Raises:
             ValueError: If required inputs for any step are missing.
@@ -407,6 +404,8 @@ class Pipeline:
                 raise RuntimeError(
                     f"Error occurred while executing step '{step.spec.id}': {e}"
                 ) from e
+
+        return self
 
     def run_step(self, step: Step) -> None:
         # Traverse input specs to ensure required inputs are present
@@ -460,7 +459,7 @@ class Pipeline:
         # Update the pipeline context with the step's outputs
         self.context.update(step.get_outputs())
 
-    def schedule(self, callback: Callable[['Pipeline'], None]) -> None:
+    def schedule(self, callback: Callable[['Pipeline'], None]) -> Self:
         """Schedules a callback to be executed after the pipeline run.
 
         Args:
@@ -469,11 +468,15 @@ class Pipeline:
 
         self._callbacks.append(callback)
 
-    def execute_callbacks(self) -> None:
+        return self
+
+    def execute_callbacks(self) -> Self:
         """Executes all scheduled callbacks."""
 
         for callback in self._callbacks:
             callback(self)
+
+        return self
 
     def reset(self) -> Self:
         """Resets the pipeline context and clears scheduled callbacks."""
@@ -505,7 +508,11 @@ class Pipeline:
             elif dtype is float:
                 return float(value)
             elif dtype is bool:
-                return bool(value)
+                return (
+                    value.lower() in ['true', '1', 'yes']
+                    if isinstance(value, str)
+                    else bool(value)
+                )
             elif get_origin(dtype) is list and isinstance(value, str):
                 item_type = dtype.__args__[0]
 
@@ -533,6 +540,42 @@ class Pipeline:
             raise ValueError(
                 f"Failed to convert value '{value}' to type '{dtype}': {e}"
             ) from e
+
+    def append(
+        self, step_spec: StepSpec | str | Type, inputs: IOValueMap | None = None
+    ) -> Self:
+        """Appends a step to the pipeline.
+
+        Args:
+            step_spec: The StepSpec instance, step ID string, or Step subclass
+                to append.
+            inputs: Optional input values for the appended step.
+        """
+        self._step_specs.append(self.get_step_specs(step_spec))
+
+        if inputs is None:
+            self._step_inputs.append({})
+        else:
+            self._step_inputs.append(inputs)
+
+        return self
+
+    def get_step_specs(self, step_spec: StepSpec | str | Type) -> StepSpec:
+        """Retrieves a StepSpec from the pipeline.
+
+        Args:
+            step_spec: The StepSpec instance, step ID string, or Step subclass
+                to retrieve.
+        """
+
+        if isinstance(step_spec, StepSpec):
+            return step_spec
+        elif isinstance(step_spec, str):
+            return get_step_spec_by_id(step_spec)
+        elif issubclass(step_spec, Step):
+            return get_step_spec_by_class(step_spec)
+        else:
+            raise ValueError(f'Invalid step spec type: {type(step_spec)}')
 
 
 # Registry for StepSpecs; maps from step ID to StepSpec
@@ -670,7 +713,7 @@ def get_step_spec_by_class(step_class: Type[Step]) -> StepSpec:
     return step_spec
 
 
-STEP_STRS_DELIMITER = ' '
+STEP_STRS_DELIMITER = ' -> '
 STEP_STR_PARAM_DELIMITER = ':'
 INPUTS_STR_DELIMITER = ';'
 INPUTS_STR_KEY_VALUE_DELIMITER = '='
@@ -750,6 +793,28 @@ def create_pipeline(step_strs: List[str]) -> Pipeline:
     return Pipeline(cast(List[str | StepSpec | Type], step_ids), step_inputs)
 
 
+def create_pipeline_from_str(pipe_str: str) -> Pipeline:
+    """Creates a Pipeline instance from a pipeline string.
+
+    Step IDs are case-insensitive and will be normalized to uppercase.
+
+    Args:
+        pipe_str: A string representing the pipeline, with step IDs
+            separated by spaces.
+
+    Returns:
+        A Pipeline instance.
+    """
+
+    if pipe_str.startswith('@'):
+        pipeline_index = int(pipe_str[1:])
+        return get_pipeline(pipeline_index)
+
+    step_strs = create_step_str_list(pipe_str)
+
+    return create_pipeline(step_strs)
+
+
 # Maps from step ID prefixes to their kinds
 _prefix_kind_map: Dict[str, str] = {}
 
@@ -814,3 +879,36 @@ def set_module_name_getter(getter: Callable[[str], str | None]) -> None:
 
     global _module_name_getter
     _module_name_getter = getter
+
+
+# Temporary in-memory store for pipelines
+_pipeline_store: List[Pipeline] = []
+
+
+def define_pipeline(pipeline: Pipeline) -> None:
+    """Defines a pipeline by adding it to the in-memory store.
+
+    Args:
+        pipeline: The Pipeline instance to add to the store.
+    """
+
+    _pipeline_store.append(pipeline)
+
+
+def get_pipeline(index: int) -> Pipeline:
+    """Retrieves a pipeline from the in-memory store by its index.
+
+    Args:
+        index: The index of the pipeline to retrieve.
+
+    Returns:
+        The Pipeline instance at the specified index.
+
+    Raises:
+        IndexError: If the index is out of range.
+    """
+
+    if index < 0 or index >= len(_pipeline_store):
+        raise IndexError(f'Pipeline index out of range: {index}')
+
+    return _pipeline_store[index]

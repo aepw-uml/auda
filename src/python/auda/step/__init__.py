@@ -4,8 +4,7 @@ from auda.core import auda
 from auda.utils.pipeline import (
     Pipeline,
     add_kind,
-    create_pipeline,
-    create_step_str_list,
+    create_pipeline_from_str,
     get_all_step_specs,
     scan_package,
     set_module_name_getter,
@@ -69,5 +68,4 @@ def create_pipeline_from_pipe(pipe: str | Pipeline) -> Pipeline:
     if isinstance(pipe, Pipeline):
         return pipe
     else:
-        step_str_list = create_step_str_list(pipe)
-        return create_pipeline(step_str_list)
+        return create_pipeline_from_str(pipe)
