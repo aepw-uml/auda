@@ -733,7 +733,7 @@ def create_step_str_list(pipe_str: str) -> List[str]:
         A list of step ID strings.
     """
     return [
-        step_str
+        step_str.strip()
         for step_str in pipe_str.strip().split(STEP_STRS_DELIMITER)
         if step_str.strip() != ''
     ]

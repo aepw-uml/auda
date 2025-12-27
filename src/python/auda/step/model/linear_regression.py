@@ -82,4 +82,66 @@ class PlotLinearRegression(DatasetBasedStep, ModelBasedStep, PlotStep):
             label='Samples',
         )
 
+        # ---- Plot the linear plane
+        # Build a grid in ORIGINAL feature space (so it overlays the scatter)
+        x0_min, x0_max = float(X[:, 0].min()), float(X[:, 0].max())
+        x1_min, x1_max = float(X[:, 1].min()), float(X[:, 1].max())
+
+        # Add a small margin so points aren't on the boundary
+        x0_min, x0_max = self.extend_range(x0_min, x0_max, margin_ratio=0.05)
+        x1_min, x1_max = self.extend_range(x1_min, x1_max, margin_ratio=0.05)
+
+        n0, n1 = 50, 50
+        x0_lin = np.linspace(x0_min, x0_max, n0)
+        x1_lin = np.linspace(x1_min, x1_max, n1)
+        X0g, X1g = np.meshgrid(x0_lin, x1_lin)
+
+        grid = np.column_stack([X0g.ravel(), X1g.ravel()])  # (n0*n1, 2)
+
+        # If the model was trained on standardized X, standardize the grid too.
+        # (Your pipeline typically standardizes using ST-BASIC / ZNorm.)
+        if x_mean is not None and x_std is not None:
+            grid_eval = (grid - x_mean.reshape(1, -1)) / x_std.reshape(1, -1)
+        else:
+            grid_eval = grid
+
+        # Compute plane in the space the model coefficients correspond to
+        # y_hat = intercept + w1*x1 + w2*x2
+        w = np.asarray(coefficients, dtype=float).reshape(-1)
+        if w.shape[0] != 2:
+            raise ValueError(
+                f'Expected 2 coefficients for 2D LR; got {w.shape[0]}.'
+            )
+
+        y_hat = float(intercept) + grid_eval @ w  # (n0*n1,)
+
+        # If the model was trained on standardized y, reverse it for plotting
+        if y_mean is not None and y_std is not None:
+            y_hat = y_hat * float(y_std) + float(y_mean)
+
+        Yg = y_hat.reshape(X0g.shape)
+
+        # Draw the plane
+        axes.plot_surface(
+            X0g,
+            X1g,
+            Yg,
+            alpha=0.35,
+            linewidth=0,
+            antialiased=True,
+        )
+
+        # Optional: labels/grid/legend polish
+        axes.set_xlabel('Feature 1')
+        axes.set_ylabel('Feature 2')
+        axes.set_zlabel('Target')
+        axes.set_title('Linear Regression (3D)')
+
+        # Matplotlib 3D legends can be flaky; but keep your scatter label
+        # anyway:
+        try:
+            axes.legend(loc='best')
+        except Exception:
+            pass
+
         return self.regular_output(figure, axes)

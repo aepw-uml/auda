@@ -1,4 +1,4 @@
-from typing import List, Literal, Tuple, Union
+from typing import Dict, List, Literal, Tuple, Union
 
 from auda.utils.pipeline import IOSpec, Pipeline
 from numpy import ndarray
@@ -323,6 +323,24 @@ class Spec(str, IOSpec):
         dtype=ndarray,
     )
 
+    DEGREE = IOSpec(
+        name='DEGREE',
+        description='Degree of the polynomial features',
+        dtype=int,
+    )
+
+    ALPHA = IOSpec(
+        name='ALPHA',
+        description='Regularization strength parameter',
+        dtype=float,
+    )
+
+    DAMPED = IOSpec(
+        name='DAMPED',
+        description='Whether to use damped trend in exponential smoothing',
+        dtype=bool,
+    )
+
     # =========================================================================#
     # Prediction specific                                                      #
     # =========================================================================#
@@ -580,4 +598,26 @@ class Spec(str, IOSpec):
         name='CURVE_EXTEND_MARGIN_RATIO',
         description='Margin ratio to extend the curve beyond the data range',
         dtype=float,
+    )
+
+    # =========================================================================#
+    # Utility specific                                                         #
+    # =========================================================================#
+
+    TIMER_NUMBER = IOSpec(
+        name='TIMER_NUMBER',
+        description='The timer number to identify different timers.',
+        dtype=int,
+    )
+
+    START_TIME_MAP = IOSpec(
+        name='START_TIME_MAP',
+        description='The map of timer numbers to their start times.',
+        dtype=Dict[int, float],
+    )
+
+    TIMER_PRINT_CALLBACK_SET = IOSpec(
+        name='TIMER_PRINT_CALLBACK_SET',
+        description='Whether the callback for printing timers has been set.',
+        dtype=bool,
     )

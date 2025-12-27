@@ -14,8 +14,8 @@ auda pipe run \
 
 # R2 = 0.7457, MAPE = 3.4480 (Best)
 auda pipe run \
-    "-p TF-Z-NORM -> AD-IF:on=normalized_dataset -> MD-SVR:on=inlier_dataset;
-    c=33.079;epsilon=0.4670;seed=130" \
+    "-p TF-Z-NORM -> AD-IF:on=normalized_dataset -> 
+    MD-SVR:on=inlier_dataset;c=33.079;epsilon=0.4670;seed=130" \
     DS-YEAR-PW:location=Japan \
     EV-CV:pipe=\@0
 
@@ -41,3 +41,33 @@ auda pipe run \
     MD-SVR:on=normalized_dataset\;c=8.452\;epsilon=0.2773\;seed=165 \
     PL-SVR:on=dataset \
     PL-SHOW
+
+# ------------------------------------------------------------------------------
+
+# Naive last value
+auda pipe run \
+    "-p TF-Z-NORM -> AD-IF:on=normalized_dataset -> 
+    MD-NAIVE:on=inlier_dataset" \
+    DS-YEAR-PW:location=Japan \
+    EV-CV:pipe=\@0
+
+# Drift baseline
+auda pipe run \
+    "-p TF-Z-NORM -> AD-IF:on=normalized_dataset -> 
+    MD-DRIFT:on=inlier_dataset" \
+    DS-YEAR-PW:location=Japan \
+    EV-CV:pipe=\@0
+
+# Exponential smoothing baseline
+auda pipe run \
+    "-p TF-Z-NORM -> AD-IF:on=normalized_dataset -> 
+    MD-ETS:on=inlier_dataset" \
+    DS-YEAR-PW:location=Japan \
+    EV-CV:pipe=\@0
+
+# Polynomial regression
+auda pipe run \
+    "-p TF-Z-NORM -> AD-IF:on=normalized_dataset -> 
+    MD-PR:on=inlier_dataset;degree=4" \
+    DS-YEAR-PW:location=Japan \
+    EV-CV:pipe=\@0
