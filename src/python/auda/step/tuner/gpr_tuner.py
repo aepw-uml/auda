@@ -21,14 +21,15 @@ from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
         Spec.SEED.optional(),
         Spec.SEARCH_SPACE.optional([[(1e-3, 1e3)], [(1e-6, 1e1)]]),
         Spec.NUM_ITERATIONS.optional(50),
-        Spec.ELITE_FRACTIONS.optional([0.1, 0.05]),
-        Spec.REFINEMENT_WIDTHS.optional([[1.0, 0.5], [0.3, 0.2]]),
+        Spec.ELITE_FRACTIONS.optional([0.12, 0.06]),
+        Spec.REFINEMENT_WIDTHS.optional([[10.0, 0.5], [2.0, 0.1]]),
         Spec.USE_ANOMALY_DETECTION.optional(True),
     ],
     output_specs=[
         Spec.BEST_SCORE,
         Spec.BEST_HYPERPARAMETERS,
         Spec.HYPERPARAMETERS_SCORE_LISTS,
+        Spec.SEED,
     ],
 )
 class GprTuner(Step):
@@ -60,7 +61,6 @@ class GprTuner(Step):
         pipeline = Pipeline().append(
             MsrsAutomator,
             {
-                **self._inputs,
                 Spec.PIPE.name: train_pipe,
                 Spec.HYPERPARAMETER_NAMES.name: [
                     Spec.LENGTH_SCALE.name,
@@ -70,6 +70,8 @@ class GprTuner(Step):
                     (1e-3, 1e3),
                     (1e-6, 1e1),
                 ],
+                **self._inputs,
+                Spec.SEED.name: seed,
             },
         )
         pipeline.run()
@@ -82,4 +84,5 @@ class GprTuner(Step):
             Spec.HYPERPARAMETERS_SCORE_LISTS.name: pipeline.get_value(
                 Spec.HYPERPARAMETERS_SCORE_LISTS.name
             ),
+            Spec.SEED.name: seed,
         }

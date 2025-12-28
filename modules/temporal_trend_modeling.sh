@@ -95,14 +95,30 @@ auda pipe run \
 # ------------------------------------------------------------------------------
 # Lab (Find best seeds to showcase)
 
+# SVR - R2
 auda pipe run \
     DS-YEAR-PW:location=Japan \
     HT-SVR:metric=r2\;use_anomaly_detection=0\
     PL-MSRS-BSF \
     PL-SHOW
 
+# SVR - MAPE
 auda pipe run \
     DS-YEAR-PW:location=Japan \
     HT-SVR:metric=mape\;use_anomaly_detection=0\
+    PL-MSRS-BSF \
+    PL-SHOW
+
+# GPR - MAPE
+auda pipe run \
+    DS-YEAR-PW:location=Japan \
+    HT-GPR:metric=mape\;use_anomaly_detection=0\
+    PL-MSRS-BSF \
+    PL-SHOW
+
+# Ridge Regression - MAPE
+auda pipe run \
+    DS-YEAR-PW:location=Japan \
+    HT-RR:metric=mape\;use_anomaly_detection=0\
     PL-MSRS-BSF \
     PL-SHOW
