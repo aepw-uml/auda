@@ -30,9 +30,6 @@ class Env:
     PRISM_DB_USERNAME: str
     PRISM_DB_PASSWORD: str
 
-    # OpenAI (ChatGPT) settings
-    OPENAI_API_KEY: str
-
     def __init__(self, dotenv_path: str = '.env'):
         """Initializes the Env class and loads environment variables from a
         specified environment file.
