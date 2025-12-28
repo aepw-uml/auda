@@ -341,6 +341,18 @@ class Spec(str, IOSpec):
         dtype=bool,
     )
 
+    LENGTH_SCALE = IOSpec(
+        name='LENGTH_SCALE',
+        description='Length scale parameter for kernel functions',
+        dtype=float,
+    )
+
+    NOISE_LEVEL = IOSpec(
+        name='NOISE_LEVEL',
+        description='Noise level parameter for kernel functions',
+        dtype=float,
+    )
+
     # =========================================================================#
     # Prediction specific                                                      #
     # =========================================================================#
@@ -613,6 +625,12 @@ class Spec(str, IOSpec):
     START_TIME_MAP = IOSpec(
         name='START_TIME_MAP',
         description='The map of timer numbers to their start times.',
+        dtype=Dict[int, float],
+    )
+
+    STOP_TIME_MAP = IOSpec(
+        name='STOP_TIME_MAP',
+        description='The map of timer numbers to their stop times.',
         dtype=Dict[int, float],
     )
 

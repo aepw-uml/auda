@@ -72,17 +72,16 @@ class Project:
             - INFO level for PRODUCTION environment.
         """
 
-        format: str = '%(asctime)s [%(levelname)s] %(name)s | %(message)s'
-
         level: int = WARNING
         match self.env.ENVIRONMENT.lower():
-            case (
-                Environment.DEVELOPMENT
-                | Environment.TESTING
-                | Environment.STAGING
-            ):
+            case Environment.DEVELOPMENT | Environment.TESTING:
                 level = DEBUG
-            case Environment.PRODUCTION:
+            case Environment.PRODUCTION | Environment.STAGING:
                 level = INFO
+
+        format: str = '%(asctime)s [%(levelname)s] %(name)s | %(message)s'
+        match self.env.ENVIRONMENT.lower():
+            case Environment.STAGING:
+                format = '%(message)s'
 
         basicConfig(format=format, level=level)

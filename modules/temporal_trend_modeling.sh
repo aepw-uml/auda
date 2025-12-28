@@ -1,14 +1,18 @@
 # C = 33.079, epsilon = 0.4670 (Best R2)
 auda pipe run \
     DS-YEAR-PW:location=Japan \
-    HT-SVR:metric=r2\;seed=130\;num_iterations=50 \
+    UT-TIMER-START \
+    HT-SVR:metric=r2\;seed=130\;use_anomaly_detection=0 \
+    UT-TIMER-STOP \
     PL-MSRS-BSF \
     PL-SHOW
 
 # C = 8.452, epsilon = 0.2773 (Best MAPE)
 auda pipe run \
     DS-YEAR-PW:location=Japan \
-    HT-SVR:metric=mape\;seed=165\;num_iterations=50 \
+    UT-TIMER-START \
+    HT-SVR:metric=mape\;seed=165 \
+    UT-TIMER-STOP \
     PL-MSRS-BSF \
     PL-SHOW
 
@@ -44,6 +48,15 @@ auda pipe run \
 
 # ------------------------------------------------------------------------------
 
+# SVR with R2 optimization
+auda pipe run \
+    DS-YEAR-PW:location=Japan \
+    HT-GPR:metric=mape\;seed=165\;num_iterations=50 \
+    PL-MSRS-BSF \
+    PL-SHOW
+
+# ------------------------------------------------------------------------------
+
 # Naive last value
 auda pipe run \
     "-p TF-Z-NORM -> AD-IF:on=normalized_dataset -> 
@@ -71,3 +84,25 @@ auda pipe run \
     MD-PR:on=inlier_dataset;degree=4" \
     DS-YEAR-PW:location=Japan \
     EV-CV:pipe=\@0
+
+# Gaussian process regression
+auda pipe run \
+    "-p TF-Z-NORM -> AD-IF:on=normalized_dataset -> 
+    MD-GPR:on=inlier_dataset;degree=4" \
+    DS-YEAR-PW:location=Japan \
+    EV-CV:pipe=\@0
+
+# ------------------------------------------------------------------------------
+# Lab (Find best seeds to showcase)
+
+auda pipe run \
+    DS-YEAR-PW:location=Japan \
+    HT-SVR:metric=r2\;use_anomaly_detection=0\
+    PL-MSRS-BSF \
+    PL-SHOW
+
+auda pipe run \
+    DS-YEAR-PW:location=Japan \
+    HT-SVR:metric=mape\;use_anomaly_detection=0\
+    PL-MSRS-BSF \
+    PL-SHOW

@@ -2,8 +2,8 @@ from random import randrange
 from typing import override
 
 from auda.step.anomaly.isolation_forest import IsolationForest
-from auda.step.model.support_vector_regression import (
-    SupportVectorRegression,
+from auda.step.model.gaussian_process_regression import (
+    GaussianProcessRegressionModel,
 )
 from auda.step.spec import Spec
 from auda.step.transformer.z_norm import ZNorm
@@ -12,17 +12,17 @@ from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
 
 
 @step(
-    id='HT-SVR',
-    description='Hyperparameter tuning for Support Vector Regression (SVR)',
+    id='HT-GPR',
+    description='Hyperparameter tuning for Gaussian Process Regression (GPR)',
     input_specs=[
         Spec.ON.optional(Spec.DATASET.name),
         Spec.METRIC,
         Spec.EXPECT_HIGHER.optional(),
         Spec.SEED.optional(),
-        Spec.SEARCH_SPACE.optional([[(0.1, 100.0)], [(0.001, 1.0)]]),
+        Spec.SEARCH_SPACE.optional([[(1e-3, 1e3)], [(1e-6, 1e1)]]),
         Spec.NUM_ITERATIONS.optional(50),
         Spec.ELITE_FRACTIONS.optional([0.1, 0.05]),
-        Spec.REFINEMENT_WIDTHS.optional([[10, 0.2], [2, 0.05]]),
+        Spec.REFINEMENT_WIDTHS.optional([[1.0, 0.5], [0.3, 0.2]]),
         Spec.USE_ANOMALY_DETECTION.optional(True),
     ],
     output_specs=[
@@ -31,9 +31,13 @@ from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
         Spec.HYPERPARAMETERS_SCORE_LISTS,
     ],
 )
-class SvrTuner(Step):
+class GprTuner(Step):
     @override
-    def run(self, seed: int | None, use_anomaly_detection: bool) -> IOValueMap:
+    def run(
+        self,
+        seed: int | None,
+        use_anomaly_detection: bool,
+    ) -> IOValueMap:
         if seed is None:
             seed = randrange(2**32)
 
@@ -44,29 +48,28 @@ class SvrTuner(Step):
                 {Spec.ON.name: Spec.NORMALIZED_DATASET.name},
             )
             train_pipe.append(
-                SupportVectorRegression,
+                GaussianProcessRegressionModel,
                 {Spec.ON.name: Spec.INLIER_DATASET.name},
             )
         else:
             train_pipe.append(
-                SupportVectorRegression,
+                GaussianProcessRegressionModel,
                 {Spec.ON.name: Spec.NORMALIZED_DATASET.name},
             )
 
         pipeline = Pipeline().append(
             MsrsAutomator,
             {
+                **self._inputs,
                 Spec.PIPE.name: train_pipe,
                 Spec.HYPERPARAMETER_NAMES.name: [
-                    Spec.C.name,
-                    Spec.EPSILON.name,
+                    Spec.LENGTH_SCALE.name,
+                    Spec.NOISE_LEVEL.name,
                 ],
                 Spec.HYPERPARAMETER_DOMAINS.name: [
-                    (0.1, 100.0),  # C
-                    (0.001, 1.0),  # Epsilon
+                    (1e-3, 1e3),
+                    (1e-6, 1e1),
                 ],
-                **self._inputs,
-                Spec.SEED.name: seed,
             },
         )
         pipeline.run()

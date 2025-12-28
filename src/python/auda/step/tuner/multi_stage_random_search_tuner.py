@@ -195,7 +195,6 @@ class BestSoFar(PlotStep):
         axes.plot(x, best_so_far, marker=None)
         axes.set_xlabel('Evaluation')
         axes.set_ylabel('Best validation score (MAPE) so far')
-        # axes.set_title('MSRS tuning convergence (best-so-far)')
 
         # Draw stage boundaries (skip the final boundary at N to avoid a line
         # at the edge)
