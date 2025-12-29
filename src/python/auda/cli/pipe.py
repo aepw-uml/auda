@@ -35,7 +35,7 @@ def list_step_specs(
     table = Table(['ID', 'Kind', 'Description'])
     for step_spec in all_step_specs:
         step_spec_kind = get_kind(step_spec)
-        if kind and step_spec != kind:
+        if kind and step_spec_kind != kind:
             continue
 
         table.append_row(step_spec.id, step_spec_kind, step_spec.description)

@@ -7,7 +7,7 @@ from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
 
 @step(
     id='UT-TIMER-START',
-    description='',
+    description='Starts a timer with the given timer number.',
     input_specs=[
         Spec.TIMER_NUMBER.optional(0),
         Spec.START_TIME_MAP.optional(),
@@ -60,7 +60,7 @@ class TimerStart(Step):
 
 @step(
     id='UT-TIMER-STOP',
-    description='',
+    description='Stops a timer with the given timer number.',
     input_specs=[
         Spec.TIMER_NUMBER.optional(0),
         Spec.STOP_TIME_MAP.optional(),

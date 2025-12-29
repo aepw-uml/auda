@@ -8,7 +8,7 @@ from auda.utils.pipeline import IOValueMap, Pipeline, step
 
 
 @step(
-    id='msrs_automator',
+    id='HT-MSRS-AUTOMATOR',
     description='Automates MSRS.',
     input_specs=[
         Spec.ON.optional(Spec.DATASET.name),

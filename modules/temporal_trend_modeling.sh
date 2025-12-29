@@ -1,18 +1,14 @@
 # C = 33.079, epsilon = 0.4670 (Best R2)
 auda pipe run \
     DS-YEAR-PW:location=Japan \
-    UT-TIMER-START \
     HT-SVR:metric=r2\;seed=130\;use_anomaly_detection=0 \
-    UT-TIMER-STOP \
     PL-MSRS-BSF \
     PL-SHOW
 
 # C = 8.452, epsilon = 0.2773 (Best MAPE)
 auda pipe run \
     DS-YEAR-PW:location=Japan \
-    UT-TIMER-START \
     HT-SVR:metric=mape\;seed=165 \
-    UT-TIMER-STOP \
     PL-MSRS-BSF \
     PL-SHOW
 
@@ -122,3 +118,20 @@ auda pipe run \
     HT-RR:metric=mape\;use_anomaly_detection=0\
     PL-MSRS-BSF \
     PL-SHOW
+
+# ----------------------------------------------------------------------------- 
+# Tuning time
+# ----------------------------------------------------------------------------- 
+
+auda pipe run \
+    DS-YEAR-PW:location=Japan \
+    UT-TIMER-START \
+    HT-SVR:metric=mape\;seed=130 \
+    UT-TIMER-STOP \
+
+auda pipe run \
+    DS-YEAR-PW:location=Japan \
+    UT-TIMER-START \
+    HT-PR:metric=mape\;seed=130 \
+    UT-TIMER-STOP \
+
