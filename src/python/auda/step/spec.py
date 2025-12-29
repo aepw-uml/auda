@@ -639,3 +639,54 @@ class Spec(str, IOSpec):
         description='Whether the callback for printing timers has been set.',
         dtype=bool,
     )
+
+    # =========================================================================#
+    # Synthetic generation specific                                            #
+    # =========================================================================#
+
+    SYNTHETIC_DATASET = IOSpec(
+        name='SYNTHETIC_DATASET',
+        description='The generated synthetic dataset.',
+        dtype=Dataset,
+    )
+
+    SYNTHETIC_SCALE = IOSpec(
+        name='SYNTHETIC_SCALE',
+        description='Scale of the synthetic noise to be added to the data.',
+        dtype=float,
+    )
+
+    TREND_STRENGTH = IOSpec(
+        name='TREND_STRENGTH',
+        description='Strength of the trend component in the synthetic time-'
+        'series data.',
+        dtype=float,
+    )
+
+    SEASONAL_STRENGTH = IOSpec(
+        name='SEASONAL_STRENGTH',
+        description='Strength of the seasonal component in the synthetic '
+        'time-series data.',
+        dtype=float,
+    )
+
+    SEASONAL_PERIOD = IOSpec(
+        name='SEASONAL_PERIOD',
+        description='Period of the seasonal component in the synthetic time-'
+        'series data.',
+        dtype=int,
+    )
+
+    EXTRA_POINTS = IOSpec(
+        name='EXTRA_POINTS',
+        description='Number of extra time points to be generated beyond the '
+        'original dataset.',
+        dtype=int,
+    )
+
+    SORT_BY_X = IOSpec(
+        name='SORT_BY_X',
+        description='Whether to sort the generated synthetic dataset by the '
+        'input feature values.',
+        dtype=bool,
+    )
