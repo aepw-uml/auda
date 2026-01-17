@@ -1,7 +1,7 @@
 from typing import override
 
 import numpy as np
-from auda.step.dataset import DatasetBasedStep
+from auda.step.dataset import DatasetBasedStep, DatasetSchema
 from auda.step.model import ModelBasedStep
 from auda.step.plot import PlotStep
 from auda.step.spec import Dataset, Spec
@@ -43,6 +43,7 @@ class LinearRegressionModel(DatasetBasedStep):
         Spec.X_STD.optional(),
         Spec.Y_MEAN.optional(),
         Spec.Y_STD.optional(),
+        Spec.DATASET_SCHEMA,
     ],
     output_specs=[Spec.FIGURE, Spec.AXES],
 )
@@ -58,6 +59,7 @@ class PlotLinearRegression(DatasetBasedStep, ModelBasedStep, PlotStep):
         x_std: np.ndarray | None,
         y_mean: float | None,
         y_std: float | None,
+        dataset_schema: DatasetSchema,
     ) -> IOValueMap:
         import matplotlib.pyplot as plt
         from mpl_toolkits.mplot3d import Axes3D  # noqa
@@ -70,6 +72,7 @@ class PlotLinearRegression(DatasetBasedStep, ModelBasedStep, PlotStep):
 
         figure = plt.figure(figsize=(8, 6))
         axes = figure.add_subplot(111, projection='3d')
+        axes.set_box_aspect((1.7, 1.7, 1.7))
 
         # ---- Scatter original data points
         axes.scatter(
@@ -132,13 +135,13 @@ class PlotLinearRegression(DatasetBasedStep, ModelBasedStep, PlotStep):
         )
 
         # Optional: labels/grid/legend polish
-        axes.set_xlabel('Feature 1')
-        axes.set_ylabel('Feature 2')
-        axes.set_zlabel('Target')
-        axes.set_title('Linear Regression (3D)')
+        z_label = (
+            dataset_schema.label_names[0] if dataset_schema.label_names else ''
+        )
+        axes.set_xlabel(dataset_schema.feature_names[0])
+        axes.set_ylabel(dataset_schema.feature_names[1])
+        axes.set_zlabel(z_label)
 
-        # Matplotlib 3D legends can be flaky; but keep your scatter label
-        # anyway:
         try:
             axes.legend(loc='best')
         except Exception:

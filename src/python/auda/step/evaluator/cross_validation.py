@@ -92,7 +92,7 @@ class CrossValidationEvaluator(DatasetBasedStep):
 
             # Calculate evaluation metrics
             maes.append(mae(y_test, y_pred))
-            rmses.append(mse(y_test, y_pred))
+            rmses.append(mse(y_test, y_pred) ** 0.5)
             r2s.append(r2(y_test, y_pred))
             mapes.append(mape(y_test, y_pred))
 
