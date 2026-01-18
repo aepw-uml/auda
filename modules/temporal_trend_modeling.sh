@@ -1,4 +1,36 @@
 # ------------------------------------------------------------------------------
+# MSRS Hyperparameter Optimization (Japan); metric = MAPE; seed = 140
+# ------------------------------------------------------------------------------
+
+# Polynomial regression
+# [Results] degree = 3
+auda pipe run \
+    DS-YEAR-PW:location=Japan \
+    PP-SPLIT:on=dataset\;seed=140 \
+    HT-PR:on=training_set\;metric=mape\;use_anomaly_detection=0
+
+# Ridge regression
+# [Results] alpha = 14.487
+auda pipe run \
+    DS-YEAR-PW:location=Japan \
+    PP-SPLIT:on=dataset\;seed=140 \
+    HT-RR:on=training_set\;metric=mape\;use_anomaly_detection=0
+
+# Gaussian Process Regression
+# [Results] length_scale = 350.558, noise_level = 2.542
+auda pipe run \
+    DS-YEAR-PW:location=Japan \
+    PP-SPLIT:on=dataset\;seed=140 \
+    HT-GPR:on=training_set\;metric=mape\;use_anomaly_detection=0
+
+# Support Vector Regression
+# [Results] C = 1.756, epsilon = 0.153
+auda pipe run \
+    DS-YEAR-PW:location=Japan \
+    PP-SPLIT:on=dataset\;seed=140 \
+    HT-SVR:on=training_set\;metric=mape\;use_anomaly_detection=0
+
+# ------------------------------------------------------------------------------
 # Find the best hyperparameters for best MAPE (seed = 140)
 # ------------------------------------------------------------------------------
 
@@ -82,4 +114,3 @@ auda pipe run \
     MD-ETS:on=inlier_dataset;seed=140" \
     DS-YEAR-PW:location=Japan \
     EV-CV:pipe=\@0\;seed=140
-

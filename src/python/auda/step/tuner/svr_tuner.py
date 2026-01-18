@@ -30,6 +30,8 @@ from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
         Spec.BEST_HYPERPARAMETERS,
         Spec.HYPERPARAMETERS_SCORE_LISTS,
         Spec.SEED,
+        Spec.HYPERPARAMETER_NAMES,
+        Spec.HYPERPARAMETER_DOMAINS,
     ],
 )
 class SvrTuner(Step):
@@ -54,18 +56,20 @@ class SvrTuner(Step):
                 {Spec.ON.name: Spec.NORMALIZED_DATASET.name},
             )
 
+        hyperparameter_names = [
+            Spec.C.name,
+            Spec.EPSILON.name,
+        ]
+        hyperparameter_domains = [
+            (0.1, 100.0),  # C
+            (0.001, 1.0),  # Epsilon
+        ]
         pipeline = Pipeline().append(
             MsrsAutomator,
             {
                 Spec.PIPE.name: train_pipe,
-                Spec.HYPERPARAMETER_NAMES.name: [
-                    Spec.C.name,
-                    Spec.EPSILON.name,
-                ],
-                Spec.HYPERPARAMETER_DOMAINS.name: [
-                    (0.1, 100.0),  # C
-                    (0.001, 1.0),  # Epsilon
-                ],
+                Spec.HYPERPARAMETER_NAMES.name: hyperparameter_names,
+                Spec.HYPERPARAMETER_DOMAINS.name: hyperparameter_domains,
                 **self._inputs,
                 Spec.SEED.name: seed,
             },
@@ -81,4 +85,6 @@ class SvrTuner(Step):
                 Spec.HYPERPARAMETERS_SCORE_LISTS.name
             ),
             Spec.SEED.name: seed,
+            Spec.HYPERPARAMETER_NAMES.name: hyperparameter_names,
+            Spec.HYPERPARAMETER_DOMAINS.name: hyperparameter_domains,
         }

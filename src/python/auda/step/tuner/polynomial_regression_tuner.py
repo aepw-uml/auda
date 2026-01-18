@@ -27,9 +27,11 @@ from auda.utils.pipeline import IOValueMap, Pipeline, step
         Spec.BEST_SCORE,
         Spec.BEST_HYPERPARAMETERS,
         Spec.SEED,
+        Spec.HYPERPARAMETER_NAMES,
+        Spec.HYPERPARAMETER_DOMAINS,
     ],
 )
-class GprTuner(DatasetBasedStep):
+class PolynomialRegressionTuner(DatasetBasedStep):
     @override
     def run(
         self,
@@ -95,4 +97,6 @@ class GprTuner(DatasetBasedStep):
             Spec.SEED.name: seed,
             Spec.BEST_SCORE.name: best_score,
             Spec.BEST_HYPERPARAMETERS.name: best_hp,
+            Spec.HYPERPARAMETER_NAMES.name: [Spec.DEGREE.name],
+            Spec.HYPERPARAMETER_DOMAINS.name: [(1, 12)],
         }

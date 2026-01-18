@@ -30,9 +30,11 @@ from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
         Spec.BEST_HYPERPARAMETERS,
         Spec.HYPERPARAMETERS_SCORE_LISTS,
         Spec.SEED,
+        Spec.HYPERPARAMETER_NAMES,
+        Spec.HYPERPARAMETER_DOMAINS,
     ],
 )
-class GprTuner(Step):
+class GaussianProcessRegressionTuner(Step):
     @override
     def run(
         self,
@@ -58,18 +60,20 @@ class GprTuner(Step):
                 {Spec.ON.name: Spec.NORMALIZED_DATASET.name},
             )
 
+        hyperparameter_names = [
+            Spec.LENGTH_SCALE.name,
+            Spec.NOISE_LEVEL.name,
+        ]
+        hyperparameter_domains = [
+            (1e-3, 1e3),
+            (1e-6, 1e1),
+        ]
         pipeline = Pipeline().append(
             MsrsAutomator,
             {
                 Spec.PIPE.name: train_pipe,
-                Spec.HYPERPARAMETER_NAMES.name: [
-                    Spec.LENGTH_SCALE.name,
-                    Spec.NOISE_LEVEL.name,
-                ],
-                Spec.HYPERPARAMETER_DOMAINS.name: [
-                    (1e-3, 1e3),
-                    (1e-6, 1e1),
-                ],
+                Spec.HYPERPARAMETER_NAMES.name: hyperparameter_names,
+                Spec.HYPERPARAMETER_DOMAINS.name: hyperparameter_domains,
                 **self._inputs,
                 Spec.SEED.name: seed,
             },
@@ -85,4 +89,6 @@ class GprTuner(Step):
                 Spec.HYPERPARAMETERS_SCORE_LISTS.name
             ),
             Spec.SEED.name: seed,
+            Spec.HYPERPARAMETER_NAMES.name: hyperparameter_names,
+            Spec.HYPERPARAMETER_DOMAINS.name: hyperparameter_domains,
         }
