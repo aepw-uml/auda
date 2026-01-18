@@ -149,6 +149,18 @@ class Spec(str, IOSpec):
         dtype=int,
     )
 
+    TRAINING_PORTION = IOSpec(
+        name='TRAINING_PORTION',
+        description='The portion of data used for training',
+        dtype=float,
+    )
+
+    SHOULD_SHUFFLE = IOSpec(
+        name='SHOULD_SHUFFLE',
+        description='Whether to shuffle the dataset before splitting',
+        dtype=bool,
+    )
+
     # =========================================================================#
     # Transformation                                                           #
     # =========================================================================#
@@ -688,5 +700,33 @@ class Spec(str, IOSpec):
         name='SORT_BY_X',
         description='Whether to sort the generated synthetic dataset by the '
         'input feature values.',
+        dtype=bool,
+    )
+
+    # =========================================================================#
+    # SORTING                                                                  #
+    # =========================================================================#
+
+    SORTED_DATASET = IOSpec(
+        name='SORTED_DATASET',
+        description='The sorted dataset.',
+        dtype=Dataset,
+    )
+
+    SORT_BY_FEATURE_INDEX = IOSpec(
+        name='SORT_BY_FEATURE_INDEX',
+        description='The feature index to sort the dataset by.',
+        dtype=int,
+    )
+
+    SORT_BY_LABEL_INDEX = IOSpec(
+        name='SORT_BY_LABEL_INDEX',
+        description='The label index to sort the dataset by.',
+        dtype=int,
+    )
+
+    SORT_ASCENDINGLY = IOSpec(
+        name='SORT_ASCENDINGLY',
+        description='Whether to sort the dataset in ascending order.',
         dtype=bool,
     )

@@ -5,7 +5,7 @@ from typing import cast
 
 import numpy as np
 from auda.core import auda
-from auda.step.spec import Dataset
+from auda.step.spec import Dataset, LabeledDataset, UnlabeledDataset
 from auda.utils.pipeline import Step
 
 
@@ -122,6 +122,7 @@ class DatasetStep(Step):
         Returns:
             The cache key.
         """
+
         args_str = ''
 
         if kwargs:
@@ -139,6 +140,7 @@ class DatasetBasedStep(Step):
             step: Step instance.
             on: Name of the dataset to retrieve.
         """
+
         if not isinstance(on, str):
             return cast(Dataset, on)
 
@@ -148,3 +150,31 @@ class DatasetBasedStep(Step):
             raise ValueError(f"No dataset found for '{on}'")
 
         return dataset
+
+    def is_dataset_labeled(self, dataset: Dataset) -> bool:
+        """Checks if the dataset is labeled.
+
+        Args:
+            dataset: The dataset to check.
+
+        Returns:
+            True if the dataset is labeled, False otherwise.
+        """
+
+        return isinstance(dataset, tuple)
+
+    def get_num_samples(self, dataset: Dataset) -> int:
+        """Gets the number of samples in the dataset.
+
+        Args:
+            dataset: The dataset.
+
+        Returns:
+            The number of samples.
+        """
+
+        if self.is_dataset_labeled(dataset):
+            X, _ = cast(LabeledDataset, dataset)
+            return len(X)
+
+        return len(cast(UnlabeledDataset, dataset))
