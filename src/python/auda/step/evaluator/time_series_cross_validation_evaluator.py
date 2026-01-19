@@ -14,15 +14,13 @@ from auda.utils.pipeline import IOValueMap, Pipeline, step
     + 'blocked).',
     input_specs=[
         Spec.ON.optional(Spec.DATASET.name),
-        # Reuse existing port name; interpretation differs from EV-CV:
-        #   num_k_folds == number of forward validation blocks
         Spec.NUM_K_FOLDS.optional(5),
         Spec.PIPE,
         Spec.SEED.optional(42),
     ],
     output_specs=[Spec.MAE, Spec.RMSE, Spec.R2, Spec.MAPE],
 )
-class TimeSeriesCrossValidation(DatasetBasedStep):
+class TimeSeriesCrossValidationEvaluator(DatasetBasedStep):
     @override
     def run(
         self,
@@ -91,8 +89,7 @@ class TimeSeriesCrossValidation(DatasetBasedStep):
             pipeline.reset().run(
                 {
                     **self._inputs,
-                    Spec.TRAINIING_SET.name: (X_train, y_train),
-                    Spec.ON.name: Spec.TRAINIING_SET.name,
+                    Spec.ON.name: (X_train, y_train),
                     Spec.SEED.name: seed,
                 }
             )

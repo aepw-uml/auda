@@ -24,6 +24,7 @@ from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
         Spec.ELITE_FRACTIONS.optional([0.12, 0.06]),
         Spec.REFINEMENT_WIDTHS.optional([[10, 0.2], [2, 0.05]]),
         Spec.USE_ANOMALY_DETECTION.optional(True),
+        Spec.USE_TIME_SERIES.optional(False),
     ],
     output_specs=[
         Spec.BEST_SCORE,

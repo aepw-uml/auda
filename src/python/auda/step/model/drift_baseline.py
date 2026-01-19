@@ -33,7 +33,7 @@ class DriftBaseline(DatasetBasedStep):
         y = np.asarray(y, dtype=float).reshape(-1)
 
         if X.ndim != 2 or X.shape[1] != 1:
-            raise ValueError('MD-DRIFT expects a single feature (Year).')
+            raise ValueError('MD-DRIFT expects a single feature.')
 
         order = np.argsort(X[:, 0])
         t = X[order, 0]

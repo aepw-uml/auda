@@ -323,6 +323,12 @@ class Spec(str, IOSpec):
         dtype=bool,
     )
 
+    USE_TIME_SERIES = IOSpec(
+        name='USE_TIME_SERIES',
+        description='Whether to treat the data as time-series data',
+        dtype=bool,
+    )
+
     FEATURE_IMPORTANCES = IOSpec(
         name='FEATURE_IMPORTANCES',
         description='Feature importances from the model',

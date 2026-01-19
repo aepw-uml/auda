@@ -3,7 +3,7 @@ from shutil import rmtree
 from auda.core import auda
 from typer import Typer, echo
 
-app = Typer(name='cache', help='Cache related commands.')
+app = Typer(name='cache', help='Manages cache')
 
 
 @app.command(name='clear', help='Clear the application cache.')

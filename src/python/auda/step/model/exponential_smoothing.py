@@ -38,13 +38,13 @@ class ExponentialSmoothingBaseline(DatasetBasedStep):
         order = np.argsort(X[:, 0])
         y_sorted = y[order]
 
-        hw = ExponentialSmoothing(
+        model = ExponentialSmoothing(
             y_sorted,
             trend='add',
             seasonal=None,
             initialization_method='estimated',
         ).fit()
 
-        model = ETSAdapter(hw, train_len=len(y_sorted))
+        model = ETSAdapter(model, train_len=len(y_sorted))
 
         return {Spec.MODEL.name: model}

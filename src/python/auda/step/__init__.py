@@ -55,6 +55,7 @@ add_kind('HT', 'hyperparameter_tuning')
 add_kind('PD', 'prediction')
 add_kind('UT', 'utility')
 add_kind('SY', 'synthetic_generation')
+add_kind('PP', 'preprocessing')
 
 
 def create_pipeline_from_pipe(pipe: str | Pipeline) -> Pipeline:

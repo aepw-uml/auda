@@ -1,5 +1,8 @@
 from auda.step.dataset import DatasetBasedStep
 from auda.step.evaluator.cross_validation import CrossValidationEvaluator
+from auda.step.evaluator.time_series_cross_validation_evaluator import (
+    TimeSeriesCrossValidationEvaluator,
+)
 from auda.step.spec import Interval, Spec
 from auda.step.tuner.multi_stage_random_search_tuner import (
     MultiStageRandomSearchTuner,
@@ -23,6 +26,7 @@ from auda.utils.pipeline import IOValueMap, Pipeline, step
         Spec.ELITE_FRACTIONS,
         Spec.REFINEMENT_WIDTHS,
         Spec.USE_ANOMALY_DETECTION.optional(True),
+        Spec.USE_TIME_SERIES.optional(False),
     ],
     output_specs=[
         Spec.BEST_SCORE,
@@ -33,20 +37,25 @@ from auda.utils.pipeline import IOValueMap, Pipeline, step
 class MsrsAutomator(DatasetBasedStep):
     def run(
         self,
-        seed: int | None,
         pipe: Pipeline,
         metric: str,
         expect_higher: bool | None,
         hyperparameter_names: list[str],
         hyperparameter_domains: list[Interval],
+        use_time_series: bool,
     ) -> IOValueMap:
-        # Cross-validation wrapper (this produces MAE/RMSE/R2/MAPE)
-        cross_validation_pipe = Pipeline().append(
-            CrossValidationEvaluator,
-            {Spec.PIPE.name: pipe, Spec.SEED.name: seed},
+        evaluator = (
+            TimeSeriesCrossValidationEvaluator
+            if use_time_series
+            else CrossValidationEvaluator
         )
 
-        # Tune length_scale + noise_level using MSRS
+        # Cross-validation wrapper (this should produce MAE/RMSE/R2/MAPE)
+        cross_validation_pipe = Pipeline().append(
+            evaluator,
+            {**self._inputs, Spec.PIPE.name: pipe},
+        )
+
         pipeline = Pipeline().append(
             MultiStageRandomSearchTuner,
             {

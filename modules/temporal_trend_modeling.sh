@@ -2,7 +2,7 @@
 # Baseline Models; seed = 140
 # ------------------------------------------------------------------------------
 
-# Naive last value
+# Naive persistence model
 auda pipe run \
     "-p TF-Z-NORM -> AD-IF:on=normalized_dataset -> 
     MD-NAIVE:on=inlier_dataset" \

@@ -29,6 +29,16 @@ class IsolationForest(DatasetBasedStep):
         from sklearn.ensemble import IsolationForest
 
         X, y = self.get_dataset_from_on(on)
+        num_samples = len(X)
+        if num_samples < 15:
+            return {
+                Spec.INLIER_INDEXES.name: list(range(num_samples)),
+                Spec.OUTLIER_INDEXES.name: [],
+                Spec.INLIER_DATASET.name: (X, y),
+                Spec.ANOMALY_SCORES.name: [0.0] * num_samples,
+                Spec.CONTAMINATION_RATE.name: 0.0,
+            }
+
         data = np.concatenate([X, y.reshape(-1, 1)], axis=1)
 
         # ---- Train an isolation forest model

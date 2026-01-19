@@ -4,6 +4,9 @@ from typing import override
 from auda.step.anomaly.isolation_forest import IsolationForest
 from auda.step.dataset import DatasetBasedStep
 from auda.step.evaluator.cross_validation import CrossValidationEvaluator
+from auda.step.evaluator.time_series_cross_validation_evaluator import (
+    TimeSeriesCrossValidationEvaluator,
+)
 from auda.step.model.polynomial_regression import (
     PolynomialRegressionModel,
 )
@@ -22,6 +25,7 @@ from auda.utils.pipeline import IOValueMap, Pipeline, step
         Spec.SEED.optional(),
         Spec.NUM_ITERATIONS.optional(50),
         Spec.USE_ANOMALY_DETECTION.optional(True),
+        Spec.USE_TIME_SERIES.optional(False),
     ],
     output_specs=[
         Spec.BEST_SCORE,
@@ -40,6 +44,7 @@ class PolynomialRegressionTuner(DatasetBasedStep):
         expect_higher: bool | None,
         seed: int | None,
         use_anomaly_detection: bool,
+        use_time_series: bool,
     ) -> IOValueMap:
         if seed is None:
             seed = randrange(2**32)
@@ -64,19 +69,22 @@ class PolynomialRegressionTuner(DatasetBasedStep):
                 {Spec.ON.name: Spec.NORMALIZED_DATASET.name},
             )
 
-        eval_pipe = Pipeline().append(
-            CrossValidationEvaluator,
-            {Spec.PIPE.name: train_pipe, Spec.SEED.name: seed},
-        )
+        if not use_time_series:
+            eval_pipe = Pipeline().append(
+                CrossValidationEvaluator,
+                {Spec.PIPE.name: train_pipe, Spec.SEED.name: seed},
+            )
+        else:
+            eval_pipe = Pipeline().append(
+                TimeSeriesCrossValidationEvaluator,
+                {Spec.PIPE.name: train_pipe, Spec.SEED.name: seed},
+            )
 
         hp_score_list: list[tuple[list[float], float]] = []
 
         for degree in range(1, 13):
             eval_pipe.reset().run(
-                {
-                    Spec.DATASET.name: on,
-                    Spec.DEGREE.name: degree,
-                }
+                {Spec.ON.name: on, Spec.DEGREE.name: degree, **self._inputs}
             )
 
             score = eval_pipe.get_value(metric.upper())
