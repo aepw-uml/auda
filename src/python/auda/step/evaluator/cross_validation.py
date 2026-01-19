@@ -75,6 +75,7 @@ class CrossValidationEvaluator(DatasetBasedStep):
                     **self._inputs,
                     Spec.TRAINIING_SET.name: (X_train, y_train),
                     Spec.ON.name: Spec.TRAINIING_SET.name,
+                    Spec.SEED.name: seed,
                 }
             )
             model = pipeline.get_value(Spec.MODEL.name)

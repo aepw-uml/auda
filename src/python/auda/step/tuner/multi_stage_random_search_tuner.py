@@ -5,6 +5,7 @@ import numpy as np
 from auda.core import auda
 from auda.step.plot import PlotStep
 from auda.step.spec import Interval, Spec
+from auda.step.tuner import HpScoreList
 from auda.step.tuner.random_search_tuner import RandomSearchTuner
 from auda.utils.pipeline import IOValueMap, Pipeline, step
 
@@ -49,8 +50,8 @@ class MultiStageRandomSearchTuner(RandomSearchTuner):
                 'elite_fractions.'
             )
 
-        hp_score_lists: List[List[Tuple[List[float], float]]] = []
-        hp_score_list: List[Tuple[List[float], float]] = []
+        hp_score_lists: List[HpScoreList] = []
+        hp_score_list: HpScoreList = []
         for stage_idx in range(num_stages + 1):
             logger.info(
                 f'Starting stage {stage_idx + 1} of {num_stages + 1}...'

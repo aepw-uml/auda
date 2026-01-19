@@ -18,7 +18,7 @@ class NaiveLastValueModel:
 
 @step(
     id='MD-NAIVE',
-    description='Naïve (persistence) baseline: predicts the last observed y.',
+    description='Naive persistence baseline: predicts the last observed y.',
     input_specs=[Spec.ON.optional(Spec.DATASET.name)],
     output_specs=[Spec.MODEL, Spec.INTERCEPT],
 )
@@ -30,7 +30,7 @@ class NaiveLastValue(DatasetBasedStep):
         if X.ndim != 2 or X.shape[1] != 1:
             raise ValueError('MD-NAIVE expects a single feature.')
 
-        # Sort by time, take last observed value
+        # Sort by the feature, take last observed value
         order = np.argsort(X[:, 0])
         last_y = float(y[order][-1])
 

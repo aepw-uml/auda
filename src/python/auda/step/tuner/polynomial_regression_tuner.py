@@ -47,9 +47,7 @@ class PolynomialRegressionTuner(DatasetBasedStep):
         if expect_higher is None:
             expect_higher = metric.lower() == 'r2'
 
-        X, y = self.get_dataset_from_on(on)
-
-        train_pipe = Pipeline().append(ZNorm)
+        train_pipe = Pipeline().append(ZNorm, {Spec.ON.name: on})
 
         if use_anomaly_detection:
             train_pipe = train_pipe.append(
@@ -76,7 +74,7 @@ class PolynomialRegressionTuner(DatasetBasedStep):
         for degree in range(1, 13):
             eval_pipe.reset().run(
                 {
-                    Spec.DATASET.name: (X, y),
+                    Spec.DATASET.name: on,
                     Spec.DEGREE.name: degree,
                 }
             )

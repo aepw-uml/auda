@@ -3,7 +3,7 @@ from typing import override
 
 from auda.step.anomaly.isolation_forest import IsolationForest
 from auda.step.model.ridge_regression import RidgeRegressionModel
-from auda.step.spec import Spec
+from auda.step.spec import Dataset, Spec
 from auda.step.transformer.z_norm import ZNorm
 from auda.step.tuner.msrs_automator import MsrsAutomator
 from auda.utils.pipeline import IOValueMap, Pipeline, Step, step
@@ -36,13 +36,14 @@ class RidgeRegressionTuner(Step):
     @override
     def run(
         self,
+        on: str | Dataset,
         seed: int | None,
         use_anomaly_detection: bool,
     ) -> IOValueMap:
         if seed is None:
             seed = randrange(2**32)
 
-        train_pipe = Pipeline().append(ZNorm)
+        train_pipe = Pipeline().append(ZNorm, {Spec.ON.name: on})
         if use_anomaly_detection:
             train_pipe = train_pipe.append(
                 IsolationForest,
