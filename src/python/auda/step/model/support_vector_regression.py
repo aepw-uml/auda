@@ -119,6 +119,7 @@ class SupportVectorRegressionPredictor(ModelBasedStep):
         Spec.DATASET_SCHEMA,
         Spec.PRED_DATASET.optional(),
         Spec.CURVE_EXTEND_MARGIN_RATIO.optional(0.05),
+        Spec.TEST_SET.optional(),
     ],
     output_specs=[Spec.FIGURE, Spec.AXES],
 )
@@ -136,6 +137,7 @@ class SupportVectorRegressionPlotter(
         y_std: float,
         pred_dataset: Dataset | None,
         curve_extend_margin_ratio: float,
+        test_set: Dataset | None,
     ) -> IOValueMap:
         from matplotlib.pyplot import axvspan
         from sklearn.svm import SVR
@@ -158,16 +160,18 @@ class SupportVectorRegressionPlotter(
         x_true = X_true.ravel()
 
         # ---- Create x_all for later use
+        x_all = x_true
         if pred_dataset is not None:
             x_pred, _ = pred_dataset
             x_all = np.concatenate([x_true, x_pred.ravel()])
-        else:
-            x_all = x_true
+        if test_set is not None:
+            x_test, _ = test_set
+            x_all = np.concatenate([x_all, x_test.ravel()])
 
         # ---- Create a plot
         figure, axes = self.create_plot_or_default()
 
-        # ---- Plot original data points
+        # ---- Plot original data points (training set)
         self.single_dispatch(
             PlotScatterPlot,
             {
@@ -199,6 +203,22 @@ class SupportVectorRegressionPlotter(
                 Spec.SAMPLE_POINT_LABEL.name: 'Support Vectors',
             },
         )
+
+        # ---- Plot test set data points (if given)
+        if test_set is not None:
+            x_test, y_test = test_set
+            self.single_dispatch(
+                PlotScatterPlot,
+                {
+                    **self._inputs,
+                    Spec.ON.name: (x_test, y_test),
+                    Spec.FIGURE.name: figure,
+                    Spec.AXES.name: axes,
+                    Spec.SAMPLE_POINT_SIZE.name: SAMPLE_POINT_SIZE,
+                    Spec.SAMPLE_POINT_COLOR.name: 'green',
+                    Spec.SAMPLE_POINT_LABEL.name: 'Test Samples',
+                },
+            )
 
         # ---- Plot predicted data points (if given)
         if pred_dataset is not None:

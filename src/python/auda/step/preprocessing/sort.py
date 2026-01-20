@@ -34,6 +34,7 @@ class SORT(DatasetBasedStep):
 
         if is_labeled:
             X, y = cast(LabeledDataset, dataset)
+            is_y_1d = len(y.shape) == 1
             num_features = X.shape[1]
             Xy = np.hstack((X, y.reshape(num_samples, 1)))
 
@@ -62,6 +63,9 @@ class SORT(DatasetBasedStep):
             )
 
             sorted_X, sorted_y = np.split(sorted_Xy, [-1], axis=1)
+            if is_y_1d:
+                sorted_y = sorted_y.ravel()
+
             sorted_dataset = (sorted_X, sorted_y)
         else:
             # Unlabeled dataset

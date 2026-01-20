@@ -14,7 +14,7 @@ from diskcache.recipes import math
     input_specs=[
         Spec.ON.optional(Spec.DATASET.name),
         Spec.TRAINING_PORTION.optional(0.8),
-        Spec.SHOULD_SHUFFLE.optional(True),
+        Spec.SHOULD_SHUFFLE.optional(False),
         Spec.SEED.optional(42),
     ],
     output_specs=[

@@ -1,8 +1,11 @@
 from typing import override
 
 from auda.step.dataset import DatasetBasedStep
+from auda.step.model import ModelBasedStep
+from auda.step.plot import PlotStep
 from auda.step.spec import Dataset, Spec
 from auda.utils.pipeline import IOValueMap, step
+from sklearn.base import np
 
 
 @step(
@@ -35,3 +38,38 @@ class PolynomialRegressionModel(DatasetBasedStep):
             Spec.COEFFICIENTS.name: linear_regression_model.coef_,
             Spec.INTERCEPT.name: linear_regression_model.intercept_,
         }
+
+
+@step(
+    id='PL-SVR',
+    description='Generates plots for Support Vector Regression (SVR) model '
+    'results.',
+    input_specs=[
+        Spec.ON.optional(Spec.DATASET.name).desc('Dataset to plot against.'),
+        Spec.MODEL.desc('Trained SVR model'),
+        Spec.X_MEAN,
+        Spec.X_STD,
+        Spec.Y_MEAN.optional(0.0),
+        Spec.Y_STD.optional(1.0),
+        Spec.DATASET_SCHEMA,
+        Spec.PRED_DATASET.optional(),
+        Spec.CURVE_EXTEND_MARGIN_RATIO.optional(0.05),
+        Spec.TEST_SET.optional(),
+    ],
+    output_specs=[Spec.FIGURE, Spec.AXES],
+)
+class PolynomialRegressionPlotter(PlotStep, DatasetBasedStep, ModelBasedStep):
+    @override
+    def run(
+        self,
+        on: str | Dataset,
+        model,
+        x_mean: np.ndarray,
+        x_std: np.ndarray,
+        y_mean: float,
+        y_std: float,
+        pred_dataset: Dataset | None,
+        curve_extend_margin_ratio: float,
+        test_set: Dataset | None,
+    ) -> IOValueMap:
+        return {}

@@ -72,9 +72,9 @@ auda pipe run \
 
 # Ridge Regression
 auda pipe run \
-    "-p TF-Z-NORM -> AD-IF:on=normalized_dataset -> 
+    "-p TF-Z-NORM:on=test_set -> AD-IF:on=normalized_dataset -> 
     MD-RR:on=inlier_dataset;alpha=14.487" \
-    DS-YEAR-PW:location=Japan \
+    DS-YEAR-PW:location=Sweden \
     PP-SPLIT:on=dataset\;seed=140 \
     EV-CV:pipe=\@0
 
