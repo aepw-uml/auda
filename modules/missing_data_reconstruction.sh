@@ -126,6 +126,26 @@ auda pipe run \
     PL-PR:on=training_set \
     PL-SHOW
 
+# Ridge regression
+auda pipe run \
+    DS-YEAR-PW:location=United\ States \
+    PP-SORT:on=dataset\;sort_by_feature_index=0 \
+    PP-SPLIT:on=sorted_dataset\;training_portion=0.7\;seed=140 \
+    TF-Z-NORM:on=training_set \
+    MD-PR:on=normalized_dataset\;degree=2 \
+    PL-RR:on=training_set \
+    PL-SHOW
+
+# Gaussian Process Regression
+auda pipe run \
+    DS-YEAR-PW:location=United\ States \
+    PP-SORT:on=dataset\;sort_by_feature_index=0 \
+    PP-SPLIT:on=sorted_dataset\;training_portion=0.7\;seed=140 \
+    TF-Z-NORM:on=training_set \
+    MD-PR:on=normalized_dataset\;degree=2 \
+    PL-GPR:on=training_set \
+    PL-SHOW
+
 # Support Vector Regression
 auda pipe run \
     DS-YEAR-PW:location=United\ States \
