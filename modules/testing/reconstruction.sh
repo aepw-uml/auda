@@ -28,7 +28,8 @@ auda pipe run \
 
 # ------------------------------------------------------------------------------
 # MSRS Hyperparameter Optimization; location = "United States"; metric = MAPE;
-# seed = 140; training_portion = 0.7
+# seed = 140; training_portion = 0.7; num_k_folds = 4 (because the dataset is
+# too small)
 # ------------------------------------------------------------------------------
 
 # Polynomial regression
@@ -39,13 +40,13 @@ auda pipe run \
     PP-SPLIT:on=sorted_dataset\;training_portion=0.7\;seed=140 \
     HT-PR:on=training_set\;metric=mape\;use_time_series=1\;num_k_folds=4
 
-# Ridge regression
-# [Results] alpha = 14.487
+# Polynomial Ridge regression
+# [Results] degree = 3.0; alpha = 14.487
 auda pipe run \
     DS-YEAR-PW:location=United\ States \
     PP-SORT:on=dataset\;sort_by_feature_index=0 \
     PP-SPLIT:on=sorted_dataset\;training_portion=0.7\;seed=140 \
-    HT-RR:on=training_set\;metric=mape\;use_time_series=1\;num_k_folds=4
+    HT-PRR:on=training_set\;metric=mape\;use_time_series=1\;num_k_folds=4
 
 # Gaussian Process Regression
 # [Results] length_scale = 55.911, noise_level = 6.487
@@ -77,18 +78,18 @@ auda pipe run \
     DS-YEAR-PW:location=United\ States \
     PP-SORT:on=dataset\;sort_by_feature_index=0 \
     PP-SPLIT:on=sorted_dataset\;training_portion=0.7\;seed=140 \
-    EV-NE:pipe=\@0
+    EV-NORMAL:pipe=\@0
 
-# Ridge regression
-# [Hyperparameters] alpha = 14.487
+# Polynomial Ridge regression
+# [Hyperparameters] degree = 3; alpha = 14.487
 # [Results] MAPE = 10.505%
 auda pipe run \
     "-p TF-Z-NORM:on=test_set -> AD-IF:on=normalized_dataset -> 
-    MD-RR:on=inlier_dataset;alpha=14.487" \
+    MD-PRR:on=inlier_dataset;degree=3;alpha=14.487" \
     DS-YEAR-PW:location=United\ States \
     PP-SORT:on=dataset\;sort_by_feature_index=0 \
     PP-SPLIT:on=sorted_dataset\;training_portion=0.7\;seed=140 \
-    EV-NE:pipe=\@0
+    EV-NORMAL:pipe=\@0
 
 # Gaussian Process Regression
 # [Hyperparameters] length_scale = 55.911, noise_level = 6.487
@@ -99,7 +100,7 @@ auda pipe run \
     DS-YEAR-PW:location=United\ States \
     PP-SORT:on=dataset\;sort_by_feature_index=0 \
     PP-SPLIT:on=sorted_dataset\;training_portion=0.7\;seed=140 \
-    EV-NE:pipe=\@0
+    EV-NORMAL:pipe=\@0
 
 # Support Vector Regression
 # [Hyperparameters] C = 72.281, epsilon = 0.002
@@ -110,7 +111,7 @@ auda pipe run \
     DS-YEAR-PW:location=United\ States \
     PP-SORT:on=dataset\;sort_by_feature_index=0 \
     PP-SPLIT:on=sorted_dataset\;training_portion=0.7\;seed=140 \
-    EV-NE:pipe=\@0
+    EV-NORMAL:pipe=\@0
 
 # -----------------------------------------------------------------------------
 # Plotting
@@ -126,14 +127,14 @@ auda pipe run \
     PL-PR:on=training_set \
     PL-SHOW
 
-# Ridge regression
+# Polynomial Ridge regression
 auda pipe run \
     DS-YEAR-PW:location=United\ States \
     PP-SORT:on=dataset\;sort_by_feature_index=0 \
     PP-SPLIT:on=sorted_dataset\;training_portion=0.7\;seed=140 \
     TF-Z-NORM:on=training_set \
-    MD-PR:on=normalized_dataset\;degree=2 \
-    PL-RR:on=training_set \
+    MD-PRR:on=normalized_dataset\;degree=3\;alpha=14.487 \
+    PL-PRR:on=training_set \
     PL-SHOW
 
 # Gaussian Process Regression

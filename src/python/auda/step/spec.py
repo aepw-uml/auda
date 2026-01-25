@@ -620,6 +620,24 @@ class Spec(str, IOSpec):
         dtype=bool,
     )
 
+    PATH = IOSpec(
+        name='PATH',
+        description='Path to save the figure',
+        dtype=str,
+    )
+
+    DPI = IOSpec(
+        name='DPI',
+        description='Dots per inch for saving the figure',
+        dtype=int,
+    )
+
+    TRANSPARENT = IOSpec(
+        name='TRANSPARENT',
+        description='Whether to save the figure with a transparent background',
+        dtype=bool,
+    )
+
     # =========================================================================#
     # Plot Specific                                                            #
     # =========================================================================#

@@ -11,7 +11,7 @@ from auda.utils.pipeline import (
 
 
 @step(
-    id='EV-NE',
+    id='EV-NORMAL',
     description='Evaluates regression models using standard metrics on a '
     + 'test dataset.',
     input_specs=[
@@ -47,8 +47,6 @@ class NormalEvaluator(DatasetBasedStep):
         y_std = pipeline.get_value(Spec.Y_STD.name)
         y_pred_std = model.predict(X_test_std)
         y_pred = y_pred_std * y_std + y_mean
-
-        print(y_pred, y_test)
 
         return {
             Spec.MAE.name: mae(y_test, y_pred),

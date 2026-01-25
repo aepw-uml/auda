@@ -6,9 +6,14 @@ from auda.utils.pipeline import Step, step
 
 
 @step(
-    id='PL-SAVE-FIGURE',
+    id='PL-SAVE',
     description='Saves the generated figure to a file.',
-    input_specs=[Spec.FIGURE],
+    input_specs=[
+        Spec.FIGURE,
+        Spec.PATH.desc('Path to save the figure'),
+        Spec.DPI.optional(300),
+        Spec.TRANSPARENT.optional(False),
+    ],
 )
 class SaveFigurePlotter(Step):
     @override
