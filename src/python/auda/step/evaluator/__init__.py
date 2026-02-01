@@ -78,7 +78,7 @@ def mape(
         epsilon: Small value to avoid division by zero.
 
     Returns:
-        Mean Absolute Percentage Error.
+        Mean Absolute Percentage Error (percentage).
     """
 
     denom = np.where(np.abs(y_true) < epsilon, np.nan, np.abs(y_true))

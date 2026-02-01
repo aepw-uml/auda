@@ -68,7 +68,7 @@ class SvrTuner(Step):
         ]
         hyperparameter_domains = [
             (0.1, 100.0),  # C
-            (0.001, 1.0),  # Epsilon
+            (0.005, 1.0),  # Epsilon
         ]
         pipeline = Pipeline().append(
             MsrsAutomator,

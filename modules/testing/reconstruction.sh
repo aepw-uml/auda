@@ -57,7 +57,7 @@ auda pipe run \
     HT-GPR:on=training_set\;metric=mape\;use_time_series=1\;num_k_folds=4
 
 # Support Vector Regression
-# [Results] C = 72.281, epsilon = 0.002
+# [Results] C = 72.281, epsilon = 0.006
 auda pipe run \
     DS-YEAR-PW:location=United\ States \
     PP-SORT:on=dataset\;sort_by_feature_index=0 \
@@ -103,11 +103,11 @@ auda pipe run \
     EV-NORMAL:pipe=\@0
 
 # Support Vector Regression
-# [Hyperparameters] C = 72.281, epsilon = 0.002
-# [Results] MAPE = 1.362%
+# [Hyperparameters] C = 72.281, epsilon = 0.006
+# [Results] MAPE = 1.177%
 auda pipe run \
     "-p TF-Z-NORM:on=test_set -> AD-IF:on=normalized_dataset -> 
-    MD-SVR:on=inlier_dataset;c=72.281;epsilon=0.002" \
+    MD-SVR:on=inlier_dataset;c=72.281;epsilon=0.006" \
     DS-YEAR-PW:location=United\ States \
     PP-SORT:on=dataset\;sort_by_feature_index=0 \
     PP-SPLIT:on=sorted_dataset\;training_portion=0.7\;seed=140 \
