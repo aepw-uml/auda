@@ -19,7 +19,7 @@ from auda.utils.pipeline import IOValueMap, step
         Spec.SORTED_DATASET,
     ],
 )
-class SORT(DatasetBasedStep):
+class SortDataset(DatasetBasedStep):
     @override
     def run(
         self,
@@ -70,16 +70,16 @@ class SORT(DatasetBasedStep):
         else:
             # Unlabeled dataset
             X = cast(UnlabeledDataset, dataset)
-            num_samples = len(X)
+            num_features = X.shape[1]
 
             # In this branch, "sort_by_label_index" is ignored.
             if (
                 sort_by_feature_index < 0
-                or sort_by_feature_index >= num_samples
+                or sort_by_feature_index >= num_features
             ):
                 raise ValueError(
                     f'sort_by_feature_index {sort_by_feature_index} is out '
-                    + f'of bounds for dataset with {num_samples} features.'
+                    + f'of bounds for dataset with {num_features} features.'
                 )
 
             column_index = sort_by_feature_index

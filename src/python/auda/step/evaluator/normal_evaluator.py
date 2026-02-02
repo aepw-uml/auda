@@ -6,6 +6,7 @@ from auda.step.evaluator import mae, mape, mse, r2
 from auda.step.spec import Dataset, Spec
 from auda.utils.pipeline import (
     IOValueMap,
+    Pipeline,
     step,
 )
 
@@ -25,7 +26,7 @@ from auda.utils.pipeline import (
 )
 class NormalEvaluator(DatasetBasedStep):
     @override
-    def run(self, pipe: str, test_set: Dataset) -> IOValueMap:
+    def run(self, pipe: str | Pipeline, test_set: Dataset) -> IOValueMap:
         # Create a pipeline
         pipeline = create_pipeline_from_pipe(pipe)
 

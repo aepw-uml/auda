@@ -49,6 +49,8 @@ class PolynomialRegressionTuner(DatasetBasedStep):
         if seed is None:
             seed = randrange(2**32)
 
+        print('ds' + self.pipeline.get_value(Spec.USE_TIME_SERIES.name))
+
         if expect_higher is None:
             expect_higher = metric.lower() == 'r2'
 

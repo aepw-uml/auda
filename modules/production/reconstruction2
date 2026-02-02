@@ -1,0 +1,50 @@
+#!/usr/bin/env zsh
+
+set -euo pipefail
+
+reconstruction_file="$PWD/results/production/reconstruction"
+mkdir -p "$(dirname "$reconstruction_file")"
+echo '' >"$reconstruction_file"
+
+location="United States"
+seed="140"
+
+# ------------------------------------------------------------------------------
+# Baselines
+# ------------------------------------------------------------------------------
+
+# Naive persistence model
+echo '- Naive Persistence Model' | tee -a "$reconstruction_file"
+auda pipe run \
+    "-p TF-Z-NORM:on=test_set -> AD-IF:on=normalized_dataset -> 
+    MD-NAIVE:on=inlier_dataset" \
+    "DS-YEAR-PW:location=$location;seed=$seed" \
+    PP-SORT:on=dataset\;sort_by_feature_index=0 \
+    PP-SPLIT:on=sorted_dataset\;training_portion=0.7 \
+    EV-NORMAL:pipe=\@0 \
+    --names=mae,rmse,r2,mape |
+    tee -a "$reconstruction_file"
+
+# Drift model
+echo '- Drift Model' | tee -a "$reconstruction_file"
+auda pipe run \
+    "-p TF-Z-NORM:on=test_set -> AD-IF:on=normalized_dataset -> 
+    MD-DRIFT:on=inlier_dataset" \
+    "DS-YEAR-PW:location=$location;seed=$seed" \
+    PP-SORT:on=dataset\;sort_by_feature_index=0 \
+    PP-SPLIT:on=sorted_dataset\;training_portion=0.7 \
+    EV-NORMAL:pipe=\@0 \
+    --names=mae,rmse,r2,mape |
+    tee -a "$reconstruction_file"
+
+# Exponential smoothing
+echo '- Exponential Smoothing' | tee -a "$reconstruction_file"
+auda pipe run \
+    "-p TF-Z-NORM:on=test_set -> AD-IF:on=normalized_dataset -> 
+    MD-ETS:on=inlier_dataset" \
+    "DS-YEAR-PW:location=$location;seed=$seed" \
+    PP-SORT:on=dataset\;sort_by_feature_index=0 \
+    PP-SPLIT:on=sorted_dataset\;training_portion=0.7 \
+    EV-NORMAL:pipe=\@0 \
+    --names=mae,rmse,r2,mape |
+    tee -a "$reconstruction_file"

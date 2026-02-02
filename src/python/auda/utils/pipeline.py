@@ -577,6 +577,18 @@ class Pipeline:
         else:
             raise ValueError(f'Invalid step spec type: {type(step_spec)}')
 
+    def clone(self) -> 'Pipeline':
+        """Creates a clone of the current Pipeline instance.
+
+        Returns:
+            A new Pipeline instance with the same step specs and inputs.
+        """
+
+        return Pipeline(
+            cast(List[StepSpec | str | Type[Any]], self._step_specs.copy()),
+            self._step_inputs.copy(),
+        )
+
 
 # Registry for StepSpecs; maps from step ID to StepSpec
 _step_specs: Dict[str, StepSpec] = {}

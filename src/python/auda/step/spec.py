@@ -161,6 +161,12 @@ class Spec(str, IOSpec):
         dtype=bool,
     )
 
+    TEST_SAMPLE_INDEXES = IOSpec(
+        name='TEST_SAMPLE_INDEXES',
+        description='Indexes of the test samples',
+        dtype=List[int],
+    )
+
     # =========================================================================#
     # Transformation                                                           #
     # =========================================================================#
@@ -286,6 +292,18 @@ class Spec(str, IOSpec):
     PIPE = IOSpec(
         name='PIPE',
         description='The sub pipeline to be executed',
+        dtype=str | Pipeline,
+    )
+
+    HT_PIPE = IOSpec(
+        name='HT_PIPE',
+        description='The hyperparameter tuning pipeline to be executed',
+        dtype=str | Pipeline,
+    )
+
+    TRAINING_PIPE = IOSpec(
+        name='TRAINING_PIPE',
+        description='The training pipeline to be executed',
         dtype=str | Pipeline,
     )
 

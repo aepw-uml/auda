@@ -1,16 +1,16 @@
+import math
 from typing import cast, override
 
 import numpy as np
 from auda.step.dataset import DatasetBasedStep
 from auda.step.spec import Dataset, LabeledDataset, Spec, UnlabeledDataset
 from auda.utils.pipeline import IOValueMap, step
-from diskcache.recipes import math
 
 
 @step(
     id='PP-SPLIT',
     description='Splits a dataset into training and testing sets based on the '
-    'specified ',
+    'specified training portion.',
     input_specs=[
         Spec.ON.optional(Spec.DATASET.name),
         Spec.TRAINING_PORTION.optional(0.8),
