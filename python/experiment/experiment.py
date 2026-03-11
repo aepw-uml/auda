@@ -10,6 +10,7 @@ from sklearn.metrics import (
     r2_score,
 )
 from sklearn.pipeline import Pipeline
+from util.logging import get_logger
 
 
 class Experiment(ABC):
@@ -48,6 +49,7 @@ class Experiment(ABC):
         self.context: dict[str, Any] = {}
         self.pipeline: Pipeline | None = None
         self.metrics: Any = None
+        self.logger = get_logger(name)
 
     @abstractmethod
     def setup(self, **kwargs) -> None:
@@ -102,7 +104,10 @@ class Experiment(ABC):
         final evaluation.
         """
 
-        pass
+        self.logger.info(
+            f'Splitting data with train_rate={self.train_rate}, '
+            f'val_rate={self.val_rate}, test_rate={self.test_rate}'
+        )
 
     @abstractmethod
     def train(self) -> None:
@@ -114,7 +119,7 @@ class Experiment(ABC):
         pipeline using the tuned configuration.
         """
 
-        pass
+        self.logger.info('Training...')
 
     @abstractmethod
     def evaluate(self) -> None:
@@ -125,7 +130,7 @@ class Experiment(ABC):
         ``self.metrics`` so it can be returned by ``get_metrics()``.
         """
 
-        pass
+        self.logger.info('Evaluating...')
 
     @abstractmethod
     def tune(self) -> None:
@@ -137,7 +142,22 @@ class Experiment(ABC):
         refit ``self.pipeline`` with the selected configuration.
         """
 
-        pass
+        self.logger.info('Tuning hyperparameters...')
+
+    def get_pipeline(self) -> Pipeline:
+        """Returns the trained pipeline.
+
+        Returns:
+            The trained scikit-learn Pipeline instance.
+
+        Raises:
+            ValueError: If the pipeline has not been trained yet.
+        """
+
+        if self.pipeline is None:
+            raise ValueError('Pipeline not set up. Call train() first.')
+
+        return self.pipeline
 
     def get_metrics(self) -> Any:
         """Returns the metrics computed during evaluation.
@@ -153,6 +173,11 @@ class Experiment(ABC):
             raise ValueError('Metrics not calculated. Call evaluate() first.')
 
         return self.metrics
+
+    def finish(self) -> Any:
+        """Performs any finalization steps after the experiment has run."""
+
+        self.logger.info('Experiment finished.')
 
 
 @dataclass(frozen=True)
@@ -174,9 +199,14 @@ class RegressionMetrics:
     def __repr__(self) -> str:
         """Returns a compact string representation of the metric values."""
 
+        mae_str = f'{self.mae:.3e}'.replace('e+', 'e')
+        mse_str = f'{self.mse:.3e}'.replace('e+', 'e')
+        r2_str = f'{self.r2:.3f}'
+        mape_str = f'{self.mape * 100:.2f}%'
+
         return (
-            f'Metrics(mae={self.mae:.4f}, mse={self.mse:.4f}, '
-            f'r2={self.r2:.4f}, mape={self.mape:.4f})'
+            f'Metrics(mae={mae_str}, mse={mse_str}, '
+            f'r2={r2_str}, mape={mape_str})'
         )
 
 
@@ -236,6 +266,11 @@ class RegressionExperiment(Experiment):
         self.y = y
         super().setup(**kwargs)
 
+        m, d = X.shape
+        self.logger.info(
+            f'Set up experiment with {m} samples and {d} features.'
+        )
+
     @override
     def split(self) -> None:
         """Randomly splits the dataset into train, validation, and test sets.
@@ -266,6 +301,14 @@ class RegressionExperiment(Experiment):
         self.X_test = self.X[indices[val_end:]]
         self.y_test = self.y[indices[val_end:]]
 
+        m_train = self.X_train.shape[0] if self.X_train is not None else 0
+        m_val = self.X_val.shape[0] if self.X_val is not None else 0
+        m_test = self.X_test.shape[0] if self.X_test is not None else 0
+        self.logger.info(
+            f'Split data into {m_train} training samples, {m_val} validation '
+            f'samples, and {m_test} test samples.'
+        )
+
     def train(self) -> None:
         """Validates that training data is ready before model training.
 
@@ -278,6 +321,8 @@ class RegressionExperiment(Experiment):
 
         if self.X_train is None or self.y_train is None:
             raise ValueError('Training data not set up. Call split() first.')
+
+        super().train()
 
     def evaluate(self) -> None:
         """Evaluates the pipeline on the test split and stores metrics.
@@ -293,10 +338,10 @@ class RegressionExperiment(Experiment):
         if self.X_test is None or self.y_test is None:
             raise ValueError('Test data not set up. Call split() first.')
 
-        if self.pipeline is None:
-            raise ValueError('Pipeline not set up. Call train() first.')
+        pipeline = self.get_pipeline()
+        super().evaluate()
 
-        y_pred = self.pipeline.predict(self.X_test)
+        y_pred = pipeline.predict(self.X_test)
         mae = mean_absolute_error(self.y_test, y_pred)
         mse = mean_squared_error(self.y_test, y_pred)
         r2 = r2_score(self.y_test, y_pred)

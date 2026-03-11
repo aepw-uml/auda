@@ -13,26 +13,26 @@ if __name__ == '__main__':
         )
 
     experiment = Reconstruction(
-        name='Reconstruction',
-        description='Reconstruct the original time series.',
+        name='Reconstruction (Naive Persistence)',
+        description=(
+            'Reconstruct the original time series with naive persistence.'
+        ),
         regressor=NaivePersistence,
     )
 
     experiment.setup(X, y)
     experiment.run()
-    print(experiment.get_metrics())
+    experiment.logger.info(experiment.get_metrics())
+    experiment.finish()
 
     experiment = Reconstruction(
-        name='Reconstruction',
-        description='Reconstruct the original time series.',
-        regressor=NaivePersistence,
-    )
-
-    experiment = Reconstruction(
-        name='Reconstruction',
-        description='Reconstruct the original time series.',
+        name='Reconstruction (Linear Regression)',
+        description=(
+            'Reconstruct the original time series with linear regression.'
+        ),
         regressor=LinearRegression,
     )
     experiment.setup(X, y)
     experiment.run()
-    print(experiment.get_metrics())
+    experiment.logger.info(experiment.get_metrics())
+    experiment.finish()
