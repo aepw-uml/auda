@@ -26,7 +26,7 @@ if __name__ == '__main__':
     experiment.finish()
 
     experiment = Reconstruction(
-        name='Reconstruction (Linear Polynomial Regression)',
+        name='Reconstruction (Polynomial Regression)',
         description=(
             'Reconstruct the original time series with polynomial regression.'
         ),

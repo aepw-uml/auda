@@ -16,8 +16,13 @@ def setup_logging() -> None:
         case 'PRODUCTION':
             level = logging.WARNING
 
+    format: str = '%(name)s | %(message)s'
+    match env.environment.upper():
+        case 'PRODUCTION':
+            format = '%(asctime)s [%(levelname)s] %(name)s | %(message)s'
+
     logging.basicConfig(
-        format='%(asctime)s [%(levelname)s] %(name)s | %(message)s',
+        format=format,
         datefmt='%Y-%m-%d %H:%M:%S',
         level=level,
     )
