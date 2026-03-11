@@ -1,7 +1,7 @@
 from dataset.year_pw import YearPW
 from experiment.reconstruction import Reconstruction
-from sklearn.linear_model import LinearRegression
 from step.model.naive_persistence import NaivePersistence
+from step.model.polynomial_regression import PolynomialRegression
 
 if __name__ == '__main__':
     dataset, schema = YearPW().fetch('Japan')
@@ -26,13 +26,13 @@ if __name__ == '__main__':
     experiment.finish()
 
     experiment = Reconstruction(
-        name='Reconstruction (Linear Regression)',
+        name='Reconstruction (Linear Polynomial Regression)',
         description=(
-            'Reconstruct the original time series with linear regression.'
+            'Reconstruct the original time series with polynomial regression.'
         ),
-        regressor=LinearRegression,
+        regressor=PolynomialRegression,
     )
-    experiment.setup(X, y)
+    experiment.setup(X, y, hyperparameters={'degree': 3})
     experiment.run()
     experiment.logger.info(experiment.get_metrics())
     experiment.finish()

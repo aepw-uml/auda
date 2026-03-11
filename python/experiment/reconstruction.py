@@ -1,7 +1,9 @@
 from typing import Type, override
 
+import numpy as np
 from experiment.experiment import RegressionExperiment
 from sklearn.base import RegressorMixin
+from sklearn.ensemble import IsolationForest
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -25,12 +27,33 @@ class Reconstruction(RegressionExperiment):
     def train(self) -> None:
         super().train()
 
+        X_train, y_train = self.get_training_set()
+        use_isolation_forest: bool = self.context.get(
+            'use_isolation_forest', False
+        )
+        if use_isolation_forest:
+            contamination = self.context.get('contamination', 'auto')
+            iso = IsolationForest(
+                contamination=contamination,
+                random_state=self.seed,
+            )
+            inlier_mask = iso.fit_predict(self.X_train) == 1
+            self.context['inlier_mask'] = inlier_mask
+
+            X_train_inliers: np.ndarray = X_train[inlier_mask]
+            y_train_inliers: np.ndarray = y_train[inlier_mask]
+
         self.pipeline = Pipeline(
             [
                 ('scaler', StandardScaler()),
-                # ('isolation_forest', IsolationForest()),
-                (self.regressor.__name__, self.regressor()),
+                (
+                    self.regressor.__name__,
+                    self.regressor(**self.context),
+                ),
             ]
         )
 
-        self.pipeline.fit(self.X_train, self.y_train)
+        if use_isolation_forest:
+            self.pipeline.fit(X_train_inliers, y_train_inliers)
+        else:
+            self.pipeline.fit(X_train, self.y_train)

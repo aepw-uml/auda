@@ -16,10 +16,10 @@ from util.logging import get_logger
 class Experiment(ABC):
     """Abstract base class for experiments.
 
-    Subclasses are responsible for implementing the full experiment lifecycle:
-    loading data in ``setup()``, creating dataset splits in ``split()``,
-    fitting a pipeline in ``train()``, optionally tuning hyperparameters in
-    ``tune()``, and computing metrics in ``evaluate()``.
+    Subclasses implement the experiment lifecycle: load inputs in
+    ``setup()``, create splits in ``split()``, optionally choose
+    hyperparameters in ``tune()``, fit a pipeline in ``train()``, and compute
+    metrics in ``evaluate()``.
     """
 
     def __init__(
@@ -38,6 +38,9 @@ class Experiment(ABC):
             seed: Random seed for reproducibility.
             train_rate: Proportion of data to use for training.
             val_rate: Proportion of data to use for validation.
+
+        ``test_rate`` is derived as ``1.0 - train_rate - val_rate``. The
+        experiment starts with empty context and no trained pipeline or metrics.
         """
 
         self.name: str = name
@@ -47,9 +50,12 @@ class Experiment(ABC):
         self.val_rate: float = val_rate
         self.test_rate: float = 1.0 - train_rate - val_rate
         self.context: dict[str, Any] = {}
-        self.pipeline: Pipeline | None = None
-        self.metrics: Any = None
         self.logger = get_logger(name)
+
+        self.pipeline: Pipeline | None = None
+        self.parameters: dict[str, Any] = {}
+        self.hyperparameters: dict[str, Any] = {}
+        self.metrics: Any = None
 
     @abstractmethod
     def setup(self, **kwargs) -> None:
@@ -71,23 +77,24 @@ class Experiment(ABC):
         """
 
         self.context = {**self.context, **kwargs}
+        if 'hyperparameters' in self.context:
+            self.hyperparameters = self.context['hyperparameters']
+        else:
+            self.context['hyperparameters'] = self.hyperparameters
 
     def run(self) -> None:
         """Runs the experiment from start to finish.
 
-        This method first calls ``split()`` and ``train()``. Then, if
-        ``val_rate > 0.0``, it calls ``tune()`` and ``train()`` again so the
-        pipeline can be refit using the tuned configuration. Finally, it calls
-        ``evaluate()`` to score the trained pipeline on the test split.
+        The workflow is ``split()``, optional ``tune()``, ``train()``, then
+        ``evaluate()``. Tuning only runs when ``val_rate > 0.0``.
         """
 
         self.split()
-        self.train()
 
         if self.val_rate > 0.0:
             self.tune()
-            self.train()
 
+        self.train()
         self.evaluate()
 
     @abstractmethod
@@ -113,13 +120,13 @@ class Experiment(ABC):
     def train(self) -> None:
         """Fits the experiment pipeline on the training split.
 
-        Subclasses should create or update ``self.pipeline`` and train it using
-        the data produced by ``split()``. When ``run()`` invokes ``train()`` a
-        second time after ``tune()``, implementations should retrain the
-        pipeline using the tuned configuration.
+        Subclasses should create or update ``self.pipeline`` and fit it using
+        the training data produced by ``split()``. If ``tune()`` stores
+        selected hyperparameters, ``train()`` should use them.
         """
 
-        self.logger.info('Training...')
+        hyperparameters_str: str = self.get_hyperparameters_str()
+        self.logger.info(f'Training ({hyperparameters_str})...')
 
     @abstractmethod
     def evaluate(self) -> None:
@@ -138,8 +145,8 @@ class Experiment(ABC):
 
         Subclasses should use the validation data created by ``split()`` to
         search for improved model settings. Any tuned parameters should be
-        stored in instance state so the next call to ``train()`` can rebuild or
-        refit ``self.pipeline`` with the selected configuration.
+        stored in instance state so ``train()`` can build the final pipeline
+        with the selected configuration.
         """
 
         self.logger.info('Tuning hyperparameters...')
@@ -175,9 +182,58 @@ class Experiment(ABC):
         return self.metrics
 
     def finish(self) -> Any:
-        """Performs any finalization steps after the experiment has run."""
+        """Performs any finalization steps after the experiment has run.
+
+        The base implementation only logs completion. Subclasses can override
+        this hook to persist artifacts or emit summaries.
+        """
 
         self.logger.info('Experiment finished.')
+
+    def get_training_set(self) -> Any:
+        """Returns the training split prepared by ``split()``.
+
+        The base class does not define a concrete dataset representation, so
+        subclasses are expected to override this method with a task-specific
+        return type and validation.
+        """
+
+        pass
+
+    def get_validation_set(self) -> Any:
+        """Returns the validation split prepared by ``split()``.
+
+        The base implementation only enforces that validation was requested.
+        Subclasses should extend this method to return the concrete validation
+        data and raise an error if the split has not been created yet.
+        """
+
+        if self.val_rate <= 0.0:
+            raise ValueError('Validation set not created. Set val_rate > 0.0.')
+
+    def get_test_set(self) -> Any:
+        """Returns the test split prepared by ``split()``.
+
+        The base class leaves the concrete dataset representation to
+        subclasses, so implementations should override this method with the
+        appropriate return type and readiness checks.
+        """
+
+        pass
+
+    def get_hyperparameters_str(self) -> str:
+        """Returns a log-friendly string representation of hyperparameters.
+
+        When no tuned values are present, this falls back to ``default
+        settings`` so training logs still read cleanly.
+        """
+
+        if not self.hyperparameters:
+            return 'default settings'
+
+        return ', '.join(
+            f'{k}={v:.3e}' for k, v in self.hyperparameters.items()
+        )
 
 
 @dataclass(frozen=True)
@@ -213,12 +269,12 @@ class RegressionMetrics:
 class RegressionExperiment(Experiment):
     """Base implementation for regression experiments.
 
-    This class manages regression dataset storage, randomized splitting, and
-    metric computation. Concrete subclasses are still expected to implement the
-    model-specific training and tuning behavior by extending or overriding
-    ``train()`` and ``tune()``.
+    This class stores regression datasets, creates randomized splits, and
+    computes standard regression metrics. Concrete subclasses still define the
+    actual model training and tuning behavior.
     """
 
+    @override
     def __init__(
         self,
         name: str,
@@ -229,9 +285,8 @@ class RegressionExperiment(Experiment):
     ) -> None:
         """Initializes a regression experiment.
 
-        The instance starts without any dataset assigned. ``setup()`` must be
-        called before the experiment can be split, trained, tuned, or
-        evaluated.
+        The instance starts without any dataset assigned, so ``setup()`` must
+        run before the experiment can be split, trained, tuned, or evaluated.
         """
 
         super().__init__(name, description, seed, train_rate, val_rate)
@@ -309,11 +364,13 @@ class RegressionExperiment(Experiment):
             f'samples, and {m_test} test samples.'
         )
 
+    @override
     def train(self) -> None:
         """Validates that training data is ready before model training.
 
         Subclasses should override or extend this method to fit a regression
-        pipeline and assign it to ``self.pipeline``.
+        pipeline and assign it to ``self.pipeline`` after calling
+        ``super().train()``.
 
         Raises:
             ValueError: If the training split has not been created yet.
@@ -324,6 +381,7 @@ class RegressionExperiment(Experiment):
 
         super().train()
 
+    @override
     def evaluate(self) -> None:
         """Evaluates the pipeline on the test split and stores metrics.
 
@@ -348,12 +406,13 @@ class RegressionExperiment(Experiment):
         mape = mean_absolute_percentage_error(self.y_test, y_pred)
         self.metrics = RegressionMetrics(mae=mae, mse=mse, r2=r2, mape=mape)
 
+    @override
     def tune(self) -> None:
         """Validates that validation data is ready for hyperparameter tuning.
 
         Subclasses should override or extend this method to search regression
         hyperparameters using the validation split and persist the chosen
-        settings for the next call to ``train()``.
+        settings for the later call to ``train()``.
 
         Raises:
             ValueError: If the validation split has not been created yet.
@@ -362,7 +421,37 @@ class RegressionExperiment(Experiment):
         if self.X_val is None or self.y_val is None:
             raise ValueError('Validation data not set up. Call split() first.')
 
+    @override
     def get_metrics(self) -> RegressionMetrics:
         """Returns regression metrics with a concrete return type."""
 
         return cast(RegressionMetrics, super().get_metrics())
+
+    @override
+    def get_training_set(self) -> tuple[np.ndarray, np.ndarray]:
+        """Returns the training split as ``(X_train, y_train)``."""
+
+        if self.X_train is None or self.y_train is None:
+            raise ValueError('Training data not set up. Call split() first.')
+
+        return self.X_train, self.y_train
+
+    @override
+    def get_validation_set(self) -> tuple[np.ndarray, np.ndarray]:
+        """Returns the validation split as ``(X_val, y_val)``."""
+
+        super().get_validation_set()
+
+        if self.X_val is None or self.y_val is None:
+            raise ValueError('Validation data not set up. Call split() first.')
+
+        return self.X_val, self.y_val
+
+    @override
+    def get_test_set(self) -> tuple[np.ndarray, np.ndarray]:
+        """Returns the test split as ``(X_test, y_test)``."""
+
+        if self.X_test is None or self.y_test is None:
+            raise ValueError('Test data not set up. Call split() first.')
+
+        return self.X_test, self.y_test
