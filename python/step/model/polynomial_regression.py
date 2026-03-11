@@ -13,8 +13,9 @@ class PolynomialRegression(Regression):
         self,
         hyperparameters: dict[str, Any],
         fit_intercept: bool = True,
+        **kwargs,
     ) -> None:
-        super().__init__(hyperparameters)
+        super().__init__(hyperparameters, **kwargs)
         self.hyperparameters: dict[str, Any] = {
             'degree': int(hyperparameters.get('degree', 2)),
         }

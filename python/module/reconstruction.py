@@ -1,5 +1,7 @@
 from dataset.year_pw import YearPW
-from experiment.reconstruction import Reconstruction
+from experiment.reconstruction import ReconstructionExperiment
+from step.model.drift_baseline import DriftBaseline
+from step.model.exponential_smoothing import ExponentialSmoothing
 from step.model.naive_persistence import NaivePersistence
 from step.model.polynomial_regression import PolynomialRegression
 
@@ -12,7 +14,9 @@ if __name__ == '__main__':
             'Label data is required for reconstruction experiment.'
         )
 
-    experiment = Reconstruction(
+    # ==========================================================================
+
+    experiment = ReconstructionExperiment(
         name='Reconstruction (Naive Persistence)',
         description=(
             'Reconstruct the original time series with naive persistence.'
@@ -25,7 +29,37 @@ if __name__ == '__main__':
     experiment.logger.info(experiment.get_metrics())
     experiment.finish()
 
-    experiment = Reconstruction(
+    # ==========================================================================
+
+    experiment = ReconstructionExperiment(
+        name='Reconstruction (Drift Baseline)',
+        description=(
+            'Reconstruct the original time series with drift baseline.'
+        ),
+        regressor=DriftBaseline,
+    )
+    experiment.setup(X, y)
+    experiment.run()
+    experiment.logger.info(experiment.get_metrics())
+    experiment.finish()
+
+    # ==========================================================================
+
+    experiment = ReconstructionExperiment(
+        name='Reconstruction (Exponential Smoothing)',
+        description=(
+            'Reconstruct the original time series with exponential smoothing.'
+        ),
+        regressor=ExponentialSmoothing,
+    )
+    experiment.setup(X, y, use_scaler=False)
+    experiment.run()
+    experiment.logger.info(experiment.get_metrics())
+    experiment.finish()
+
+    # ==========================================================================
+
+    experiment = ReconstructionExperiment(
         name='Reconstruction (Polynomial Regression)',
         description=(
             'Reconstruct the original time series with polynomial regression.'
@@ -36,3 +70,5 @@ if __name__ == '__main__':
     experiment.run()
     experiment.logger.info(experiment.get_metrics())
     experiment.finish()
+
+    # ==========================================================================
