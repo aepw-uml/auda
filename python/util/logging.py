@@ -1,6 +1,6 @@
 import logging
 
-from python.util.env import env
+from util.env import env
 
 
 def setup_logging() -> None:
