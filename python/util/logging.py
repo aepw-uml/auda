@@ -11,20 +11,26 @@ def setup_logging() -> None:
         - INFO level for PRODUCTION environment.
     """
 
-    level: int = logging.WARNING
+    level: int = logging.INFO
     match env.environment.upper():
         case 'PRODUCTION':
-            level = logging.DEBUG
+            level = logging.WARNING
 
-    format: str = '%(asctime)s [%(levelname)s] %(name)s | %(message)s'
-    match env.environment.upper():
-        case 'PRODUCTION':
-            format = '%(message)s'
+    logging.basicConfig(
+        format='%(asctime)s [%(levelname)s] %(name)s | %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        level=level,
+    )
 
-    logging.basicConfig(format=format, level=level)
+
+# Indicates whether the logging configuration has been set up.
+has_setup: bool = False
 
 
 def get_logger(name: str) -> logging.Logger:
     """Returns a logger instance with the specified name."""
+
+    if not has_setup:
+        setup_logging()
 
     return logging.getLogger(name)
