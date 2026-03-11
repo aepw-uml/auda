@@ -402,9 +402,7 @@ class RegressionExperiment(Experiment):
             ValueError: If the training split has not been created yet.
         """
 
-        if self.X_train is None or self.y_train is None:
-            raise ValueError('Training data not set up. Call split() first.')
-
+        self.get_training_set()
         super().train()
 
     @override
@@ -419,9 +417,7 @@ class RegressionExperiment(Experiment):
             ValueError: If the test split or trained pipeline is unavailable.
         """
 
-        if self.X_test is None or self.y_test is None:
-            raise ValueError('Test data not set up. Call split() first.')
-
+        self.get_test_set()
         pipeline = self.get_pipeline()
         super().evaluate()
 
@@ -444,8 +440,7 @@ class RegressionExperiment(Experiment):
             ValueError: If the validation split has not been created yet.
         """
 
-        if self.X_val is None or self.y_val is None:
-            raise ValueError('Validation data not set up. Call split() first.')
+        self.get_validation_set()
 
     @override
     def get_metrics(self) -> RegressionMetrics:
@@ -455,7 +450,11 @@ class RegressionExperiment(Experiment):
 
     @override
     def get_training_set(self) -> tuple[np.ndarray, np.ndarray]:
-        """Returns the training split as ``(X_train, y_train)``."""
+        """Returns the training split as ``(X_train, y_train)``.
+
+        Raises:
+            ValueError: If the training split has not been created yet.
+        """
 
         if self.X_train is None or self.y_train is None:
             raise ValueError('Training data not set up. Call split() first.')
@@ -464,7 +463,12 @@ class RegressionExperiment(Experiment):
 
     @override
     def get_validation_set(self) -> tuple[np.ndarray, np.ndarray]:
-        """Returns the validation split as ``(X_val, y_val)``."""
+        """Returns the validation split as ``(X_val, y_val)``.
+
+        Raises:
+            ValueError: If the validation split has not been created yet or if
+                validation was not requested.
+        """
 
         super().get_validation_set()
 
@@ -475,7 +479,11 @@ class RegressionExperiment(Experiment):
 
     @override
     def get_test_set(self) -> tuple[np.ndarray, np.ndarray]:
-        """Returns the test split as ``(X_test, y_test)``."""
+        """Returns the test split as ``(X_test, y_test)``.
+
+        Raises:
+            ValueError: If the test split has not been created yet.
+        """
 
         if self.X_test is None or self.y_test is None:
             raise ValueError('Test data not set up. Call split() first.')

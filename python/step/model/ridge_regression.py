@@ -1,13 +1,12 @@
 from typing import Any, Self
 
 import numpy as np
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import Ridge
 
 from .model import Regression
 
 
-class PolynomialRegression(Regression):
+class RidgeRegression(Regression):
     def __init__(
         self,
         hyperparameters: dict[str, Any],
@@ -15,26 +14,24 @@ class PolynomialRegression(Regression):
         **kwargs,
     ) -> None:
         super().__init__(hyperparameters, **kwargs)
+
         self.hyperparameters: dict[str, Any] = {
-            'degree': int(hyperparameters.get('degree', 2)),
+            'alpha': float(hyperparameters.get('alpha', 1.0)),
         }
         self.fit_intercept: bool = fit_intercept
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
         super().fit(X, y, num_features=1)
 
-        degree = self.hyperparameters['degree']
-        if degree < 1:
-            raise ValueError('Polynomial regression degree must be at least 1.')
+        alpha = self.hyperparameters['alpha']
+        if alpha < 0.0:
+            raise ValueError('Ridge regression alpha must be non-negative.')
 
-        self.polynomial_features_ = PolynomialFeatures(
-            degree=degree,
-            include_bias=False,
+        self.regressor_ = Ridge(
+            alpha=alpha,
+            fit_intercept=self.fit_intercept,
         )
-        X_poly = self.polynomial_features_.fit_transform(X)
-
-        self.regressor_ = LinearRegression(fit_intercept=self.fit_intercept)
-        self.regressor_.fit(X_poly, y)
+        self.regressor_.fit(X, y)
 
         self.parameters['coefficients'] = self.regressor_.coef_
         if self.fit_intercept:
@@ -45,5 +42,4 @@ class PolynomialRegression(Regression):
     def predict(self, X: np.ndarray) -> np.ndarray:
         super().predict(X, num_features=1)
 
-        X_poly = self.polynomial_features_.transform(X)
-        return self.regressor_.predict(X_poly)
+        return self.regressor_.predict(X)
