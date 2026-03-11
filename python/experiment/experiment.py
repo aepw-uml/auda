@@ -343,8 +343,10 @@ class RegressionExperiment(Experiment):
 
         n_samples = self.X.shape[0]
         indices = np.arange(n_samples)
-        np.random.seed(self.seed)
-        np.random.shuffle(indices)
+
+        if self.context.get('split_shuffle', True):
+            np.random.seed(self.seed)
+            np.random.shuffle(indices)
 
         train_end = int(self.train_rate * n_samples)
         val_end = train_end + int(self.val_rate * n_samples)
