@@ -666,6 +666,12 @@ class Spec(str, IOSpec):
         dtype=float,
     )
 
+    DATASET_IS_NORMALIZED = IOSpec(
+        name='DATASET_IS_NORMALIZED',
+        description='Whether the dataset has been normalized',
+        dtype=bool,
+    )
+
     # =========================================================================#
     # Utility specific                                                         #
     # =========================================================================#

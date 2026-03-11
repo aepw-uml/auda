@@ -102,6 +102,7 @@ class PolynomialRidgeRegressionModel(DatasetBasedStep):
         Spec.PRED_DATASET.optional(),
         Spec.CURVE_EXTEND_MARGIN_RATIO.optional(0.05),
         Spec.TEST_SET.optional(),
+        Spec.DATASET_IS_NORMALIZED.optional(False),
     ],
     output_specs=[Spec.FIGURE, Spec.AXES],
 )
@@ -120,28 +121,57 @@ class PolynomialRidgeRegressionPlotter(
         pred_dataset: Dataset | None,
         curve_extend_margin_ratio: float,
         test_set: Dataset | None,
+        dataset_is_normalized: bool = False,
     ) -> IOValueMap:
         from sklearn.pipeline import Pipeline as SkPipeline
 
         SAMPLE_POINT_SIZE = 60
         ORIGINAL_SAMPLE_COLOR = 'cornflowerblue'
+        OUTLIER_SAMPLE_COLOR = 'red'
         PREDICTED_SAMPLE_COLOR = 'green'
         LINE_COLOR = 'orange'
         LINE_LABEL = 'Polynomial Ridge Fit'
 
         self.verify_model(model, SkPipeline)
 
-        X_true, _ = self.get_dataset_from_on(on)
+        X_true, y_true = self.get_dataset_from_on(on)
         self.check_feature_dimension(X_true, expected_dimension=1)
+
+        x_mean_scalar = float(x_mean[0])
+        x_std_scalar = float(x_std[0])
+        y_mean_scalar = float(y_mean)
+        y_std_scalar = float(y_std)
+
+        def denormalize_dataset(dataset: Dataset) -> Dataset:
+            x_data, y_data = dataset
+            return (
+                x_data * x_std_scalar + x_mean_scalar,
+                y_data * y_std_scalar + y_mean_scalar,
+            )
+
+        if dataset_is_normalized:
+            X_true, y_true = denormalize_dataset((X_true, y_true))
 
         x_true = X_true.ravel()
 
         # ---- Create x_all for later use
         x_all = x_true
         if pred_dataset is not None:
-            x_pred, _ = pred_dataset
+            if dataset_is_normalized:
+                x_pred, y_pred = pred_dataset
+                pred_dataset = (
+                    x_pred * x_std_scalar + x_mean_scalar,
+                    y_pred * y_std_scalar + y_mean_scalar,
+                )
+            x_pred, y_pred = pred_dataset
             x_all = np.concatenate([x_true, x_pred.ravel()])
         if test_set is not None:
+            if dataset_is_normalized:
+                x_test, y_test = test_set
+                test_set = (
+                    x_test * x_std_scalar + x_mean_scalar,
+                    y_test * y_std_scalar + y_mean_scalar,
+                )
             x_test, _ = test_set
             x_all = np.concatenate([x_all, x_test.ravel()])
 
@@ -153,7 +183,7 @@ class PolynomialRidgeRegressionPlotter(
             PlotScatterPlot,
             {
                 **self._inputs,
-                Spec.ON.name: on,
+                Spec.ON.name: (X_true, y_true),
                 Spec.FIGURE.name: figure,
                 Spec.AXES.name: axes,
                 Spec.SAMPLE_POINT_SIZE.name: SAMPLE_POINT_SIZE,
@@ -200,8 +230,6 @@ class PolynomialRidgeRegressionPlotter(
             x_min, x_max, curve_extend_margin_ratio
         )
 
-        x_mean_scalar = float(x_mean[0])
-        x_std_scalar = float(x_std[0])
         x_curve = np.linspace(x_min, x_max, 300).reshape(-1, 1)
         x_curve_std = (x_curve - x_mean_scalar) / x_std_scalar
         y_curve_std = model.predict(x_curve_std)
@@ -218,6 +246,51 @@ class PolynomialRidgeRegressionPlotter(
                 Spec.LINE_LABEL.name: LINE_LABEL,
             },
         )
+
+        # ---- Overlay outlier points on top of existing plots
+        outlier_dataset = None
+        for input_name, value in self._inputs.items():
+            if 'outlier_dataset' not in input_name.lower():
+                continue
+            if (
+                isinstance(value, tuple)
+                and len(value) == 2
+                and isinstance(value[0], np.ndarray)
+                and isinstance(value[1], np.ndarray)
+            ):
+                outlier_dataset = value
+                break
+
+        if outlier_dataset is not None and dataset_is_normalized:
+            outlier_dataset = denormalize_dataset(outlier_dataset)
+
+        if outlier_dataset is None:
+            outlier_indexes_raw = self._inputs.get(Spec.OUTLIER_INDEXES.name)
+            if isinstance(outlier_indexes_raw, (list, np.ndarray)):
+                outlier_indexes = np.asarray(outlier_indexes_raw, dtype=int)
+                outlier_indexes = outlier_indexes[
+                    (outlier_indexes >= 0) & (outlier_indexes < len(X_true))
+                ]
+                if len(outlier_indexes) > 0:
+                    outlier_dataset = (
+                        X_true[outlier_indexes],
+                        y_true[outlier_indexes],
+                    )
+
+        if outlier_dataset is not None:
+            self.single_dispatch(
+                PlotScatterPlot,
+                {
+                    **self._inputs,
+                    Spec.ON.name: outlier_dataset,
+                    Spec.FIGURE.name: figure,
+                    Spec.AXES.name: axes,
+                    Spec.Z_ORDER.name: 3,
+                    Spec.SAMPLE_POINT_SIZE.name: SAMPLE_POINT_SIZE,
+                    Spec.SAMPLE_POINT_COLOR.name: OUTLIER_SAMPLE_COLOR,
+                    Spec.SAMPLE_POINT_LABEL.name: 'Outliers',
+                },
+            )
 
         self.single_dispatch(
             PlotSet,
