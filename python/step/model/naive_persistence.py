@@ -1,22 +1,25 @@
+from typing import Self
+
 import numpy as np
-from sklearn.base import BaseEstimator, RegressorMixin
-from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
+from sklearn.utils.validation import check_array, check_X_y
+
+from .model import Regression
 
 
-class NaivePersistence(RegressorMixin, BaseEstimator):
-    def fit(self, X: np.ndarray, y: np.ndarray):
+class NaivePersistence(Regression):
+    def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
         X, y = check_X_y(X, y)
 
         if X.shape[1] != 1:
             raise ValueError('NaivePersistenceModel expects a single feature.')
 
         order = np.argsort(X[:, 0])
-        self.last_y_ = float(y[order][-1])
+        self.parameters['last_y'] = float(y[order][-1])
+        self.last_y = self.parameters['last_y']
 
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        check_is_fitted(self, 'last_y_')
         X = check_array(X)
 
         if X.shape[1] != 1:
@@ -24,4 +27,4 @@ class NaivePersistence(RegressorMixin, BaseEstimator):
 
         m = X.shape[0]
 
-        return np.full((m,), self.last_y_, dtype=float)
+        return np.full((m,), self.parameters['last_y'], dtype=float)
