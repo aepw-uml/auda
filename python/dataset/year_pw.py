@@ -36,18 +36,19 @@ class YearPW(DatasetFetcher):
         )
         result = table_result.data
 
-        # ---- Process data
         current_year = date.today().year
-        pairs = [
-            (year, waste) for (year, waste) in result if year <= current_year
+        valid_samples = [
+            (year, waste) for year, waste in result if year <= current_year
         ]
 
-        if not pairs:
+        if not valid_samples:
             raise ValueError(
                 f'No plastic waste data found for location: {location}'
             )
 
-        years, wastes = zip(*pairs)
+        sorted_samples = sorted(valid_samples, key=lambda sample: sample[0])
+
+        years, wastes = zip(*sorted_samples)
         X = np.array([[year] for year in years], dtype=float)
         y = np.array(wastes, dtype=float)
 
