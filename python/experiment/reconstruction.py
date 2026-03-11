@@ -1,4 +1,4 @@
-from typing import Type, override
+from typing import Any, Type, override
 
 import numpy as np
 from experiment.experiment import RegressionExperiment
@@ -47,25 +47,14 @@ class ReconstructionExperiment(RegressionExperiment):
             X_train_inliers: np.ndarray = X_train[inlier_mask]
             y_train_inliers: np.ndarray = y_train[inlier_mask]
 
+        steps: list[tuple[str, Any]] = []
+
         if self.context.get('use_scaler', True):
-            self.pipeline = Pipeline(
-                [
-                    ('scaler', StandardScaler()),
-                    (
-                        self.regressor.__name__,
-                        self.regressor(**self.context),
-                    ),
-                ]
-            )
-        else:
-            self.pipeline = Pipeline(
-                [
-                    (
-                        self.regressor.__name__,
-                        self.regressor(**self.context),
-                    ),
-                ]
-            )
+            steps.append(('scaler', StandardScaler()))
+
+        steps.append((self.regressor.__name__, self.regressor(**self.context)))
+
+        self.pipeline = Pipeline(steps)
 
         if use_isolation_forest:
             self.pipeline.fit(X_train_inliers, y_train_inliers)

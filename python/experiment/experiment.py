@@ -20,6 +20,20 @@ class Experiment(ABC):
     ``setup()``, create splits in ``split()``, optionally choose
     hyperparameters in ``tune()``, fit a pipeline in ``train()``, and compute
     metrics in ``evaluate()``.
+
+    Attributes:
+        name: Human-readable experiment name used in logs.
+        description: Short description of the experiment's purpose.
+        seed: Random seed used for reproducible operations.
+        train_rate: Fraction of samples assigned to the training split.
+        val_rate: Fraction of samples assigned to the validation split.
+        test_rate: Fraction of samples assigned to the test split.
+        context: Shared experiment configuration and runtime metadata.
+        logger: Logger used to report lifecycle progress and results.
+        pipeline: Trained scikit-learn pipeline produced during training.
+        parameters: General experiment parameters persisted on the instance.
+        hyperparameters: Tuned model settings selected before training.
+        metrics: Evaluation result produced by ``evaluate()``.
     """
 
     def __init__(
@@ -272,6 +286,16 @@ class RegressionExperiment(Experiment):
     This class stores regression datasets, creates randomized splits, and
     computes standard regression metrics. Concrete subclasses still define the
     actual model training and tuning behavior.
+
+    Attributes:
+        X: Full feature matrix provided in ``setup()``.
+        y: Full target vector provided in ``setup()``.
+        X_train: Training feature matrix created in ``split()``.
+        y_train: Training target vector created in ``split()``.
+        X_val: Validation feature matrix created in ``split()``.
+        y_val: Validation target vector created in ``split()``.
+        X_test: Test feature matrix created in ``split()``.
+        y_test: Test target vector created in ``split()``.
     """
 
     @override
