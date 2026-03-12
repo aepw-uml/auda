@@ -2,8 +2,7 @@ from pathlib import Path
 
 
 def save_content_to_file(file_path: Path, content: str) -> None:
-    """
-    Save the given content to a file at the specified path.
+    """Saves the given content to a file at the specified path.
 
     Args:
         file_path: The path to the file where the content will be saved.
