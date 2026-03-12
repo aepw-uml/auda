@@ -16,13 +16,14 @@ class SupervisedLearningModel(BaseEstimator, ABC):
     """
 
     def __init__(self, hyperparameters: dict[str, Any], **kwargs) -> None:
-        """Initialize the model with hyperparameters.
+        """Initializes the model with hyperparameters.
 
         Args:
             hyperparameters: Configuration values used by subclasses.
             **kwargs: Additional keyword arguments accepted for API
                 compatibility.
         """
+
         self.hyperparameters: dict[str, Any] = hyperparameters
         self.parameters: dict[str, Any] = {}
         _ = kwargs
@@ -30,7 +31,7 @@ class SupervisedLearningModel(BaseEstimator, ABC):
     def fit(
         self, X: np.ndarray, y: np.ndarray, num_features: int | None = None
     ) -> Self:
-        """Validate training data before subclass-specific fitting.
+        """Validates training data before subclass-specific fitting.
 
         Args:
             X: Training features with shape ``(n_samples, n_features)``.
@@ -44,6 +45,7 @@ class SupervisedLearningModel(BaseEstimator, ABC):
             ValueError: If the input data does not match the expected feature
                 count.
         """
+
         X, y = check_X_y(X, y)
         if num_features is not None and X.shape[1] != num_features:
             raise ValueError(
@@ -55,7 +57,7 @@ class SupervisedLearningModel(BaseEstimator, ABC):
     def predict(
         self, X: np.ndarray, num_features: int | None = None
     ) -> np.ndarray:
-        """Validate inference data before subclass-specific prediction.
+        """Validates inference data before subclass-specific prediction.
 
         Args:
             X: Features with shape ``(n_samples, n_features)``.
@@ -68,6 +70,7 @@ class SupervisedLearningModel(BaseEstimator, ABC):
             ValueError: If the input data does not match the expected feature
                 count.
         """
+
         X = check_array(X)
 
         if num_features is not None and X.shape[1] != num_features:
@@ -78,11 +81,12 @@ class SupervisedLearningModel(BaseEstimator, ABC):
         return X
 
     def __sklearn_is_fitted__(self) -> bool:
-        """Return whether the estimator has learned parameters.
+        """Returns whether the estimator has learned parameters.
 
         Returns:
             ``True`` when fitting has populated model parameters.
         """
+
         return self.parameters != {}
 
 

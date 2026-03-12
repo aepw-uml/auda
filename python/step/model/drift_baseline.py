@@ -11,7 +11,7 @@ class DriftBaseline(SupervisedLearningModel):
 
     @override
     def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
-        """Fit the drift baseline model.
+        """Fits the drift baseline model.
 
         Args:
             X: Training time indices with shape ``(n_samples, 1)``.
@@ -20,6 +20,7 @@ class DriftBaseline(SupervisedLearningModel):
         Returns:
             The fitted estimator.
         """
+
         super().fit(X, y, num_features=1)
 
         order = np.argsort(X[:, 0])
@@ -40,7 +41,7 @@ class DriftBaseline(SupervisedLearningModel):
 
     @override
     def predict(self, X: np.ndarray) -> np.ndarray:
-        """Predict future values using the fitted drift line.
+        """Predicts future values using the fitted drift line.
 
         Args:
             X: Future time indices with shape ``(n_samples, 1)``.
@@ -48,6 +49,7 @@ class DriftBaseline(SupervisedLearningModel):
         Returns:
             Predicted targets with shape ``(n_samples,)``.
         """
+
         super().predict(X, num_features=1)
 
         x0 = self.parameters['x0']

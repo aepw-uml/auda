@@ -10,7 +10,7 @@ class ExponentialSmoothing(SupervisedLearningModel):
 
     @override
     def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
-        """Fit the exponential smoothing model.
+        """Fits the exponential smoothing model.
 
         Args:
             X: Training time indices with shape ``(n_samples, 1)``.
@@ -19,6 +19,7 @@ class ExponentialSmoothing(SupervisedLearningModel):
         Returns:
             The fitted estimator.
         """
+
         super().fit(X, y, num_features=1)
 
         order = np.argsort(X[:, 0])
@@ -37,7 +38,7 @@ class ExponentialSmoothing(SupervisedLearningModel):
 
     @override
     def predict(self, X: np.ndarray) -> np.ndarray:
-        """Forecast values at future time steps.
+        """Forecasts values at future time steps.
 
         Args:
             X: Future time indices with shape ``(n_samples, 1)``.
@@ -49,6 +50,7 @@ class ExponentialSmoothing(SupervisedLearningModel):
             ValueError: If requested periods are not whole future time steps
                 or are not in the future.
         """
+
         super().predict(X, num_features=1)
 
         X = np.asarray(X, dtype=float)

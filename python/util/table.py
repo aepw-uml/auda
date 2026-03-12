@@ -55,10 +55,15 @@ class Table:
         if self.headers and self.bold_headers:
             headers = [f'\033[1m{header}\033[0m' for header in self.headers]
 
-        return tabulate(
-            self.table,
-            headers=headers or (),
-            tablefmt=self.fmt,
-            colalign=self.colalign,
-            disable_numparse=True,
+        return (
+            str(
+                tabulate(
+                    self.table,
+                    headers=headers or (),
+                    tablefmt=self.fmt,
+                    colalign=self.colalign,
+                    disable_numparse=True,
+                )
+            )
+            + '\n'
         )

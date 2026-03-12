@@ -8,9 +8,11 @@ from dataset.year_pw import YearPW
 from experiment.reconstruction import ReconstructionExperiment
 from step.model.drift_baseline import DriftBaseline
 from step.model.exponential_smoothing import ExponentialSmoothing
+from step.model.gaussian_process_regression import GaussianProcessRegression
 from step.model.naive_persistence import NaivePersistence
 from step.model.polynomial_regression import PolynomialRegression
 from step.model.ridge_regression import RidgeRegression
+from step.model.support_vector_regression import SupportVectorRegression
 from util.table import Table
 
 
@@ -61,7 +63,7 @@ def getPolynomialRegressionReconstruction() -> ReconstructionExperiment:
         tuning_parameters={
             'hyperparameter_names': ['degree'],
             'search_space': [[(2, 12)]],
-            'elite_fractions': [0.2, 0.1],
+            'elite_fractions': [0.12, 0.06],
             'refinement_widths': [[2], [0.5]],
         }
     )
@@ -81,10 +83,53 @@ def getRidgeRegressionReconstruction() -> ReconstructionExperiment:
     experiment.set_context(
         tuning_parameters={
             'hyperparameter_names': ['alpha'],
-            'search_space': [[(1e-3, 1e3)]],
-            'elite_fractions': [0.2, 0.1],
-            'refinement_widths': [[10], [0.5]],
-            'expect_higher': False,
+            'search_space': [[(1e-6, 1e3)]],
+            'elite_fractions': [0.12, 0.06],
+            'refinement_widths': [[0.5], [0.1]],
+        }
+    )
+
+    return experiment
+
+
+def getGaussianProcessReconstruction() -> ReconstructionExperiment:
+    experiment = ReconstructionExperiment(
+        name='Gaussian Process Regression',
+        description=(
+            'Reconstruct the original time series with Gaussian process '
+            'regression.'
+        ),
+        regressor=GaussianProcessRegression,
+    )
+
+    experiment.set_context(
+        tuning_parameters={
+            'hyperparameter_names': ['length_scale', 'noise_level'],
+            'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
+            'elite_fractions': [0.12, 0.06],
+            'refinement_widths': [[10.0, 0.5], [2.0, 0.1]],
+        }
+    )
+
+    return experiment
+
+
+def getSupportVectorRegressionReconstruction() -> ReconstructionExperiment:
+    experiment = ReconstructionExperiment(
+        name='Support Vector Regression',
+        description=(
+            'Reconstruct the original time series with support vector '
+            'regression.'
+        ),
+        regressor=SupportVectorRegression,
+    )
+
+    experiment.set_context(
+        tuning_parameters={
+            'hyperparameter_names': ['C', 'epsilon'],
+            'search_space': [[(0.1, 100.0)], [(0.001, 1.0)]],
+            'elite_fractions': [0.12, 0.06],
+            'refinement_widths': [[10.0, 0.2], [2.0, 0.05]],
         }
     )
 
@@ -120,6 +165,8 @@ def run_reconstruction_experiments(
         getExponentialSmoothingReconstruction(),
         getPolynomialRegressionReconstruction(),
         getRidgeRegressionReconstruction(),
+        getGaussianProcessReconstruction(),
+        getSupportVectorRegressionReconstruction(),
     ]
 
     for experiment in experiments:

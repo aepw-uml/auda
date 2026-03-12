@@ -24,13 +24,14 @@ class GaussianProcessRegression(Regression):
         hyperparameters: dict[str, Any],
         **kwargs,
     ) -> None:
-        """Initialize the Gaussian process regression model.
+        """Initializes the Gaussian process regression model.
 
         Args:
             hyperparameters: Model configuration containing ``length_scale``
                 and ``noise_level``.
             **kwargs: Additional keyword arguments forwarded to the base class.
         """
+
         super().__init__(hyperparameters, **kwargs)
         self.hyperparameters: dict[str, Any] = {
             'length_scale': float(hyperparameters.get('length_scale', 1.0)),
@@ -39,7 +40,7 @@ class GaussianProcessRegression(Regression):
 
     @override
     def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
-        """Fit the Gaussian process regressor.
+        """Fits the Gaussian process regressor.
 
         Args:
             X: Training features with shape ``(n_samples, n_features)``.
@@ -52,6 +53,7 @@ class GaussianProcessRegression(Regression):
             ValueError: If ``length_scale`` is not positive or
                 ``noise_level`` is negative.
         """
+
         super().fit(X, y)
 
         length_scale = self.hyperparameters['length_scale']
@@ -88,7 +90,7 @@ class GaussianProcessRegression(Regression):
 
     @override
     def predict(self, X: np.ndarray) -> np.ndarray:
-        """Predict targets for new samples.
+        """Predicts targets for new samples.
 
         Args:
             X: Feature matrix with shape ``(n_samples, n_features)``.
@@ -96,6 +98,7 @@ class GaussianProcessRegression(Regression):
         Returns:
             Predicted targets with shape ``(n_samples,)``.
         """
+
         super().predict(X)
 
         return np.asarray(self.regressor_.predict(X), dtype=float)

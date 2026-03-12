@@ -14,13 +14,14 @@ class RidgeRegression(Regression):
         fit_intercept: bool = True,
         **kwargs,
     ) -> None:
-        """Initialize the ridge regression model.
+        """Initializes the ridge regression model.
 
         Args:
             hyperparameters: Model configuration, including ``alpha``.
             fit_intercept: Whether to fit an intercept term.
             **kwargs: Additional keyword arguments forwarded to the base class.
         """
+
         super().__init__(hyperparameters, **kwargs)
 
         self.hyperparameters: dict[str, Any] = {
@@ -29,7 +30,7 @@ class RidgeRegression(Regression):
         self.fit_intercept: bool = fit_intercept
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
-        """Fit the ridge regression model.
+        """Fits the ridge regression model.
 
         Args:
             X: Training features with shape ``(n_samples, 1)``.
@@ -41,6 +42,7 @@ class RidgeRegression(Regression):
         Raises:
             ValueError: If ``alpha`` is negative.
         """
+
         super().fit(X, y, num_features=1)
 
         alpha = self.hyperparameters['alpha']
@@ -60,7 +62,7 @@ class RidgeRegression(Regression):
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        """Predict targets for new samples.
+        """Predicts targets for new samples.
 
         Args:
             X: Feature matrix with shape ``(n_samples, 1)``.
@@ -68,6 +70,7 @@ class RidgeRegression(Regression):
         Returns:
             Predicted targets with shape ``(n_samples,)``.
         """
+
         super().predict(X, num_features=1)
 
         return self.regressor_.predict(X)
