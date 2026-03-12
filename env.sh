@@ -4,5 +4,9 @@ source .venv/bin/activate
 # Set the PYTHONPATH to include all the modules under `python`.
 PYTHONPATH="$PYTHONPATH:$PWD/python" && export PYTHONPATH
 
-# Add the `bin` directory to the PATH
+# Add the `bin` directory to the PATH.
 PATH="$PWD/bin:$PATH" && export PATH
+
+function run_module() {
+    python "python/module/$1.py" "${@: -2:1}"
+}
