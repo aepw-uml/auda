@@ -299,6 +299,7 @@ class RegressionExperiment(Experiment):
         """
 
         super().__init__(name, description, seed, train_rate, val_rate)
+        self.metrics: RegressionMetrics | None = None
 
         self.X: np.ndarray | None = None
         self.y: np.ndarray | None = None

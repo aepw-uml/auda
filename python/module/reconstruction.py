@@ -1,3 +1,6 @@
+from common.hyperparameters import get_hyperparameters_str
+from common.metrics import RegressionMetrics
+from dataset.dataset import Dataset, DatasetSchema
 from dataset.year_pw import YearPW
 from experiment.reconstruction import ReconstructionExperiment
 from step.model.drift_baseline import DriftBaseline
@@ -5,68 +8,52 @@ from step.model.exponential_smoothing import ExponentialSmoothing
 from step.model.naive_persistence import NaivePersistence
 from step.model.polynomial_regression import PolynomialRegression
 from step.model.ridge_regression import RidgeRegression
+from util.table import Table
 
-if __name__ == '__main__':
-    dataset, schema = YearPW().fetch('Japan')
-    X, y = dataset.X, dataset.y
 
-    if y is None:
-        raise ValueError(
-            'Label data is required for reconstruction experiment.'
-        )
-
-    # ==========================================================================
-
-    experiment = ReconstructionExperiment(
-        name='Reconstruction (Naive Persistence)',
+def getNaivePersistenceReconstruction() -> ReconstructionExperiment:
+    return ReconstructionExperiment(
+        name='Naive Persistence',
         description=(
             'Reconstruct the original time series with naive persistence.'
         ),
         regressor=NaivePersistence,
     )
 
-    experiment.setup(X, y)
-    experiment.run()
-    experiment.logger.info(experiment.get_metrics())
-    experiment.finish()
 
-    # ==========================================================================
-
-    experiment = ReconstructionExperiment(
-        name='Reconstruction (Drift Baseline)',
+def getDriftBaselineReconstruction() -> ReconstructionExperiment:
+    return ReconstructionExperiment(
+        name='Drift Baseline',
         description=(
             'Reconstruct the original time series with drift baseline.'
         ),
         regressor=DriftBaseline,
     )
-    experiment.setup(X, y)
-    experiment.run()
-    experiment.logger.info(experiment.get_metrics())
-    experiment.finish()
 
-    # ==========================================================================
 
+def getExponentialSmoothingReconstruction() -> ReconstructionExperiment:
     experiment = ReconstructionExperiment(
-        name='Reconstruction (Exponential Smoothing)',
+        name='Exponential Smoothing',
         description=(
             'Reconstruct the original time series with exponential smoothing.'
         ),
         regressor=ExponentialSmoothing,
     )
-    experiment.setup(X, y, use_scaler=False)
-    experiment.run()
-    experiment.logger.info(experiment.get_metrics())
-    experiment.finish()
 
-    # ==========================================================================
+    experiment.set_context(use_scaler=False)
 
+    return experiment
+
+
+def getPolynomialRegressionReconstruction() -> ReconstructionExperiment:
     experiment = ReconstructionExperiment(
-        name='Reconstruction (Polynomial Regression)',
+        name='Polynomial Regression',
         description=(
             'Reconstruct the original time series with polynomial regression.'
         ),
         regressor=PolynomialRegression,
     )
+
     experiment.set_context(
         tuning_parameters={
             'hyperparameter_names': ['degree'],
@@ -75,23 +62,95 @@ if __name__ == '__main__':
             'refinement_widths': [[2], [0.5]],
         }
     )
-    experiment.setup(X, y)
-    experiment.run()
-    experiment.logger.info(experiment.get_metrics())
-    experiment.finish()
 
-    # ==========================================================================
+    return experiment
 
+
+def getRidgeRegressionReconstruction() -> ReconstructionExperiment:
     experiment = ReconstructionExperiment(
-        name='Reconstruction (Ridge Regression)',
+        name='Ridge Regression',
         description=(
             'Reconstruct the original time series with ridge regression.'
         ),
         regressor=RidgeRegression,
     )
-    experiment.setup(X, y)
-    experiment.run()
-    experiment.logger.info(experiment.get_metrics())
-    experiment.finish()
 
-    # ==========================================================================
+    experiment.set_context(
+        tuning_parameters={
+            'hyperparameter_names': ['alpha'],
+            'search_space': [[(1e-3, 1e3)]],
+            'elite_fractions': [0.2, 0.1],
+            'refinement_widths': [[10], [0.5]],
+            'expect_higher': False,
+        }
+    )
+
+    return experiment
+
+
+def run_reconstruction_experiments(
+    dataset: Dataset,
+    schema: DatasetSchema,
+) -> None:
+    X, y = dataset.X, dataset.y
+    _ = schema
+
+    if y is None:
+        raise ValueError(
+            'Label data is required for reconstruction experiment.'
+        )
+
+    if X.shape[0] != y.shape[0]:
+        raise ValueError(
+            'Number of samples in features and labels must be the same.'
+        )
+
+    if X.shape[1] != 1 or y.ndim != 1:
+        raise ValueError(
+            'Features must have exactly one column and labels must be '
+            'one-dimensional.'
+        )
+
+    experiments: list[ReconstructionExperiment] = [
+        getNaivePersistenceReconstruction(),
+        getDriftBaselineReconstruction(),
+        getExponentialSmoothingReconstruction(),
+        getPolynomialRegressionReconstruction(),
+        getRidgeRegressionReconstruction(),
+    ]
+
+    for experiment in experiments:
+        experiment.setup(X, y)
+        experiment.run()
+        experiment.logger.info(experiment.get_metrics())
+        experiment.finish()
+
+    # Build a metric table and save it to a file.
+    metric_table = Table(headers=['Experiment', 'MAE', 'RMSE', 'R²', 'MAPE'])
+    for experiment in experiments:
+        metrics: RegressionMetrics = experiment.get_metrics()
+        [mae_str, rmse_str, r2_str, mape_str] = metrics.item_strs()
+        metric_table.append_row(
+            experiment.name,
+            mae_str,
+            rmse_str,
+            r2_str,
+            mape_str,
+        )
+    print(metric_table)
+
+    # Build a hyperparameter table and save it to a file.
+    hyperparameter_table = Table(headers=['Experiment', 'Hyperparameters'])
+    for experiment in experiments:
+        hyerparameters_str = get_hyperparameters_str(experiment.hyperparameters)
+        hyperparameter_table.append_row(
+            experiment.name,
+            hyerparameters_str if hyerparameters_str else '-',
+        )
+    print(hyperparameter_table)
+
+
+if __name__ == '__main__':
+    location = 'Japan'
+    dataset, schema = YearPW().fetch(location)
+    run_reconstruction_experiments(dataset, schema)

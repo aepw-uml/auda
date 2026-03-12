@@ -23,17 +23,22 @@ class RegressionMetrics:
     def __repr__(self) -> str:
         """Returns a compact string representation of the metric values."""
 
-        mae_str = f'{self.mae:.3e}'.replace('e+', 'e')
-        rmse_str = f'{self.rmse:.3e}'.replace('e+', 'e')
-        r2_str = f'{self.r2:.3f}'
-        mape_str = f'{self.mape * 100:.2f}%'
+        [mae_str, rmse_str, r2_str, mape_str] = self.item_strs()
 
         return (
             f'Metrics(mae={mae_str}, mse={rmse_str}, '
             f'r2={r2_str}, mape={mape_str})'
         )
 
-    def get_value(self, name: RegressionMetricName) -> float:
+    def item_strs(self) -> list[str]:
+        return [
+            f'{self.mae:.3e}'.replace('e+', 'e'),
+            f'{self.rmse:.3e}'.replace('e+', 'e'),
+            f'{self.r2:.3f}',
+            f'{self.mape * 100:.2f}%',
+        ]
+
+    def get_value_by_name(self, name: RegressionMetricName) -> float:
         """Returns the value of the specified metric.
 
         Args:

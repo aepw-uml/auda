@@ -64,7 +64,7 @@ def random_search(
         ]
 
         metrics: RegressionMetrics = evaluate_hyperparameters(hyperparameters)
-        score: float = metrics.get_value(metric)
+        score: float = metrics.get_value_by_name(metric)
         hyperparameter_scores.append((score, hyperparameters))
 
         if logger is not None:
