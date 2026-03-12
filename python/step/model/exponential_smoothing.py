@@ -2,8 +2,7 @@ from typing import Self, override
 
 import numpy as np
 from statsmodels.tsa.holtwinters import ExponentialSmoothing as EST
-
-from .model import SupervisedLearningModel
+from step.model.model import SupervisedLearningModel
 
 
 class ExponentialSmoothing(SupervisedLearningModel):

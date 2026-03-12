@@ -3,8 +3,7 @@ from typing import Any, Self
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
-
-from .model import Regression
+from step.model.model import Regression
 
 
 class PolynomialRegression(Regression):

@@ -2,8 +2,7 @@ from typing import Any, Self
 
 import numpy as np
 from sklearn.linear_model import Ridge
-
-from .model import Regression
+from step.model.model import Regression
 
 
 class RidgeRegression(Regression):

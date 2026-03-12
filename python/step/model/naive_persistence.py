@@ -1,8 +1,7 @@
 from typing import Self
 
 import numpy as np
-
-from .model import SupervisedLearningModel
+from step.model.model import SupervisedLearningModel
 
 
 class NaivePersistence(SupervisedLearningModel):
