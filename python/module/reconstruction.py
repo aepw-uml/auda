@@ -67,6 +67,14 @@ if __name__ == '__main__':
         ),
         regressor=PolynomialRegression,
     )
+    experiment.set_context(
+        tuning_parameters={
+            'hyperparameter_names': ['degree'],
+            'search_space': [[(2, 12)]],
+            'elite_fractions': [0.2, 0.1],
+            'refinement_widths': [[2], [0.5]],
+        }
+    )
     experiment.setup(X, y)
     experiment.run()
     experiment.logger.info(experiment.get_metrics())

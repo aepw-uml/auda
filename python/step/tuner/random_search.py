@@ -17,8 +17,8 @@ def random_search(
     evaluate_hyperparameters: Callable[[Hyperparameters], RegressionMetrics],
     metric: RegressionMetricName = 'mape',
     expect_higher: bool | str = 'auto',
-    seed: int = 42,
     num_iterations: int = 100,
+    seed: int = 42,
     logger: Logger | None = None,
 ) -> list[HyperparameterScore]:
     """Perform random search to find the best hyperparameters.
@@ -36,9 +36,9 @@ def random_search(
             better. If set to 'auto', it will be determined based on the metric
             name (e.g., 'r2' is expected to be higher, while 'mape' is expected
             to be lower).
-        seed: The random seed for reproducibility.
         num_iterations: The number of random hyperparameter combinations to
             evaluate.
+        seed: The random seed for reproducibility.
         logger: An optional logger to log the progress of the random search.
 
     Returns:
@@ -79,7 +79,7 @@ def random_search(
             logger.info(
                 f'[{i + 1}/{num_iterations}] '
                 f'Hyperparameters = {hyperparameters_str}, '
-                f'score = {score}'
+                f'score = {score:.3e}'
             )
 
     return hyperparameter_scores

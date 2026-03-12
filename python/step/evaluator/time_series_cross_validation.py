@@ -37,12 +37,12 @@ def time_series_cross_validation(
     all_metrics: list[RegressionMetrics] = []
 
     folds = np.array_split(np.arange(m), num_k_folds)
-    for fold_idx in range(num_k_folds):
+    for fold_idx in range(1, num_k_folds):
         X_train = np.concatenate(
-            [X[folds[j]] for j in range(num_k_folds) if j != fold_idx]
+            [X[folds[j]] for j in range(num_k_folds) if j < fold_idx]
         )
         y_train = np.concatenate(
-            [y[folds[j]] for j in range(num_k_folds) if j != fold_idx]
+            [y[folds[j]] for j in range(num_k_folds) if j < fold_idx]
         )
         val_idx = folds[fold_idx]
         X_val = X[val_idx]

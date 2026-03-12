@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Any, cast, override
 
 import numpy as np
@@ -71,7 +71,29 @@ class Experiment(ABC):
         self.hyperparameters: dict[str, Any] = {}
         self.metrics: Any = None
 
-    @abstractmethod
+    def set_context(self, **kwargs) -> None:
+        """Updates the experiment context with additional key-value pairs.
+
+        This method provides a convenient way to persist arbitrary metadata or
+        configuration throughout the experiment lifecycle. Values with duplicate
+        keys overwrite earlier entries.
+
+        Args:
+            **kwargs: Key-value pairs to merge into the experiment context.
+        """
+
+        self.context = {**self.context, **kwargs}
+
+    def log(self, message: str) -> None:
+        """Logs a message with the experiment's logger.
+
+        Args:
+            message: The message to log.
+        """
+
+        if self.logger is not None and self.context.get('enable_logging', True):
+            self.logger.info(message)
+
     def setup(self, **kwargs) -> None:
         """Loads or assigns the inputs required by the experiment.
 
@@ -104,14 +126,10 @@ class Experiment(ABC):
         """
 
         self.split()
-
-        if self.val_rate > 0.0:
-            self.tune()
-
+        self.tune()
         self.train()
         self.evaluate()
 
-    @abstractmethod
     def split(self) -> None:
         """Splits the data into training, validation, and test sets.
 
@@ -125,12 +143,11 @@ class Experiment(ABC):
         final evaluation.
         """
 
-        self.logger.info(
+        self.log(
             f'Splitting data with train_rate={self.train_rate}, '
             f'val_rate={self.val_rate}, test_rate={self.test_rate}'
         )
 
-    @abstractmethod
     def train(self) -> None:
         """Fits the experiment pipeline on the training split.
 
@@ -140,9 +157,8 @@ class Experiment(ABC):
         """
 
         hyperparameters_str: str = self.get_hyperparameters_str()
-        self.logger.info(f'Training ({hyperparameters_str})...')
+        self.log(f'Training ({hyperparameters_str})...')
 
-    @abstractmethod
     def evaluate(self) -> None:
         """Evaluates the trained pipeline and stores the resulting metrics.
 
@@ -151,9 +167,8 @@ class Experiment(ABC):
         ``self.metrics`` so it can be returned by ``get_metrics()``.
         """
 
-        self.logger.info('Evaluating...')
+        self.log('Evaluating...')
 
-    @abstractmethod
     def tune(self) -> None:
         """Tunes hyperparameters using the validation split.
 
@@ -163,7 +178,7 @@ class Experiment(ABC):
         with the selected configuration.
         """
 
-        self.logger.info('Tuning hyperparameters...')
+        pass
 
     def get_pipeline(self) -> Pipeline:
         """Returns the trained pipeline.
@@ -202,7 +217,7 @@ class Experiment(ABC):
         this hook to persist artifacts or emit summaries.
         """
 
-        self.logger.info('Experiment finished.')
+        self.log('Experiment finished.')
 
     def get_training_set(self) -> Any:
         """Returns the training split prepared by ``split()``.
@@ -316,9 +331,7 @@ class RegressionExperiment(Experiment):
         super().setup(**kwargs)
 
         m, d = X.shape
-        self.logger.info(
-            f'Set up experiment with {m} samples and {d} features.'
-        )
+        self.log(f'Set up experiment with {m} samples and {d} features.')
 
     @override
     def split(self) -> None:
@@ -355,7 +368,7 @@ class RegressionExperiment(Experiment):
         m_train = self.X_train.shape[0] if self.X_train is not None else 0
         m_val = self.X_val.shape[0] if self.X_val is not None else 0
         m_test = self.X_test.shape[0] if self.X_test is not None else 0
-        self.logger.info(
+        self.log(
             f'Split data into {m_train} training samples, {m_val} validation '
             f'samples, and {m_test} test samples.'
         )
@@ -397,20 +410,6 @@ class RegressionExperiment(Experiment):
         r2 = r2_score(self.y_test, y_pred)
         mape = mean_absolute_percentage_error(self.y_test, y_pred)
         self.metrics = RegressionMetrics(mae=mae, rmse=rmse, r2=r2, mape=mape)
-
-    @override
-    def tune(self) -> None:
-        """Validates that validation data is ready for hyperparameter tuning.
-
-        Subclasses should override or extend this method to search regression
-        hyperparameters using the validation split and persist the chosen
-        settings for the later call to ``train()``.
-
-        Raises:
-            ValueError: If the validation split has not been created yet.
-        """
-
-        self.get_validation_set()
 
     @override
     def get_metrics(self) -> RegressionMetrics:

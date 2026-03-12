@@ -34,6 +34,15 @@ class RegressionMetrics:
         )
 
     def get_value(self, name: RegressionMetricName) -> float:
+        """Returns the value of the specified metric.
+
+        Args:
+            name: The name of the metric to retrieve.
+
+        Returns:
+            The value of the specified metric.
+        """
+
         match name:
             case 'mae':
                 return self.mae
@@ -43,5 +52,24 @@ class RegressionMetrics:
                 return self.r2
             case 'mape':
                 return self.mape
-            case _:
-                raise ValueError(f'Unknown metric name: {name}')
+
+
+def average_regression_metrics(
+    all_regression_metrics: list[RegressionMetrics],
+) -> RegressionMetrics:
+    """Averages a list of RegressionMetrics objects.
+
+    Args:
+        all_regression_metrics: A list of RegressionMetrics objects to average.
+
+    Returns:
+        A new RegressionMetrics object containing the average of each metric.
+    """
+
+    n = len(all_regression_metrics)
+    return RegressionMetrics(
+        mae=sum(m.mae for m in all_regression_metrics) / n,
+        rmse=sum(m.rmse for m in all_regression_metrics) / n,
+        r2=sum(m.r2 for m in all_regression_metrics) / n,
+        mape=sum(m.mape for m in all_regression_metrics) / n,
+    )
