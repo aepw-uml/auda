@@ -16,12 +16,20 @@ def random_search(
     search_space: SearchSpace,
     evaluate_hyperparameters: Callable[[Hyperparameters], RegressionMetrics],
     metric: RegressionMetricName = 'mape',
-    expect_higher: bool | str = 'auto',
     num_iterations: int = 100,
     seed: int = 42,
     logger: Logger | None = None,
 ) -> list[HyperparameterScore]:
-    """Perform random search to find the best hyperparameters.
+    """Samples and evaluates random hyperparameter combinations.
+
+    For each iteration, this function draws one value for each hyperparameter
+    by first choosing one interval uniformly at random from that
+    hyperparameter's domain and then sampling uniformly within the chosen
+    interval. The resulting hyperparameter vector is passed to
+    ``evaluate_hyperparameters``, and the requested metric value is stored
+    together with the sampled hyperparameters. The function returns all sampled
+    `(score, hyperparameters)` pairs in evaluation order and does not sort or
+    rank them.
 
     Args:
         hyperparameter_names: A list of hyperparameter names.
@@ -32,22 +40,15 @@ def random_search(
             values and returns a RegressionMetrics object containing the
             evaluation metrics for those hyperparameters.
         metric: The name of the metric to optimize.
-        expect_higher: Whether to expect higher values of the metric to be
-            better. If set to 'auto', it will be determined based on the metric
-            name (e.g., 'r2' is expected to be higher, while 'mape' is expected
-            to be lower).
         num_iterations: The number of random hyperparameter combinations to
             evaluate.
         seed: The random seed for reproducibility.
         logger: An optional logger to log the progress of the random search.
 
     Returns:
-        A list of tuples, where each tuple contains a score and the
-        corresponding hyperparameters that achieved that score.
+        A list of ``(score, hyperparameters)`` tuples in the order they were
+        evaluated.
     """
-
-    if expect_higher == 'auto':
-        expect_higher = metric == 'r2'
 
     rng = Random(seed)
     if len(search_space) != len(hyperparameter_names):
@@ -86,7 +87,7 @@ def random_search(
 
 
 def select_random_hyperparameter(intervals: Domain, rng: Random) -> float:
-    """Select a random hyperparameter value from the given intervals.
+    """Selects a random hyperparameter value from the given intervals.
 
     Args:
         intervals: A list of intervals from which to select a random value.
