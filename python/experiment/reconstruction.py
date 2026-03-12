@@ -61,7 +61,6 @@ class ReconstructionExperiment(RegressionExperiment):
         if self.context.get('use_scaler', True):
             steps.append(('scaler', StandardScaler()))
 
-        self.context['hyperparameters'] = self.hyperparameters
         steps.append((self.regressor.__name__, self.regressor(**self.context)))
 
         self.pipeline = Pipeline(steps)
@@ -127,10 +126,15 @@ class ReconstructionExperiment(RegressionExperiment):
         def evaluate_hyperparameters(
             hyperparameters: list[float],
         ) -> RegressionMetrics:
-            self.hyperparameters = {
-                name: value
-                for name, value in zip(hyperparameter_names, hyperparameters)
-            }
+            self.set_hyperparameters(
+                replace=True,
+                **{
+                    name: value
+                    for name, value in zip(
+                        hyperparameter_names, hyperparameters
+                    )
+                },
+            )
             all_regression_metrics = time_series_cross_validation(
                 X_train, y_train, evaluate_fold
             )
@@ -151,7 +155,12 @@ class ReconstructionExperiment(RegressionExperiment):
             self.logger,
         )
 
-        self.hyperparameters = {
-            name: value
-            for name, value in zip(hyperparameter_names, best_hyperparameters)
-        }
+        self.set_hyperparameters(
+            replace=True,
+            **{
+                name: value
+                for name, value in zip(
+                    hyperparameter_names, best_hyperparameters
+                )
+            },
+        )

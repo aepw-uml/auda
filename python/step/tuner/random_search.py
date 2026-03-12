@@ -79,7 +79,7 @@ def random_search(
 
             logger.info(
                 f'[{i + 1}/{num_iterations}] '
-                f'Hyperparameters = {hyperparameters_str}, '
+                f'Hyperparameters = ({hyperparameters_str}); '
                 f'score = {score:.3e}'
             )
 

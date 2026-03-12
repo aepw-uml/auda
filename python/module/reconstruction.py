@@ -131,6 +131,10 @@ def getSupportVectorRegressionReconstruction() -> ReconstructionExperiment:
             'elite_fractions': [0.12, 0.06],
             'refinement_widths': [[10.0, 0.2], [2.0, 0.05]],
         }
+        # hyperparameters={
+        #     'C': 100.91,
+        #     'epsilon': 0.2,
+        # }
     )
 
     return experiment

@@ -2,6 +2,7 @@ from abc import ABC
 from typing import Any, cast, override
 
 import numpy as np
+from common.hyperparameters import get_hyperparameters_str
 from common.metrics import RegressionMetrics
 from sklearn.metrics import (
     mean_absolute_error,
@@ -84,6 +85,23 @@ class Experiment(ABC):
 
         self.context = {**self.context, **kwargs}
 
+    def set_hyperparameters(self, replace: bool = False, **kwargs) -> None:
+        """Updates the experiment's hyperparameters with additional key-value
+        pairs.
+
+        Args:
+            replace: If True, the provided hyperparameters replace any existing
+                values. If False, the provided hyperparameters are merged with
+                existing values, with precedence given to the new entries.
+            **kwargs: Hyperparameter names and values to merge into the context
+                and update on the instance.
+        """
+
+        self.hyperparameters = (
+            {**self.hyperparameters, **kwargs} if not replace else kwargs
+        )
+        self.context['hyperparameters'] = self.hyperparameters
+
     def log(self, message: str) -> None:
         """Logs a message with the experiment's logger.
 
@@ -113,10 +131,14 @@ class Experiment(ABC):
         """
 
         self.context = {**self.context, **kwargs}
+
+        # Set up Hyperparameters.
         if 'hyperparameters' in self.context:
-            self.hyperparameters = self.context['hyperparameters']
+            self.set_hyperparameters(
+                replace=False, **self.context['hyperparameters']
+            )
         else:
-            self.context['hyperparameters'] = self.hyperparameters
+            self.set_hyperparameters(replace=True)
 
     def run(self) -> None:
         """Runs the experiment from start to finish.
@@ -156,7 +178,7 @@ class Experiment(ABC):
         selected hyperparameters, ``train()`` should use them.
         """
 
-        hyperparameters_str: str = self.get_hyperparameters_str()
+        hyperparameters_str: str = get_hyperparameters_str(self.hyperparameters)
         self.log(f'Training ({hyperparameters_str})...')
 
     def evaluate(self) -> None:
@@ -249,20 +271,6 @@ class Experiment(ABC):
         """
 
         pass
-
-    def get_hyperparameters_str(self) -> str:
-        """Returns a log-friendly string representation of hyperparameters.
-
-        When no tuned values are present, this falls back to ``default
-        settings`` so training logs still read cleanly.
-        """
-
-        if not self.hyperparameters:
-            return 'default settings'
-
-        return ', '.join(
-            f'{k}={v:.3e}' for k, v in self.hyperparameters.items()
-        )
 
 
 class RegressionExperiment(Experiment):
