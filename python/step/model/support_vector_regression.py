@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Self
 
 import numpy as np
 from step.model.model import Regression
@@ -24,10 +24,11 @@ class SupportVectorRegression(Regression):
         self.hyperparameters: dict[str, Any] = {
             'C': float(hyperparameters.get('C', 0.1)),
             'epsilon': float(hyperparameters.get('epsilon', 0.1)),
+            'gamma': hyperparameters.get('gamma', 'scale'),
         }
         self.kernel: str = kernel
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
+    def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
         """Fits the model to the training data.
 
         Args:
@@ -38,8 +39,14 @@ class SupportVectorRegression(Regression):
 
         c = self.hyperparameters['C']
         epsilon = self.hyperparameters['epsilon']
+        gamma = self.hyperparameters['gamma']
 
-        self.regressor_ = SVR(kernel=self.kernel, C=c, epsilon=epsilon)
+        self.regressor_ = SVR(
+            kernel=self.kernel,
+            C=c,
+            epsilon=epsilon,
+            gamma=gamma,
+        )
         self.regressor_.fit(X, y)
 
         svr = self.regressor_
@@ -54,6 +61,8 @@ class SupportVectorRegression(Regression):
         self.parameters['dual_coefficients'] = dual_coefficients
         self.parameters['intercept'] = intercept
         self.parameters['gamma'] = gamma
+
+        return self
 
     def predict(self, X: Any) -> np.ndarray:
         """Predicts target values for the given input data.

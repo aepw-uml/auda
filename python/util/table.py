@@ -4,6 +4,15 @@ from tabulate import tabulate
 
 
 class Table:
+    """Table class for creating and formatting tables.
+
+    Attributes:
+        tables: A list of lists representing the table data.
+        headers: A list of strings representing the column headers.
+        bold_headers: A boolean indicating whether to bold the headers.
+        fmt: A string representing the table format in tabulate.
+    """
+
     def __init__(
         self,
         headers: list[str] | None = None,
@@ -13,11 +22,13 @@ class Table:
     ) -> None:
         """Initializes a Table instance.
 
-        Attributes:
-            tables: A list of lists representing the table data.
-            headers: A list of strings representing the column headers.
+        Args:
+            headers: A list of strings representing the column headers; defaults
+                to None (no headers).
             bold_headers: A boolean indicating whether to bold the headers.
             fmt: A string representing the table format in tabulate.
+            colalign: A list of strings representing the column alignment;
+                defaults to None (no alignment).
         """
 
         self.headers: list[str] | None = headers

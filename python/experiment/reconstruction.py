@@ -10,12 +10,11 @@ from experiment.experiment import RegressionExperiment
 from sklearn.base import RegressorMixin
 from sklearn.ensemble import IsolationForest
 from sklearn.linear_model import LinearRegression
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
 from step.evaluator.time_series_cross_validation import (
     time_series_cross_validation,
 )
 from step.model.model import SupervisedLearningModel
+from step.model.standardize_regressor import StandardizedRegressor
 from step.tuner.multistage_random_search import multistage_random_search
 from step.tuner.random_search import Interval, SearchSpace
 
@@ -56,14 +55,13 @@ class ReconstructionExperiment(RegressionExperiment):
             X_train_inliers: np.ndarray = X_train[inlier_mask]
             y_train_inliers: np.ndarray = y_train[inlier_mask]
 
-        steps: list[tuple[str, Any]] = []
-
-        if self.context.get('use_scaler', True):
-            steps.append(('scaler', StandardScaler()))
-
-        steps.append((self.regressor.__name__, self.regressor(**self.context)))
-
-        self.pipeline = Pipeline(steps)
+        self.pipeline = StandardizedRegressor(
+            regressor_cls=self.regressor,
+            regressor_kwargs=self.context,
+            use_x_scaler=self.context.get('use_scaler', True),
+            use_y_scaler=self.context.get('use_target_scaler', True),
+        )
+        self.pipeline.fit(X_train, y_train)
 
         if use_isolation_forest:
             self.pipeline.fit(X_train_inliers, y_train_inliers)

@@ -67,7 +67,7 @@ class Experiment(ABC):
         self.context: dict[str, Any] = {}
         self.logger = get_logger(name)
 
-        self.pipeline: Pipeline | None = None
+        self.pipeline: Any = None
         self.parameters: dict[str, Any] = {}
         self.hyperparameters: dict[str, Any] = {}
         self.metrics: Any = None

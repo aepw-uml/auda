@@ -2,7 +2,7 @@ from pathlib import Path
 
 from common.files import save_content_to_file
 from common.hyperparameters import get_hyperparameters_str
-from common.metrics import RegressionMetrics
+from common.metrics import RegressionMetricName, RegressionMetrics
 from dataset.dataset import Dataset, DatasetSchema
 from dataset.year_pw import YearPW
 from experiment.reconstruction import ReconstructionExperiment
@@ -114,7 +114,9 @@ def getGaussianProcessReconstruction() -> ReconstructionExperiment:
     return experiment
 
 
-def getSupportVectorRegressionReconstruction() -> ReconstructionExperiment:
+def getSupportVectorRegressionReconstruction(
+    tune_gamma: bool = True,
+) -> ReconstructionExperiment:
     experiment = ReconstructionExperiment(
         name='Support Vector Regression',
         description=(
@@ -124,18 +126,37 @@ def getSupportVectorRegressionReconstruction() -> ReconstructionExperiment:
         regressor=SupportVectorRegression,
     )
 
-    experiment.set_context(
-        tuning_parameters={
-            'hyperparameter_names': ['C', 'epsilon'],
-            'search_space': [[(0.1, 100.0)], [(0.001, 1.0)]],
-            'elite_fractions': [0.12, 0.06],
-            'refinement_widths': [[10.0, 0.2], [2.0, 0.05]],
-        }
-        # hyperparameters={
-        #     'C': 100.91,
-        #     'epsilon': 0.2,
-        # }
-    )
+    if tune_gamma:
+        experiment.set_context(
+            tuning_parameters={
+                'hyperparameter_names': ['C', 'epsilon', 'gamma'],
+                'search_space': [
+                    [(0.1, 100.0)],
+                    [(0.001, 1.0)],
+                    [(0.001, 1.0)],
+                ],
+                'elite_fractions': [0.12, 0.06],
+                'refinement_widths': [
+                    [10.0, 0.2, 0.1],
+                    [2.0, 0.05, 0.02],
+                ],
+            }
+        )
+    else:
+        experiment.set_context(
+            tuning_parameters={
+                'hyperparameter_names': ['C', 'epsilon'],
+                'search_space': [
+                    [(0.1, 100.0)],
+                    [(0.001, 1.0)],
+                ],
+                'elite_fractions': [0.12, 0.06],
+                'refinement_widths': [
+                    [10.0, 0.2],
+                    [2.0, 0.05],
+                ],
+            }
+        )
 
     return experiment
 
@@ -143,6 +164,8 @@ def getSupportVectorRegressionReconstruction() -> ReconstructionExperiment:
 def run_reconstruction_experiments(
     dataset: Dataset,
     schema: DatasetSchema,
+    metric: RegressionMetricName = 'mape',
+    svr_tune_gamma: bool = True,
 ) -> None:
     X, y = dataset.X, dataset.y
     _ = schema
@@ -170,10 +193,13 @@ def run_reconstruction_experiments(
         getPolynomialRegressionReconstruction(),
         getRidgeRegressionReconstruction(),
         getGaussianProcessReconstruction(),
-        getSupportVectorRegressionReconstruction(),
+        getSupportVectorRegressionReconstruction(tune_gamma=svr_tune_gamma),
     ]
 
     for experiment in experiments:
+        if 'tuning_parameters' in experiment.context:
+            experiment.context['tuning_parameters']['metric'] = metric
+
         experiment.setup(X, y)
         experiment.run()
         experiment.logger.info(experiment.get_metrics())
@@ -216,6 +242,7 @@ def run_reconstruction_experiments(
 
 
 if __name__ == '__main__':
+    # location = 'United States'
     location = 'Japan'
     dataset, schema = YearPW().fetch(location)
-    run_reconstruction_experiments(dataset, schema)
+    run_reconstruction_experiments(dataset, schema, metric='r2')
