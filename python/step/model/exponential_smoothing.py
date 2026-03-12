@@ -6,8 +6,19 @@ from step.model.model import SupervisedLearningModel
 
 
 class ExponentialSmoothing(SupervisedLearningModel):
+    """Forecast future values with additive Holt exponential smoothing."""
+
     @override
     def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
+        """Fit the exponential smoothing model.
+
+        Args:
+            X: Training time indices with shape ``(n_samples, 1)``.
+            y: Training targets with shape ``(n_samples,)``.
+
+        Returns:
+            The fitted estimator.
+        """
         super().fit(X, y, num_features=1)
 
         order = np.argsort(X[:, 0])
@@ -26,6 +37,18 @@ class ExponentialSmoothing(SupervisedLearningModel):
 
     @override
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """Forecast values at future time steps.
+
+        Args:
+            X: Future time indices with shape ``(n_samples, 1)``.
+
+        Returns:
+            Predicted targets with shape ``(n_samples,)``.
+
+        Raises:
+            ValueError: If requested periods are not whole future time steps
+                or are not in the future.
+        """
         super().predict(X, num_features=1)
 
         X = np.asarray(X, dtype=float)

@@ -13,6 +13,10 @@ class GaussianProcessRegression(Regression):
     white-noise term captures observation noise. Hyperparameters are read from
     ``hyperparameters`` and stored as floats so they are safe to pass directly
     to scikit-learn.
+
+    Attributes:
+        hyperparameters: Model configuration containing ``length_scale`` and
+            ``noise_level``.
     """
 
     def __init__(
@@ -20,6 +24,13 @@ class GaussianProcessRegression(Regression):
         hyperparameters: dict[str, Any],
         **kwargs,
     ) -> None:
+        """Initialize the Gaussian process regression model.
+
+        Args:
+            hyperparameters: Model configuration containing ``length_scale``
+                and ``noise_level``.
+            **kwargs: Additional keyword arguments forwarded to the base class.
+        """
         super().__init__(hyperparameters, **kwargs)
         self.hyperparameters: dict[str, Any] = {
             'length_scale': float(hyperparameters.get('length_scale', 1.0)),
@@ -30,17 +41,16 @@ class GaussianProcessRegression(Regression):
     def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
         """Fit the Gaussian process regressor.
 
-        Parameters
-        ----------
-        X:
-            Training features with shape ``(n_samples, n_features)``.
-        y:
-            Training targets with shape ``(n_samples,)``.
+        Args:
+            X: Training features with shape ``(n_samples, n_features)``.
+            y: Training targets with shape ``(n_samples,)``.
 
-        Returns
-        -------
-        Self
+        Returns:
             The fitted estimator.
+
+        Raises:
+            ValueError: If ``length_scale`` is not positive or
+                ``noise_level`` is negative.
         """
         super().fit(X, y)
 
@@ -80,14 +90,10 @@ class GaussianProcessRegression(Regression):
     def predict(self, X: np.ndarray) -> np.ndarray:
         """Predict targets for new samples.
 
-        Parameters
-        ----------
-        X:
-            Feature matrix with shape ``(n_samples, n_features)``.
+        Args:
+            X: Feature matrix with shape ``(n_samples, n_features)``.
 
-        Returns
-        -------
-        np.ndarray
+        Returns:
             Predicted targets with shape ``(n_samples,)``.
         """
         super().predict(X)

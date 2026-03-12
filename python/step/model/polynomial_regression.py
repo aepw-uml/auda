@@ -7,12 +7,21 @@ from step.model.model import Regression
 
 
 class PolynomialRegression(Regression):
+    """Regression model that expands one feature into polynomial terms."""
+
     def __init__(
         self,
         hyperparameters: dict[str, Any],
         fit_intercept: bool = True,
         **kwargs,
     ) -> None:
+        """Initialize the polynomial regression model.
+
+        Args:
+            hyperparameters: Model configuration, including ``degree``.
+            fit_intercept: Whether to fit an intercept term.
+            **kwargs: Additional keyword arguments forwarded to the base class.
+        """
         super().__init__(hyperparameters, **kwargs)
         self.hyperparameters: dict[str, Any] = {
             'degree': int(hyperparameters.get('degree', 2)),
@@ -20,6 +29,18 @@ class PolynomialRegression(Regression):
         self.fit_intercept: bool = fit_intercept
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
+        """Fit the polynomial regression model.
+
+        Args:
+            X: Training features with shape ``(n_samples, 1)``.
+            y: Training targets with shape ``(n_samples,)``.
+
+        Returns:
+            The fitted estimator.
+
+        Raises:
+            ValueError: If the configured polynomial degree is less than 1.
+        """
         super().fit(X, y, num_features=1)
 
         degree = self.hyperparameters['degree']
@@ -42,6 +63,14 @@ class PolynomialRegression(Regression):
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """Predict targets for new samples.
+
+        Args:
+            X: Feature matrix with shape ``(n_samples, 1)``.
+
+        Returns:
+            Predicted targets with shape ``(n_samples,)``.
+        """
         super().predict(X, num_features=1)
 
         X_poly = self.polynomial_features_.transform(X)
