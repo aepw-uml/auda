@@ -1,3 +1,6 @@
+from pathlib import Path
+
+from common.files import save_content_to_file
 from common.hyperparameters import get_hyperparameters_str
 from common.metrics import RegressionMetrics
 from dataset.dataset import Dataset, DatasetSchema
@@ -125,6 +128,9 @@ def run_reconstruction_experiments(
         experiment.logger.info(experiment.get_metrics())
         experiment.finish()
 
+    # Module path to save the results of the reconstruction experiments.
+    module_path = Path('results') / 'module' / 'reconstruction'
+
     # Build a metric table and save it to a file.
     metric_table = Table(headers=['Experiment', 'MAE', 'RMSE', 'R²', 'MAPE'])
     for experiment in experiments:
@@ -137,7 +143,10 @@ def run_reconstruction_experiments(
             r2_str,
             mape_str,
         )
-    print(metric_table)
+
+    metric_table_path: Path = module_path / 'metric_table'
+    save_content_to_file(metric_table_path, metric_table.__repr__())
+    print(f'Saved metric table to "{metric_table_path}".')
 
     # Build a hyperparameter table and save it to a file.
     hyperparameter_table = Table(headers=['Experiment', 'Hyperparameters'])
@@ -147,7 +156,12 @@ def run_reconstruction_experiments(
             experiment.name,
             hyerparameters_str if hyerparameters_str else '-',
         )
-    print(hyperparameter_table)
+    hyperparameter_table_path: Path = module_path / 'hyperparameter_table'
+    save_content_to_file(
+        hyperparameter_table_path,
+        hyperparameter_table.__repr__(),
+    )
+    print(f'Saved hyperparameter table to "{hyperparameter_table_path}".')
 
 
 if __name__ == '__main__':
