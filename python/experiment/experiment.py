@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Any, cast, override
 
 import numpy as np
+from common.metrics import RegressionMetrics
 from sklearn.metrics import (
     mean_absolute_error,
     mean_absolute_percentage_error,
@@ -250,36 +250,6 @@ class Experiment(ABC):
         )
 
 
-@dataclass(frozen=True)
-class RegressionMetrics:
-    """Container for regression evaluation metrics.
-
-    Attributes:
-        mae: Mean Absolute Error.
-        mse: Mean Squared Error.
-        r2: R-squared score.
-        mape: Mean Absolute Percentage Error.
-    """
-
-    mae: float
-    mse: float
-    r2: float
-    mape: float
-
-    def __repr__(self) -> str:
-        """Returns a compact string representation of the metric values."""
-
-        mae_str = f'{self.mae:.3e}'.replace('e+', 'e')
-        mse_str = f'{self.mse:.3e}'.replace('e+', 'e')
-        r2_str = f'{self.r2:.3f}'
-        mape_str = f'{self.mape * 100:.2f}%'
-
-        return (
-            f'Metrics(mae={mae_str}, mse={mse_str}, '
-            f'r2={r2_str}, mape={mape_str})'
-        )
-
-
 class RegressionExperiment(Experiment):
     """Base implementation for regression experiments.
 
@@ -423,10 +393,10 @@ class RegressionExperiment(Experiment):
 
         y_pred = pipeline.predict(self.X_test)
         mae = mean_absolute_error(self.y_test, y_pred)
-        mse = mean_squared_error(self.y_test, y_pred)
+        rmse = mean_squared_error(self.y_test, y_pred) ** 0.5
         r2 = r2_score(self.y_test, y_pred)
         mape = mean_absolute_percentage_error(self.y_test, y_pred)
-        self.metrics = RegressionMetrics(mae=mae, mse=mse, r2=r2, mape=mape)
+        self.metrics = RegressionMetrics(mae=mae, rmse=rmse, r2=r2, mape=mape)
 
     @override
     def tune(self) -> None:
