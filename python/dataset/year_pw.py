@@ -58,9 +58,9 @@ class YearPW(DatasetFetcher):
     def get_dataset_schema(self) -> DatasetSchema:
         return DatasetSchema(
             feature_names=['Year'],
-            label_names=['Plastic Waste Generated'],
+            target_names=['Plastic Waste Generated'],
             feature_units=[''],
-            label_units=['Tonnes'],
+            target_units=['Tonnes'],
         )
 
     @override

@@ -1,9 +1,10 @@
 from abc import ABC
-from typing import Any, cast, override
+from typing import Any, Type, cast, override
 
 import numpy as np
 from common.hyperparameters import get_hyperparameters_str
 from common.metrics import RegressionMetrics
+from dataset.dataset import DatasetSchema
 from sklearn.metrics import (
     mean_absolute_error,
     mean_absolute_percentage_error,
@@ -11,6 +12,7 @@ from sklearn.metrics import (
     r2_score,
 )
 from sklearn.pipeline import Pipeline
+from step.plot.plotter import Plotter, RegressionPlotter
 from util.logging import get_logger
 
 
@@ -272,6 +274,16 @@ class Experiment(ABC):
 
         pass
 
+    def plot(self) -> Plotter | None:
+        """Returns a Plotter instance for visualizing the experiment results.
+
+        The base class can return a Plotter instance if the experiment is
+        designed to produce visualizations, but subclasses can override this
+        method to return None if plotting is not applicable.
+        """
+
+        return None
+
 
 class RegressionExperiment(Experiment):
     """Base implementation for regression experiments.
@@ -467,3 +479,31 @@ class RegressionExperiment(Experiment):
             raise ValueError('Test data not set up. Call split() first.')
 
         return self.X_test, self.y_test
+
+    def plot(self) -> Plotter | None:
+        plotter_factory: Type[RegressionPlotter] | None = self.context.get(
+            'plotter_factory'
+        )
+        if plotter_factory is None:
+            return None
+
+        schema: DatasetSchema | None = self.context.get('schema')
+        if schema is None:
+            raise ValueError(
+                'Dataset schema is required in context to create plotter.'
+            )
+
+        X_train, y_train = self.get_training_set()
+        X_test, y_test = self.get_test_set()
+
+        plotter: Plotter = plotter_factory(
+            schema=schema,
+            model=self.pipeline.predict,
+            X_train=X_train,
+            y_train=y_train,
+            X_test=X_test,
+            y_test=y_test,
+        )
+
+        plotter.plot()
+        return plotter

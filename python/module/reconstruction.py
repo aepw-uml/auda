@@ -13,6 +13,7 @@ from step.model.naive_persistence import NaivePersistence
 from step.model.polynomial_regression import PolynomialRegression
 from step.model.ridge_regression import RidgeRegression
 from step.model.support_vector_regression import SupportVectorRegression
+from step.plot.plotter import RegressionPlotter
 from util.table import Table
 
 
@@ -60,12 +61,13 @@ def getPolynomialRegressionReconstruction() -> ReconstructionExperiment:
     )
 
     experiment.set_context(
+        plotter_factory=RegressionPlotter,
         tuning_parameters={
             'hyperparameter_names': ['degree'],
             'search_space': [[(2, 12)]],
             'elite_fractions': [0.12, 0.06],
             'refinement_widths': [[2], [0.5]],
-        }
+        },
     )
 
     return experiment
@@ -168,7 +170,6 @@ def run_reconstruction_experiments(
     svr_tune_gamma: bool = True,
 ) -> None:
     X, y = dataset.X, dataset.y
-    _ = schema
 
     if y is None:
         raise ValueError(
@@ -197,12 +198,22 @@ def run_reconstruction_experiments(
     ]
 
     for experiment in experiments:
+        # Inject schema into the experiment context.
+        experiment.context['schema'] = schema
+
+        # Inject metric into the experiment context for hyperparameter tuning if
+        # tuning parameters are defined.
         if 'tuning_parameters' in experiment.context:
             experiment.context['tuning_parameters']['metric'] = metric
 
         experiment.setup(X, y)
         experiment.run()
         experiment.logger.info(experiment.get_metrics())
+
+        plotter = experiment.plot()
+        if plotter is not None:
+            plotter.show()
+
         experiment.finish()
 
     # Module path to save the results of the reconstruction experiments.

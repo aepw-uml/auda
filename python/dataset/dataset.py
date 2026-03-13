@@ -14,17 +14,17 @@ class DatasetSchema:
 
     Attributes:
         feature_names: List of feature names.
-        label_names: List of label names.
         feature_units: List of feature units.
-        label_units: List of label units.
+        target_names: List of target names.
+        target_units: List of target units.
         class_names: List of class names (for classification models).
     """
 
     # Regression models
     feature_names: list[str]
     feature_units: list[str]
-    label_names: list[str] | None = None
-    label_units: list[str] | None = None
+    target_names: list[str] | None = None
+    target_units: list[str] | None = None
 
     # Classification models
     class_names: list[str] | None = None
