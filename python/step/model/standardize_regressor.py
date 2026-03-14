@@ -18,6 +18,8 @@ class StandardizedRegressor(BaseEstimator, RegressorMixin):
         self.use_x_scaler: bool = use_x_scaler
         self.use_y_scaler: bool = use_y_scaler
 
+        self.regressor_: Any = None
+
     def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
         X_fit: np.ndarray = X
         y_fit: np.ndarray = y

@@ -134,3 +134,17 @@ class DatasetFetcher(ABC):
             np.savez(path, X=dataset.X)
         else:
             np.savez(path, X=dataset.X, y=dataset.y)
+
+
+def combine_names_and_units(names: list[str], units: list[str]) -> list[str]:
+    """Combines names and units into a single list of strings.
+
+    Args:
+        names: List of names.
+        units: List of units corresponding to the names.
+    """
+
+    return [
+        f'{names[i]} ({units[i]})' if units[i] else names[i]
+        for i in range(len(names))
+    ]

@@ -35,6 +35,7 @@ class SupportVectorRegression(Regression):
             X: Training data features.
             y: Training data target values.
         """
+
         from sklearn.svm import SVR
 
         c = self.hyperparameters['C']
@@ -58,6 +59,7 @@ class SupportVectorRegression(Regression):
         gamma = svr.gamma
 
         self.parameters['num_support_vectors'] = num_support_vectors
+        self.parameters['support_vector_indices'] = svr.support_.tolist()
         self.parameters['dual_coefficients'] = dual_coefficients
         self.parameters['intercept'] = intercept
         self.parameters['gamma'] = gamma

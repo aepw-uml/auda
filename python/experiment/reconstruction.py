@@ -61,12 +61,13 @@ class ReconstructionExperiment(RegressionExperiment):
             use_x_scaler=self.context.get('use_scaler', True),
             use_y_scaler=self.context.get('use_target_scaler', True),
         )
-        self.pipeline.fit(X_train, y_train)
 
         if use_isolation_forest:
             self.pipeline.fit(X_train_inliers, y_train_inliers)
         else:
             self.pipeline.fit(X_train, self.y_train)
+
+        self.parameters = self.pipeline.regressor_.parameters
 
     @override
     def tune(self) -> None:

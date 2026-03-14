@@ -3,6 +3,7 @@ from pathlib import Path
 from common.files import save_content_to_file
 from common.hyperparameters import get_hyperparameters_str
 from common.metrics import RegressionMetricName, RegressionMetrics
+from common.names import to_kebab
 from dataset.dataset import Dataset, DatasetSchema
 from dataset.year_pw import YearPW
 from experiment.reconstruction import ReconstructionExperiment
@@ -13,7 +14,15 @@ from step.model.naive_persistence import NaivePersistence
 from step.model.polynomial_regression import PolynomialRegression
 from step.model.ridge_regression import RidgeRegression
 from step.model.support_vector_regression import SupportVectorRegression
-from step.plot.plotter import RegressionPlotter
+from step.plot.gaussian_process_regression import (
+    GaussianProcessRegressionPlotter,
+)
+from step.plot.plotter import Plotter
+from step.plot.polynomial_regression import PolynomialRegressionPlotter
+from step.plot.ridge_regression import RidgeRegressionPlotter
+from step.plot.support_vector_regression import (
+    SupportVectorRegressionPlotter,
+)
 from util.table import Table
 
 
@@ -61,10 +70,10 @@ def getPolynomialRegressionReconstruction() -> ReconstructionExperiment:
     )
 
     experiment.set_context(
-        plotter_factory=RegressionPlotter,
+        plotter_factory=PolynomialRegressionPlotter,
         tuning_parameters={
             'hyperparameter_names': ['degree'],
-            'search_space': [[(2, 12)]],
+            'search_space': [[(2.0, 12.0)]],
             'elite_fractions': [0.12, 0.06],
             'refinement_widths': [[2], [0.5]],
         },
@@ -83,12 +92,13 @@ def getRidgeRegressionReconstruction() -> ReconstructionExperiment:
     )
 
     experiment.set_context(
+        plotter_factory=RidgeRegressionPlotter,
         tuning_parameters={
-            'hyperparameter_names': ['alpha'],
-            'search_space': [[(1e-6, 1e3)]],
+            'hyperparameter_names': ['degree', 'alpha'],
+            'search_space': [[(2.0, 12.0)], [(1e-6, 1e3)]],
             'elite_fractions': [0.12, 0.06],
-            'refinement_widths': [[0.5], [0.1]],
-        }
+            'refinement_widths': [[2, 0.5], [0.5, 0.1]],
+        },
     )
 
     return experiment
@@ -105,12 +115,13 @@ def getGaussianProcessReconstruction() -> ReconstructionExperiment:
     )
 
     experiment.set_context(
+        plotter_factory=GaussianProcessRegressionPlotter,
         tuning_parameters={
             'hyperparameter_names': ['length_scale', 'noise_level'],
             'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
             'elite_fractions': [0.12, 0.06],
             'refinement_widths': [[10.0, 0.5], [2.0, 0.1]],
-        }
+        },
     )
 
     return experiment
@@ -130,6 +141,7 @@ def getSupportVectorRegressionReconstruction(
 
     if tune_gamma:
         experiment.set_context(
+            plotter_factory=SupportVectorRegressionPlotter,
             tuning_parameters={
                 'hyperparameter_names': ['C', 'epsilon', 'gamma'],
                 'search_space': [
@@ -142,10 +154,11 @@ def getSupportVectorRegressionReconstruction(
                     [10.0, 0.2, 0.1],
                     [2.0, 0.05, 0.02],
                 ],
-            }
+            },
         )
     else:
         experiment.set_context(
+            plotter_factory=SupportVectorRegressionPlotter,
             tuning_parameters={
                 'hyperparameter_names': ['C', 'epsilon'],
                 'search_space': [
@@ -157,7 +170,7 @@ def getSupportVectorRegressionReconstruction(
                     [10.0, 0.2],
                     [2.0, 0.05],
                 ],
-            }
+            },
         )
 
     return experiment
@@ -166,6 +179,7 @@ def getSupportVectorRegressionReconstruction(
 def run_reconstruction_experiments(
     dataset: Dataset,
     schema: DatasetSchema,
+    plot_title: str = '',
     metric: RegressionMetricName = 'mape',
     svr_tune_gamma: bool = True,
 ) -> None:
@@ -209,11 +223,6 @@ def run_reconstruction_experiments(
         experiment.setup(X, y)
         experiment.run()
         experiment.logger.info(experiment.get_metrics())
-
-        plotter = experiment.plot()
-        if plotter is not None:
-            plotter.show()
-
         experiment.finish()
 
     # Module path to save the results of the reconstruction experiments.
@@ -250,6 +259,20 @@ def run_reconstruction_experiments(
         hyperparameter_table.__repr__(),
     )
     print(f'Saved hyperparameter table to "{hyperparameter_table_path}".')
+
+    # Save the plots of each experiment.
+    plots_dir: Path = module_path / 'plots'
+    for experiment in experiments:
+        # Inject plot title into the experiment context.
+        experiment.context['plot_title'] = plot_title
+
+        plotter: Plotter | None = experiment.plot()
+        if plotter is None:
+            continue
+
+        plot_path: Path = plots_dir / to_kebab(experiment.name)
+        file_path: str = plotter.save(plot_path)
+        print(f'Saved plot for "{experiment.name}" to "{file_path}".')
 
 
 if __name__ == '__main__':

@@ -481,6 +481,10 @@ class RegressionExperiment(Experiment):
         return self.X_test, self.y_test
 
     def plot(self) -> Plotter | None:
+        """Returns a RegressionPlotter instance for visualizing the regression
+        results.
+        """
+
         plotter_factory: Type[RegressionPlotter] | None = self.context.get(
             'plotter_factory'
         )
@@ -493,16 +497,21 @@ class RegressionExperiment(Experiment):
                 'Dataset schema is required in context to create plotter.'
             )
 
+        plot_title: str = self.context.get('plot_title', self.name)
+
         X_train, y_train = self.get_training_set()
         X_test, y_test = self.get_test_set()
 
         plotter: Plotter = plotter_factory(
             schema=schema,
+            title=plot_title,
             model=self.pipeline.predict,
             X_train=X_train,
             y_train=y_train,
             X_test=X_test,
             y_test=y_test,
+            parameters=self.parameters,
+            hyperparameters=self.hyperparameters,
         )
 
         plotter.plot()
