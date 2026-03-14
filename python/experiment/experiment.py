@@ -44,8 +44,7 @@ class Experiment(ABC):
         name: str,
         description: str,
         seed: int = 42,
-        train_rate: float = 0.8,
-        val_rate: float = 0.0,
+        train_rate: float = 0.9,
     ) -> None:
         """Initializes an experiment.
 
@@ -54,18 +53,13 @@ class Experiment(ABC):
             description: Description of the experiment.
             seed: Random seed for reproducibility.
             train_rate: Proportion of data to use for training.
-            val_rate: Proportion of data to use for validation.
-
-        ``test_rate`` is derived as ``1.0 - train_rate - val_rate``. The
-        experiment starts with empty context and no trained pipeline or metrics.
         """
 
         self.name: str = name
         self.description: str = description
         self.seed: int = seed
         self.train_rate: float = train_rate
-        self.val_rate: float = val_rate
-        self.test_rate: float = 1.0 - train_rate - val_rate
+        self.test_rate: float = 1.0 - train_rate
         self.context: dict[str, Any] = {}
         self.logger = get_logger(name)
 
@@ -169,7 +163,7 @@ class Experiment(ABC):
 
         self.log(
             f'Splitting data with train_rate={self.train_rate}, '
-            f'val_rate={self.val_rate}, test_rate={self.test_rate}'
+            f'test_rate={self.test_rate}'
         )
 
     def train(self) -> None:
@@ -253,17 +247,6 @@ class Experiment(ABC):
 
         pass
 
-    def get_validation_set(self) -> Any:
-        """Returns the validation split prepared by ``split()``.
-
-        The base implementation only enforces that validation was requested.
-        Subclasses should extend this method to return the concrete validation
-        data and raise an error if the split has not been created yet.
-        """
-
-        if self.val_rate <= 0.0:
-            raise ValueError('Validation set not created. Set val_rate > 0.0.')
-
     def get_test_set(self) -> Any:
         """Returns the test split prepared by ``split()``.
 
@@ -297,8 +280,6 @@ class RegressionExperiment(Experiment):
         y: Full target vector provided in ``setup()``.
         X_train: Training feature matrix created in ``split()``.
         y_train: Training target vector created in ``split()``.
-        X_val: Validation feature matrix created in ``split()``.
-        y_val: Validation target vector created in ``split()``.
         X_test: Test feature matrix created in ``split()``.
         y_test: Test target vector created in ``split()``.
     """
@@ -310,7 +291,6 @@ class RegressionExperiment(Experiment):
         description: str,
         seed: int = 42,
         train_rate: float = 0.8,
-        val_rate: float = 0.0,
     ) -> None:
         """Initializes a regression experiment.
 
@@ -318,15 +298,13 @@ class RegressionExperiment(Experiment):
         run before the experiment can be split, trained, tuned, or evaluated.
         """
 
-        super().__init__(name, description, seed, train_rate, val_rate)
+        super().__init__(name, description, seed, train_rate)
         self.metrics: RegressionMetrics | None = None
 
         self.X: np.ndarray | None = None
         self.y: np.ndarray | None = None
         self.X_train: np.ndarray | None = None
         self.y_train: np.ndarray | None = None
-        self.X_val: np.ndarray | None = None
-        self.y_val: np.ndarray | None = None
         self.X_test: np.ndarray | None = None
         self.y_test: np.ndarray | None = None
 
@@ -358,9 +336,9 @@ class RegressionExperiment(Experiment):
     def split(self) -> None:
         """Randomly splits the dataset into train, validation, and test sets.
 
-        The shuffled splits are written to ``X_train``, ``y_train``, ``X_val``,
-        ``y_val``, ``X_test``, and ``y_test`` for downstream use by
-        ``train()``, ``tune()``, and ``evaluate()``.
+        The shuffled splits are written to ``X_train``, ``y_train``, ``X_test``,
+        and ``y_test`` for downstream use by ``train()``, ``tune()``, and
+        ``evaluate()``.
 
         Raises:
             ValueError: If the dataset has not been provided via ``setup()``.
@@ -376,22 +354,19 @@ class RegressionExperiment(Experiment):
             np.random.seed(self.seed)
             np.random.shuffle(indices)
 
-        train_end = int(self.train_rate * n_samples)
-        val_end = train_end + int(self.val_rate * n_samples)
+        num_test_samples = max(2, int(n_samples * self.test_rate))
+        train_end = n_samples - num_test_samples
 
         self.X_train = self.X[indices[:train_end]]
         self.y_train = self.y[indices[:train_end]]
-        self.X_val = self.X[indices[train_end:val_end]]
-        self.y_val = self.y[indices[train_end:val_end]]
-        self.X_test = self.X[indices[val_end:]]
-        self.y_test = self.y[indices[val_end:]]
+        self.X_test = self.X[indices[train_end:]]
+        self.y_test = self.y[indices[train_end:]]
 
         m_train = self.X_train.shape[0] if self.X_train is not None else 0
-        m_val = self.X_val.shape[0] if self.X_val is not None else 0
         m_test = self.X_test.shape[0] if self.X_test is not None else 0
         self.log(
-            f'Split data into {m_train} training samples, {m_val} validation '
-            f'samples, and {m_test} test samples.'
+            f'Split data into {m_train} training samples '
+            f'and {m_test} test samples.'
         )
 
     @override
@@ -450,22 +425,6 @@ class RegressionExperiment(Experiment):
             raise ValueError('Training data not set up. Call split() first.')
 
         return self.X_train, self.y_train
-
-    @override
-    def get_validation_set(self) -> tuple[np.ndarray, np.ndarray]:
-        """Returns the validation split as ``(X_val, y_val)``.
-
-        Raises:
-            ValueError: If the validation split has not been created yet or if
-                validation was not requested.
-        """
-
-        super().get_validation_set()
-
-        if self.X_val is None or self.y_val is None:
-            raise ValueError('Validation data not set up. Call split() first.')
-
-        return self.X_val, self.y_val
 
     @override
     def get_test_set(self) -> tuple[np.ndarray, np.ndarray]:

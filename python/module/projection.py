@@ -1,11 +1,13 @@
 from pathlib import Path
+from typing import cast, override
 
 from common.files import save_content_to_file
 from common.hyperparameters import get_hyperparameters_str
-from common.metrics import RegressionMetricName, RegressionMetrics
+from common.metrics import RegressionMetrics
 from common.names import to_kebab
 from dataset.dataset import Dataset, DatasetSchema
 from dataset.year_trc import YearTRC
+from experiment.experiment_group import ExperimentGroup
 from experiment.projection import ProjectionExperiment
 from step.model.drift_baseline import DriftBaseline
 from step.model.exponential_smoothing import ExponentialSmoothing
@@ -26,7 +28,7 @@ from step.plot.support_vector_regression import (
 from util.table import Table
 
 
-def getNaivePersistenceProjection() -> ProjectionExperiment:
+def getNaivePersistenceProjection(**_) -> ProjectionExperiment:
     return ProjectionExperiment(
         name='Naive Persistence',
         description=(
@@ -36,7 +38,7 @@ def getNaivePersistenceProjection() -> ProjectionExperiment:
     )
 
 
-def getDriftBaselineProjection() -> ProjectionExperiment:
+def getDriftBaselineProjection(**_) -> ProjectionExperiment:
     return ProjectionExperiment(
         name='Drift Baseline',
         description=('Project the original time series with drift baseline.'),
@@ -44,7 +46,7 @@ def getDriftBaselineProjection() -> ProjectionExperiment:
     )
 
 
-def getExponentialSmoothingProjection() -> ProjectionExperiment:
+def getExponentialSmoothingProjection(**_) -> ProjectionExperiment:
     experiment = ProjectionExperiment(
         name='Exponential Smoothing',
         description=(
@@ -58,7 +60,7 @@ def getExponentialSmoothingProjection() -> ProjectionExperiment:
     return experiment
 
 
-def getPolynomialRegressionProjection() -> ProjectionExperiment:
+def getPolynomialRegressionProjection(**_) -> ProjectionExperiment:
     experiment = ProjectionExperiment(
         name='Polynomial Regression',
         description=(
@@ -81,7 +83,7 @@ def getPolynomialRegressionProjection() -> ProjectionExperiment:
     return experiment
 
 
-def getRidgeRegressionProjection() -> ProjectionExperiment:
+def getRidgeRegressionProjection(**_) -> ProjectionExperiment:
     experiment = ProjectionExperiment(
         name='Ridge Regression',
         description=('Project the original time series with ridge regression.'),
@@ -102,7 +104,7 @@ def getRidgeRegressionProjection() -> ProjectionExperiment:
     return experiment
 
 
-def getGaussianProcessProjection() -> ProjectionExperiment:
+def getGaussianProcessProjection(**_) -> ProjectionExperiment:
     experiment = ProjectionExperiment(
         name='Gaussian Process Regression',
         description=(
@@ -126,7 +128,7 @@ def getGaussianProcessProjection() -> ProjectionExperiment:
 
 
 def getSupportVectorRegressionProjection(
-    tune_gamma: bool = True,
+    **context: str,
 ) -> ProjectionExperiment:
     experiment = ProjectionExperiment(
         name='Support Vector Regression',
@@ -140,7 +142,7 @@ def getSupportVectorRegressionProjection(
         plotter_factory=SupportVectorRegressionPlotter,
     )
 
-    if tune_gamma:
+    if context.get('svr_tune_gamma', 'False').lower() == 'true':
         experiment.set_context(
             tuning_parameters={
                 'hyperparameter_names': ['C', 'epsilon', 'gamma'],
@@ -181,63 +183,93 @@ def getSupportVectorRegressionProjection(
     return experiment
 
 
+class ProjectionExperimentGroup(ExperimentGroup):
+    @override
+    def run(self, dataset: Dataset, schema: DatasetSchema) -> None:
+        super().run(dataset)
+
+        X, y = dataset.X, dataset.y
+        assert y is not None
+
+        seed = int(self.context.get('seed', 42))
+        metric = self.context.get('metric', 'mape')
+        for experiment in self.experiments:
+            experiment = cast(ProjectionExperiment, experiment)
+
+            # Set the random seed for reproducibility.
+            experiment.seed = seed
+
+            # Inject schema into the experiment context.
+            experiment.context['schema'] = schema
+
+            # Inject metric into the experiment context for hyperparameter
+            # tuning if tuning parameters are defined.
+            if 'tuning_parameters' in experiment.context:
+                experiment.context['tuning_parameters']['metric'] = metric
+
+            experiment.setup(X, y)
+            experiment.run()
+            experiment.logger.info(experiment.get_metrics())
+            experiment.finish()
+
+    @override
+    def check_dataset(self, dataset: Dataset) -> None:
+        X, y = dataset.X, dataset.y
+
+        if y is None:
+            raise ValueError(
+                'Label data is required for projection experiment.'
+            )
+
+        if X.shape[0] != y.shape[0]:
+            raise ValueError(
+                'Number of samples in features and labels must be the same.'
+            )
+
+        if X.shape[1] != 1 or y.ndim != 1:
+            raise ValueError(
+                'Features must have exactly one column and labels must be '
+                'one-dimensional.'
+            )
+
+
+def get_projection_experiment_group(
+    context: dict[str, str],
+) -> ProjectionExperimentGroup:
+    group = ProjectionExperimentGroup(name='Projection Experiments')
+    group.add_experiment(getNaivePersistenceProjection(**context))
+    group.add_experiment(getDriftBaselineProjection(**context))
+    group.add_experiment(getExponentialSmoothingProjection(**context))
+    group.add_experiment(getPolynomialRegressionProjection(**context))
+    group.add_experiment(getRidgeRegressionProjection(**context))
+    group.add_experiment(getGaussianProcessProjection(**context))
+    group.add_experiment(getSupportVectorRegressionProjection(**context))
+
+    return group
+
+
 def run_projection_experiments(
     dataset: Dataset,
     schema: DatasetSchema,
-    plot_title: str = '',
-    metric: RegressionMetricName = 'mape',
-    svr_tune_gamma: bool = True,
-    seed: int = 42,
+    context: dict[str, str] | None = None,
 ) -> None:
-    X, y = dataset.X, dataset.y
+    if context is None:
+        context = {}
 
-    if y is None:
-        raise ValueError('Label data is required for projection experiment.')
+    experiment_group = get_projection_experiment_group(context)
+    experiment_group.set_context(**context)
+    experiment_group.run(dataset, schema)
 
-    if X.shape[0] != y.shape[0]:
-        raise ValueError(
-            'Number of samples in features and labels must be the same.'
-        )
 
-    if X.shape[1] != 1 or y.ndim != 1:
-        raise ValueError(
-            'Features must have exactly one column and labels must be '
-            'one-dimensional.'
-        )
-
-    experiments: list[ProjectionExperiment] = [
-        getNaivePersistenceProjection(),
-        getDriftBaselineProjection(),
-        getExponentialSmoothingProjection(),
-        getPolynomialRegressionProjection(),
-        getRidgeRegressionProjection(),
-        getGaussianProcessProjection(),
-        getSupportVectorRegressionProjection(tune_gamma=svr_tune_gamma),
-    ]
-
-    for experiment in experiments:
-        # Set the random seed for reproducibility.
-        experiment.seed = seed
-
-        # Inject schema into the experiment context.
-        experiment.context['schema'] = schema
-
-        # Inject metric into the experiment context for hyperparameter tuning if
-        # tuning parameters are defined.
-        if 'tuning_parameters' in experiment.context:
-            experiment.context['tuning_parameters']['metric'] = metric
-
-        experiment.setup(X, y)
-        experiment.run()
-        experiment.logger.info(experiment.get_metrics())
-        experiment.finish()
-
+def save_projection_experiment_results(
+    group: ProjectionExperimentGroup,
+) -> None:
     # Module path to save the results of the projection experiments.
     module_path = Path('results') / 'module' / 'projection'
 
     # Build a metric table and save it to a file.
     metric_table = Table(headers=['Experiment', 'MAE', 'RMSE', 'R²', 'MAPE'])
-    for experiment in experiments:
+    for experiment in group.experiments:
         metrics: RegressionMetrics = experiment.get_metrics()
         [mae_str, rmse_str, r2_str, mape_str] = metrics.item_strs()
         metric_table.append_row(
@@ -257,7 +289,7 @@ def run_projection_experiments(
 
     # Build a hyperparameter table and save it to a file.
     hyperparameter_table = Table(headers=['Experiment', 'Hyperparameters'])
-    for experiment in experiments:
+    for experiment in group.experiments:
         hyerparameters_str = get_hyperparameters_str(experiment.hyperparameters)
         hyperparameter_table.append_row(
             experiment.name,
@@ -275,9 +307,8 @@ def run_projection_experiments(
 
     # Save the plots of each experiment.
     plots_dir: Path = module_path / 'plots'
-    for experiment in experiments:
-        # Inject plot title into the experiment context.
-        experiment.context['plot_title'] = plot_title
+    for experiment in group.experiments:
+        experiment.context['plot_title'] = ''
 
         plotter: Plotter | None = experiment.plot()
         if plotter is None:
@@ -296,5 +327,7 @@ if __name__ == '__main__':
     # We find that tuning the gamma hyperparameter of SVR drops the performance
     # instead.
     run_projection_experiments(
-        dataset, schema, metric='mape', svr_tune_gamma=True, seed=150
+        dataset,
+        schema,
+        {'metric': 'mape', 'svr_tune_gamma': 'True', 'seed': '151'},
     )

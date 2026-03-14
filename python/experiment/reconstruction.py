@@ -28,7 +28,7 @@ class ReconstructionExperiment(RegressionExperiment):
             SupervisedLearningModel | RegressorMixin
         ] = LinearRegression,
     ) -> None:
-        super().__init__(name, description, seed, train_rate, val_rate=0.0)
+        super().__init__(name, description, seed, train_rate)
         self.regressor = regressor
 
     @override

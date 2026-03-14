@@ -2,11 +2,17 @@
 source .venv/bin/activate
 
 # Set the PYTHONPATH to include all the modules under `python`.
-PYTHONPATH="$PYTHONPATH:$PWD/python" && export PYTHONPATH
+_path="$PWD/python"
+if [[ ":$PYTHONPATH:" != *":$_path:"* ]]; then
+    export PYTHONPATH="${PYTHONPATH:+$PYTHONPATH:}$_path"
+fi
 
 # Add the `bin` directory to the PATH.
-PATH="$PWD/bin:$PATH" && export PATH
+_path="$PWD/bin"
+if [[ ":$PATH:" != *":$_path:"* ]]; then
+    export PATH="${PATH:+$PATH:}$_path"
+fi
 
 function run_module() {
-    python "python/module/$1.py" "${@: -2:1}"
+    python "python/module/$1.py" "${@:2}"
 }

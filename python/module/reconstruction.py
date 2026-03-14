@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import cast, override
 
 from common.files import save_content_to_file
 from common.hyperparameters import get_hyperparameters_str
@@ -7,6 +8,7 @@ from common.names import to_kebab
 from dataset.dataset import Dataset, DatasetSchema
 from dataset.year_pwg import YearPWG
 from dataset.year_trc import YearTRC
+from experiment.experiment_group import ExperimentGroup
 from experiment.reconstruction import ReconstructionExperiment
 from step.model.cubic_spline import CubicSpline
 from step.model.gaussian_process_regression import GaussianProcessRegression
@@ -27,7 +29,7 @@ from step.plot.support_vector_regression import (
 from util.table import Table
 
 
-def getLinearInterpolationReconstruction() -> ReconstructionExperiment:
+def getLinearInterpolationReconstruction(**_) -> ReconstructionExperiment:
     """Builds a linear-interpolation reconstruction experiment."""
 
     experiment = ReconstructionExperiment(
@@ -41,7 +43,9 @@ def getLinearInterpolationReconstruction() -> ReconstructionExperiment:
     return experiment
 
 
-def getMovingAverageInterpolationReconstruction() -> ReconstructionExperiment:
+def getMovingAverageInterpolationReconstruction(
+    **_,
+) -> ReconstructionExperiment:
     """Builds a moving-average-interpolation reconstruction experiment."""
 
     experiment = ReconstructionExperiment(
@@ -56,7 +60,7 @@ def getMovingAverageInterpolationReconstruction() -> ReconstructionExperiment:
     return experiment
 
 
-def getCubicSplineInterpolationReconstruction() -> ReconstructionExperiment:
+def getCubicSplineInterpolationReconstruction(**_) -> ReconstructionExperiment:
     """Builds a cubic-spline-interpolation reconstruction experiment."""
 
     experiment = ReconstructionExperiment(
@@ -71,7 +75,7 @@ def getCubicSplineInterpolationReconstruction() -> ReconstructionExperiment:
     return experiment
 
 
-def getPolynomialRegressionReconstruction() -> ReconstructionExperiment:
+def getPolynomialRegressionReconstruction(**_) -> ReconstructionExperiment:
     """Builds a polynomial-regression reconstruction experiment."""
 
     experiment = ReconstructionExperiment(
@@ -96,7 +100,7 @@ def getPolynomialRegressionReconstruction() -> ReconstructionExperiment:
     return experiment
 
 
-def getRidgeRegressionReconstruction() -> ReconstructionExperiment:
+def getRidgeRegressionReconstruction(**_) -> ReconstructionExperiment:
     """Builds a ridge-regression reconstruction experiment."""
 
     experiment = ReconstructionExperiment(
@@ -121,7 +125,7 @@ def getRidgeRegressionReconstruction() -> ReconstructionExperiment:
     return experiment
 
 
-def getGaussianProcessReconstruction() -> ReconstructionExperiment:
+def getGaussianProcessReconstruction(**_) -> ReconstructionExperiment:
     """Builds a Gaussian-process reconstruction experiment."""
 
     experiment = ReconstructionExperiment(
@@ -148,7 +152,7 @@ def getGaussianProcessReconstruction() -> ReconstructionExperiment:
 
 
 def getSupportVectorRegressionReconstruction(
-    tune_gamma: bool = True,
+    **context,
 ) -> ReconstructionExperiment:
     """Builds a support-vector-regression reconstruction experiment."""
 
@@ -165,7 +169,7 @@ def getSupportVectorRegressionReconstruction(
         plotter_factory=SupportVectorRegressionPlotter,
     )
 
-    if tune_gamma:
+    if context.get('svr_tune_gamma', 'False').lower() == 'true':
         experiment.set_context(
             tuning_parameters={
                 'hyperparameter_names': ['C', 'epsilon', 'gamma'],
@@ -206,13 +210,99 @@ def getSupportVectorRegressionReconstruction(
     return experiment
 
 
+class ReconstructionExperimentGroup(ExperimentGroup):
+    """Runs the configured reconstruction experiments."""
+
+    @override
+    def run(self, dataset: Dataset, schema: DatasetSchema) -> None:
+        """Runs the experiments after injecting shared context.
+
+        Args:
+            dataset: Dataset containing the feature matrix and target vector.
+            schema: Schema describing the dataset columns and units.
+        """
+
+        super().run(dataset)
+
+        X, y = dataset.X, dataset.y
+        assert y is not None
+
+        seed = int(self.context.get('seed', 42))
+        metric = cast(RegressionMetricName, self.context.get('metric', 'mape'))
+        for experiment in self.experiments:
+            experiment = cast(ReconstructionExperiment, experiment)
+
+            # Set the random seed for reproducibility.
+            experiment.seed = seed
+
+            # Inject schema into the experiment context.
+            experiment.context['schema'] = schema
+
+            # Inject metric into the experiment context for hyperparameter
+            # tuning if tuning parameters are defined.
+            if 'tuning_parameters' in experiment.context:
+                experiment.context['tuning_parameters']['metric'] = metric
+
+            experiment.setup(X, y)
+            experiment.run()
+            experiment.logger.info(experiment.get_metrics())
+            experiment.finish()
+
+    @override
+    def check_dataset(self, dataset: Dataset) -> None:
+        """Validates the dataset required by reconstruction experiments.
+
+        Args:
+            dataset: Dataset containing the feature matrix and target vector.
+
+        Raises:
+            ValueError: If the dataset is incompatible with reconstruction.
+        """
+
+        X, y = dataset.X, dataset.y
+
+        if y is None:
+            raise ValueError(
+                'Label data is required for reconstruction experiments.'
+            )
+
+        if X.shape[0] != y.shape[0]:
+            raise ValueError(
+                'Number of samples in features and labels must be the same.'
+            )
+
+        if y.ndim != 1:
+            raise ValueError('Labels must be one-dimensional.')
+
+
+def get_reconstruction_experiment_group(
+    context: dict[str, str],
+) -> ReconstructionExperimentGroup:
+    """Builds the reconstruction experiment group.
+
+    Args:
+        tune_gamma: Whether to tune the gamma hyperparameter for SVR.
+
+    Returns:
+        The configured reconstruction experiment group.
+    """
+
+    group = ReconstructionExperimentGroup(name='Reconstruction Experiments')
+    group.add_experiment(getLinearInterpolationReconstruction(**context))
+    group.add_experiment(getMovingAverageInterpolationReconstruction(**context))
+    group.add_experiment(getCubicSplineInterpolationReconstruction(**context))
+    group.add_experiment(getPolynomialRegressionReconstruction(**context))
+    group.add_experiment(getRidgeRegressionReconstruction(**context))
+    group.add_experiment(getGaussianProcessReconstruction(**context))
+    group.add_experiment(getSupportVectorRegressionReconstruction(**context))
+
+    return group
+
+
 def run_reconstruction_experiments(
     dataset: Dataset,
     schema: DatasetSchema,
-    plot_title: str = '',
-    metric: RegressionMetricName = 'mape',
-    svr_tune_gamma: bool = True,
-    seed: int = 42,
+    context: dict[str, str] | None = None,
 ) -> None:
     """Runs the reconstruction experiments and saves their artifacts.
 
@@ -222,57 +312,24 @@ def run_reconstruction_experiments(
         plot_title: Optional title to use for generated plots.
         metric: Metric used during hyperparameter tuning.
         svr_tune_gamma: Whether to tune the gamma hyperparameter for SVR.
+        seed: Random seed for reproducible experiment runs.
     """
 
-    X, y = dataset.X, dataset.y
+    if context is None:
+        context = {}
 
-    if y is None:
-        raise ValueError(
-            'Label data is required for reconstruction experiments.'
-        )
+    experiment_group = get_reconstruction_experiment_group(context)
+    experiment_group.set_context(**context)
+    experiment_group.run(dataset, schema)
 
-    if X.shape[0] != y.shape[0]:
-        raise ValueError(
-            'Number of samples in features and labels must be the same.'
-        )
 
-    if y.ndim != 1:
-        raise ValueError('Labels must be one-dimensional.')
-
-    experiments: list[ReconstructionExperiment] = [
-        getLinearInterpolationReconstruction(),
-        getMovingAverageInterpolationReconstruction(),
-        getCubicSplineInterpolationReconstruction(),
-        getPolynomialRegressionReconstruction(),
-        getRidgeRegressionReconstruction(),
-        getGaussianProcessReconstruction(),
-        getSupportVectorRegressionReconstruction(tune_gamma=svr_tune_gamma),
-    ]
-
-    for experiment in experiments:
-        # Set the random seed for reproducibility.
-        experiment.seed = seed
-
-        # Inject schema into the experiment context.
-        experiment.context['schema'] = schema
-
-        # Inject metric into the experiment context for hyperparameter tuning if
-        # tuning parameters are defined.
-        if 'tuning_parameters' in experiment.context:
-            experiment.context['tuning_parameters']['metric'] = metric
-
-        experiment.setup(X, y)
-        experiment.run()
-        experiment.logger.info(experiment.get_metrics())
-        experiment.finish()
-
+def save_reconstruction_experiment_results(
+    group: ReconstructionExperimentGroup,
+) -> None:
     module_path = Path('results') / 'module' / 'reconstruction'
 
     metric_table = Table(headers=['Experiment', 'MAE', 'RMSE', 'R²', 'MAPE'])
-    for experiment in experiments:
-        # Set the random seed for reproducibility.
-        experiment.seed = seed
-
+    for experiment in group.experiments:
         metrics: RegressionMetrics = experiment.get_metrics()
         [mae_str, rmse_str, r2_str, mape_str] = metrics.item_strs()
         metric_table.append_row(
@@ -291,7 +348,7 @@ def run_reconstruction_experiments(
     print()
 
     hyperparameter_table = Table(headers=['Experiment', 'Hyperparameters'])
-    for experiment in experiments:
+    for experiment in group.experiments:
         hyperparameters_str = get_hyperparameters_str(
             experiment.hyperparameters
         )
@@ -310,17 +367,9 @@ def run_reconstruction_experiments(
     print(hyperparameter_table.__repr__())
     print()
 
-    if X.shape[1] != 1:
-        print(
-            'Skipping plot export for reconstruction experiments because '
-            'plotting requires exactly one feature column.'
-        )
-        return
-
     plots_dir: Path = module_path / 'plots'
-    for experiment in experiments:
-        experiment.context['plot_title'] = plot_title
-
+    for experiment in group.experiments:
+        experiment.context['plot_title'] = ''
         plotter: Plotter | None = experiment.plot()
         if plotter is None:
             continue
@@ -337,5 +386,7 @@ if __name__ == '__main__':
     dataset, schema = YearTRC().fetch('United States')
 
     run_reconstruction_experiments(
-        dataset, schema, metric='mape', svr_tune_gamma=True, seed=150
+        dataset,
+        schema,
+        {'metric': 'mape', 'svr_tune_gamma': 'True', 'seed': '151'},
     )
