@@ -192,7 +192,11 @@ class ProjectionExperimentGroup(ExperimentGroup):
         assert y is not None
 
         seed = int(self.context.get('seed', 42))
+        self.logger.info(f'Using seed {seed}.')
+
         metric = self.context.get('metric', 'mape')
+        self.logger.info(f'Using metric "{metric}" for hyperparameter tuning.')
+
         for experiment in self.experiments:
             experiment = cast(ProjectionExperiment, experiment)
 
@@ -252,13 +256,15 @@ def run_projection_experiments(
     dataset: Dataset,
     schema: DatasetSchema,
     context: dict[str, str] | None = None,
-) -> None:
+) -> ProjectionExperimentGroup:
     if context is None:
         context = {}
 
-    experiment_group = get_projection_experiment_group(context)
-    experiment_group.set_context(**context)
-    experiment_group.run(dataset, schema)
+    group = get_projection_experiment_group(context)
+    group.set_context(**context)
+    group.run(dataset, schema)
+
+    return group
 
 
 def save_projection_experiment_results(

@@ -2,6 +2,7 @@ from abc import abstractmethod
 
 from dataset.dataset import Dataset
 from experiment.experiment import Experiment
+from util import logging
 
 
 class ExperimentGroup:
@@ -9,6 +10,7 @@ class ExperimentGroup:
         self.name: str = name
         self.experiments: list[Experiment] = []
         self.context: dict[str, str] = {}
+        self.logger = logging.get_logger(self.name)
 
     def set_context(self, **kwargs: str) -> None:
         self.context.update(kwargs)

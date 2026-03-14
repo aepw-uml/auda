@@ -9,7 +9,6 @@ from common.metrics import (
 from experiment.experiment import RegressionExperiment
 from sklearn.base import RegressorMixin
 from sklearn.ensemble import IsolationForest
-from sklearn.linear_model import LinearRegression
 from step.evaluator.time_series_cross_validation import (
     time_series_cross_validation,
 )
@@ -25,11 +24,9 @@ class ProjectionExperiment(RegressionExperiment):
         self,
         name: str,
         description: str,
+        regressor: Type[SupervisedLearningModel | RegressorMixin],
         seed: int = 42,
         train_rate: float = 0.8,
-        regressor: Type[
-            SupervisedLearningModel | RegressorMixin
-        ] = LinearRegression,
     ) -> None:
         super().__init__(name, description, seed, train_rate)
         self.regressor = regressor

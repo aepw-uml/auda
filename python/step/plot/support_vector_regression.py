@@ -16,6 +16,8 @@ class SupportVectorRegressionPlotter(RegressionPlotter):
         self.curve_description = 'Support Vector Regression'
         self.ax.set_title('Support Vector Regression')
 
+        self.set_labels_legend()
+
     def plot_epsilon_tube(self) -> None:
         """Plots the epsilon tube around the regression curve."""
 

@@ -3,7 +3,7 @@ from typing import cast, override
 
 from common.files import save_content_to_file
 from common.hyperparameters import get_hyperparameters_str
-from common.metrics import RegressionMetricName, RegressionMetrics
+from common.metrics import RegressionMetrics
 from common.names import to_kebab
 from dataset.dataset import Dataset, DatasetSchema
 from dataset.year_pwg import YearPWG
@@ -228,7 +228,11 @@ class ReconstructionExperimentGroup(ExperimentGroup):
         assert y is not None
 
         seed = int(self.context.get('seed', 42))
-        metric = cast(RegressionMetricName, self.context.get('metric', 'mape'))
+        self.logger.info(f'Using seed {seed}.')
+
+        metric = self.context.get('metric', 'mape')
+        self.logger.info(f'Using metric "{metric}" for hyperparameter tuning.')
+
         for experiment in self.experiments:
             experiment = cast(ReconstructionExperiment, experiment)
 
@@ -303,24 +307,27 @@ def run_reconstruction_experiments(
     dataset: Dataset,
     schema: DatasetSchema,
     context: dict[str, str] | None = None,
-) -> None:
+) -> ReconstructionExperimentGroup:
     """Runs the reconstruction experiments and saves their artifacts.
 
     Args:
         dataset: Dataset containing the feature matrix and target vector.
         schema: Schema describing the dataset columns and units.
-        plot_title: Optional title to use for generated plots.
-        metric: Metric used during hyperparameter tuning.
-        svr_tune_gamma: Whether to tune the gamma hyperparameter for SVR.
-        seed: Random seed for reproducible experiment runs.
+        context: Optional dictionary containing context values for the
+            experiments
+
+    Returns:
+        The reconstruction experiment group containing the run experiments.
     """
 
     if context is None:
         context = {}
 
-    experiment_group = get_reconstruction_experiment_group(context)
-    experiment_group.set_context(**context)
-    experiment_group.run(dataset, schema)
+    group = get_reconstruction_experiment_group(context)
+    group.set_context(**context)
+    group.run(dataset, schema)
+
+    return group
 
 
 def save_reconstruction_experiment_results(
