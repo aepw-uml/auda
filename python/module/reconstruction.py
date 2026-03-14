@@ -6,11 +6,8 @@ from common.metrics import RegressionMetricName, RegressionMetrics
 from common.names import to_kebab
 from dataset.dataset import Dataset, DatasetSchema
 from dataset.year_pw import YearPW
-from experiment.projection import ProjectionExperiment
-from step.model.drift_baseline import DriftBaseline
-from step.model.exponential_smoothing import ExponentialSmoothing
+from experiment.reconstruction import ReconstructionExperiment
 from step.model.gaussian_process_regression import GaussianProcessRegression
-from step.model.naive_persistence import NaivePersistence
 from step.model.polynomial_regression import PolynomialRegression
 from step.model.ridge_regression import RidgeRegression
 from step.model.support_vector_regression import SupportVectorRegression
@@ -26,43 +23,13 @@ from step.plot.support_vector_regression import (
 from util.table import Table
 
 
-def getNaivePersistenceProjection() -> ProjectionExperiment:
-    return ProjectionExperiment(
-        name='Naive Persistence',
-        description=(
-            'Project the original time series with naive persistence.'
-        ),
-        regressor=NaivePersistence,
-    )
+def getPolynomialRegressionReconstruction() -> ReconstructionExperiment:
+    """Builds a polynomial-regression reconstruction experiment."""
 
-
-def getDriftBaselineProjection() -> ProjectionExperiment:
-    return ProjectionExperiment(
-        name='Drift Baseline',
-        description=('Project the original time series with drift baseline.'),
-        regressor=DriftBaseline,
-    )
-
-
-def getExponentialSmoothingProjection() -> ProjectionExperiment:
-    experiment = ProjectionExperiment(
-        name='Exponential Smoothing',
-        description=(
-            'Project the original time series with exponential smoothing.'
-        ),
-        regressor=ExponentialSmoothing,
-    )
-
-    experiment.set_context(use_scaler=False)
-
-    return experiment
-
-
-def getPolynomialRegressionProjection() -> ProjectionExperiment:
-    experiment = ProjectionExperiment(
+    experiment = ReconstructionExperiment(
         name='Polynomial Regression',
         description=(
-            'Project the original time series with polynomial regression.'
+            'Reconstruct the original time series with polynomial regression.'
         ),
         regressor=PolynomialRegression,
     )
@@ -81,10 +48,14 @@ def getPolynomialRegressionProjection() -> ProjectionExperiment:
     return experiment
 
 
-def getRidgeRegressionProjection() -> ProjectionExperiment:
-    experiment = ProjectionExperiment(
+def getRidgeRegressionReconstruction() -> ReconstructionExperiment:
+    """Builds a ridge-regression reconstruction experiment."""
+
+    experiment = ReconstructionExperiment(
         name='Ridge Regression',
-        description=('Project the original time series with ridge regression.'),
+        description=(
+            'Reconstruct the original time series with ridge regression.'
+        ),
         regressor=RidgeRegression,
     )
 
@@ -102,11 +73,14 @@ def getRidgeRegressionProjection() -> ProjectionExperiment:
     return experiment
 
 
-def getGaussianProcessProjection() -> ProjectionExperiment:
-    experiment = ProjectionExperiment(
+def getGaussianProcessReconstruction() -> ReconstructionExperiment:
+    """Builds a Gaussian-process reconstruction experiment."""
+
+    experiment = ReconstructionExperiment(
         name='Gaussian Process Regression',
         description=(
-            'Project the original time series with Gaussian process regression.'
+            'Reconstruct the original time series with Gaussian process '
+            'regression.'
         ),
         regressor=GaussianProcessRegression,
     )
@@ -125,13 +99,16 @@ def getGaussianProcessProjection() -> ProjectionExperiment:
     return experiment
 
 
-def getSupportVectorRegressionProjection(
+def getSupportVectorRegressionReconstruction(
     tune_gamma: bool = True,
-) -> ProjectionExperiment:
-    experiment = ProjectionExperiment(
+) -> ReconstructionExperiment:
+    """Builds a support-vector-regression reconstruction experiment."""
+
+    experiment = ReconstructionExperiment(
         name='Support Vector Regression',
         description=(
-            'Project the original time series with support vector regression.'
+            'Reconstruct the original time series with support vector '
+            'regression.'
         ),
         regressor=SupportVectorRegression,
     )
@@ -181,7 +158,7 @@ def getSupportVectorRegressionProjection(
     return experiment
 
 
-def run_projection_experiments(
+def run_reconstruction_experiments(
     dataset: Dataset,
     schema: DatasetSchema,
     plot_title: str = '',
@@ -189,30 +166,36 @@ def run_projection_experiments(
     svr_tune_gamma: bool = True,
     seed: int = 42,
 ) -> None:
+    """Runs the reconstruction experiments and saves their artifacts.
+
+    Args:
+        dataset: Dataset containing the feature matrix and target vector.
+        schema: Schema describing the dataset columns and units.
+        plot_title: Optional title to use for generated plots.
+        metric: Metric used during hyperparameter tuning.
+        svr_tune_gamma: Whether to tune the gamma hyperparameter for SVR.
+    """
+
     X, y = dataset.X, dataset.y
 
     if y is None:
-        raise ValueError('Label data is required for projection experiment.')
+        raise ValueError(
+            'Label data is required for reconstruction experiments.'
+        )
 
     if X.shape[0] != y.shape[0]:
         raise ValueError(
             'Number of samples in features and labels must be the same.'
         )
 
-    if X.shape[1] != 1 or y.ndim != 1:
-        raise ValueError(
-            'Features must have exactly one column and labels must be '
-            'one-dimensional.'
-        )
+    if y.ndim != 1:
+        raise ValueError('Labels must be one-dimensional.')
 
-    experiments: list[ProjectionExperiment] = [
-        getNaivePersistenceProjection(),
-        getDriftBaselineProjection(),
-        getExponentialSmoothingProjection(),
-        getPolynomialRegressionProjection(),
-        getRidgeRegressionProjection(),
-        getGaussianProcessProjection(),
-        getSupportVectorRegressionProjection(tune_gamma=svr_tune_gamma),
+    experiments: list[ReconstructionExperiment] = [
+        getPolynomialRegressionReconstruction(),
+        getRidgeRegressionReconstruction(),
+        getGaussianProcessReconstruction(),
+        getSupportVectorRegressionReconstruction(tune_gamma=svr_tune_gamma),
     ]
 
     for experiment in experiments:
@@ -232,12 +215,13 @@ def run_projection_experiments(
         experiment.logger.info(experiment.get_metrics())
         experiment.finish()
 
-    # Module path to save the results of the projection experiments.
-    module_path = Path('results') / 'module' / 'projection'
+    module_path = Path('results') / 'module' / 'reconstruction'
 
-    # Build a metric table and save it to a file.
     metric_table = Table(headers=['Experiment', 'MAE', 'RMSE', 'R²', 'MAPE'])
     for experiment in experiments:
+        # Set the random seed for reproducibility.
+        experiment.seed = seed
+
         metrics: RegressionMetrics = experiment.get_metrics()
         [mae_str, rmse_str, r2_str, mape_str] = metrics.item_strs()
         metric_table.append_row(
@@ -255,14 +239,16 @@ def run_projection_experiments(
     print(metric_table.__repr__())
     print()
 
-    # Build a hyperparameter table and save it to a file.
     hyperparameter_table = Table(headers=['Experiment', 'Hyperparameters'])
     for experiment in experiments:
-        hyerparameters_str = get_hyperparameters_str(experiment.hyperparameters)
+        hyperparameters_str = get_hyperparameters_str(
+            experiment.hyperparameters
+        )
         hyperparameter_table.append_row(
             experiment.name,
-            hyerparameters_str if hyerparameters_str else '-',
+            hyperparameters_str if hyperparameters_str else '-',
         )
+
     hyperparameter_table_path: Path = module_path / 'hyperparameter_table'
     save_content_to_file(
         hyperparameter_table_path,
@@ -273,10 +259,15 @@ def run_projection_experiments(
     print(hyperparameter_table.__repr__())
     print()
 
-    # Save the plots of each experiment.
+    if X.shape[1] != 1:
+        print(
+            'Skipping plot export for reconstruction experiments because '
+            'plotting requires exactly one feature column.'
+        )
+        return
+
     plots_dir: Path = module_path / 'plots'
     for experiment in experiments:
-        # Inject plot title into the experiment context.
         experiment.context['plot_title'] = plot_title
 
         plotter: Plotter | None = experiment.plot()
@@ -290,11 +281,10 @@ def run_projection_experiments(
 
 if __name__ == '__main__':
     # location = 'United States'
-    location = 'Japan'
+    # location = 'Japan'
+    location = 'United Kingdom'
     dataset, schema = YearPW().fetch(location)
 
-    # We find that tuning the gamma hyperparameter of SVR drops the performance
-    # instead.
-    run_projection_experiments(
+    run_reconstruction_experiments(
         dataset, schema, metric='mape', svr_tune_gamma=True, seed=150
     )

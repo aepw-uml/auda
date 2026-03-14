@@ -78,7 +78,6 @@ class GaussianProcessRegression(Regression):
 
         self.regressor_ = GaussianProcessRegressor(
             kernel=kernel,
-            optimizer=None,  # type: ignore[assignment]
         )
         self.regressor_.fit(X, y)
 
