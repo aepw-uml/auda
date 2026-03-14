@@ -1,7 +1,7 @@
 from logging import Logger
-from random import Random
-from typing import Callable
+from typing import Callable, Literal
 
+import numpy as np
 from common.metrics import RegressionMetricName, RegressionMetrics
 
 Interval = tuple[float, float]
@@ -9,12 +9,14 @@ Hyperparameters = list[float]
 HyperparameterScore = tuple[float, Hyperparameters]
 Domain = list[Interval]
 SearchSpace = list[Domain]
+SamplingScale = Literal['uniform', 'log_uniform']
 
 
 def random_search(
     hyperparameter_names: list[str],
     search_space: SearchSpace,
     evaluate_hyperparameters: Callable[[Hyperparameters], RegressionMetrics],
+    sampling_scales: list[SamplingScale],
     metric: RegressionMetricName = 'mape',
     num_iterations: int = 100,
     seed: int = 42,
@@ -39,6 +41,7 @@ def random_search(
         evaluate_hyperparameters: A function that takes a list of hyperparameter
             values and returns a RegressionMetrics object containing the
             evaluation metrics for those hyperparameters.
+        sampling_scales: A list of sampling scales for each hyperparameter.
         metric: The name of the metric to optimize.
         num_iterations: The number of random hyperparameter combinations to
             evaluate.
@@ -50,7 +53,7 @@ def random_search(
         evaluated.
     """
 
-    rng = Random(seed)
+    rng = np.random.default_rng(seed=seed)
     if len(search_space) != len(hyperparameter_names):
         raise ValueError(
             'Length of search_space must match length of hyperparameter_names.'
@@ -59,8 +62,8 @@ def random_search(
     hyperparameter_scores: list[HyperparameterScore] = []
     for i in range(num_iterations):
         hyperparameters: Hyperparameters = [
-            select_random_hyperparameter(intervals, rng)
-            for intervals in search_space
+            select_random_hyperparameter(intervals, rng, sampling_scales[i])
+            for i, intervals in enumerate(search_space)
         ]
 
         metrics: RegressionMetrics = evaluate_hyperparameters(hyperparameters)
@@ -86,18 +89,28 @@ def random_search(
     return hyperparameter_scores
 
 
-def select_random_hyperparameter(intervals: Domain, rng: Random) -> float:
+def select_random_hyperparameter(
+    intervals: Domain,
+    rng: np.random.Generator,
+    sampling_scale: SamplingScale,
+) -> float:
     """Selects a random hyperparameter value from the given intervals.
 
     Args:
         intervals: A list of intervals from which to select a random value.
         rng: A random number generator instance.
+        sampling_scale: The sampling scale to use.
 
     Returns:
         A random hyperparameter value selected from the given intervals.
     """
 
-    selected_interval_index = rng.randint(0, len(intervals) - 1)
-    selected_interval = intervals[selected_interval_index]
+    # Randomly select one of the intervals.
+    selected_interval_index = rng.integers(0, len(intervals))
+    low, high = intervals[selected_interval_index]
 
-    return rng.uniform(selected_interval[0], selected_interval[1])
+    match sampling_scale:
+        case 'log_uniform':
+            return np.exp(rng.uniform(np.log(low), np.log(high)))
+        case 'uniform':
+            return rng.uniform(low, high)

@@ -1,11 +1,13 @@
 from logging import Logger
 from typing import Callable, cast
 
+import numpy as np
 from common.metrics import RegressionMetricName, RegressionMetrics
 from step.tuner.random_search import (
     Hyperparameters,
     HyperparameterScore,
     Interval,
+    SamplingScale,
     SearchSpace,
     random_search,
 )
@@ -17,6 +19,7 @@ def multistage_random_search(
     elite_fractions: list[float],
     refinement_widths: list[list[float]],
     evaluate_hyperparameters: Callable[[Hyperparameters], RegressionMetrics],
+    sampling_scales: list[SamplingScale],
     hyperparameter_domains: list[Interval] | None = None,
     metric: RegressionMetricName = 'mape',
     expect_higher: bool | str = 'auto',
@@ -24,7 +27,7 @@ def multistage_random_search(
     seed: int = 42,
     logger: Logger | None = None,
 ) -> tuple[list[list[HyperparameterScore]], Hyperparameters]:
-    """Runs random search over multiple refinement stages.
+    """Runs Multistage random search (MRS) over multiple refinement stages.
 
     This function performs ``len(elite_fractions) + 1`` stages. At each stage
     it calls ``single_stage`` to evaluate ``num_iterations`` randomly sampled
@@ -44,6 +47,7 @@ def multistage_random_search(
         evaluate_hyperparameters: A function that takes a list of hyperparameter
             values and returns a RegressionMetrics object containing the
             evaluation metrics for those hyperparameters.
+        sampling_scales: A list of sampling scales for each hyperparameter.
         hyperparameter_domains: Overall domains for each hyperparameter. If
             None, it will be set to the first intervals of the search space.
         metric: The name of the metric to optimize.
@@ -96,6 +100,7 @@ def multistage_random_search(
             elite_fraction,
             refinement_width,
             evaluate_hyperparameters,
+            sampling_scales,
             hyperparameter_domains,
             metric=metric,
             expect_higher=expect_higher,
@@ -120,6 +125,7 @@ def single_stage(
     elite_fraction: float | None,
     refinement_widths: list[float] | None,
     evaluate_hyperparameters: Callable[[Hyperparameters], RegressionMetrics],
+    sampling_scales: list[SamplingScale],
     hyperparameter_domains: list[Interval],
     metric: RegressionMetricName,
     expect_higher: bool,
@@ -150,6 +156,7 @@ def single_stage(
         evaluate_hyperparameters: A function that takes a list of hyperparameter
             values and returns a RegressionMetrics object containing the
             evaluation metrics for those hyperparameters.
+        sampling_scales: A list of sampling scales for each hyperparameter.
         hyperparameter_domains: Overall domains for each hyperparameter.
         metric: The name of the metric to optimize.
         expect_higher: Whether higher values of the chosen metric are better.
@@ -167,6 +174,7 @@ def single_stage(
         hyperparameter_names,
         search_space,
         evaluate_hyperparameters,
+        sampling_scales,
         metric=metric,
         seed=seed,
         num_iterations=num_iterations,
@@ -196,13 +204,68 @@ def single_stage(
         for i in range(len(candidate)):
             hp = candidate[i]
             refinement_width = refinement_widths[i]
-            minimum = hyperparameter_domains[i][0]
-            maximum = hyperparameter_domains[i][1]
+            sampling_scale = sampling_scales[i]
+
             next_search_space[i].append(
-                (
-                    max(hp - refinement_width, minimum),
-                    min(hp + refinement_width, maximum),
+                refine_interval(
+                    hp,
+                    refinement_width,
+                    hyperparameter_domains[i],
+                    sampling_scale,
                 )
             )
 
     return hyperparameter_scores, next_search_space
+
+
+def refine_interval(
+    center: float,
+    refinement_width: float,
+    domain: Interval,
+    sampling_scale: SamplingScale,
+) -> Interval:
+    """Builds a refined interval around a candidate hyperparameter value.
+
+    For ``uniform`` sampling, the refinement is additive in the original
+    parameter space. For ``log_uniform`` sampling, the refinement is additive
+    in log-space so the resulting interval shrinks multiplicatively around the
+    candidate.
+
+    Args:
+        center: The elite candidate value to refine around.
+        refinement_width: Width of the refinement region in the appropriate
+            sampling space.
+        domain: Overall minimum and maximum allowed values.
+        sampling_scale: The sampling scale used for this hyperparameter.
+
+    Returns:
+        A refined interval clipped to the provided domain.
+
+    Raises:
+        ValueError: If log-uniform refinement is requested for a non-positive
+            value or domain.
+    """
+
+    minimum, maximum = domain
+
+    match sampling_scale:
+        case 'uniform':
+            return (
+                max(center - refinement_width, minimum),
+                min(center + refinement_width, maximum),
+            )
+        case 'log_uniform':
+            if center <= 0.0 or minimum <= 0.0 or maximum <= 0.0:
+                raise ValueError(
+                    'Log-uniform refinement requires positive values and '
+                    'domains.'
+                )
+
+            log_center = np.log(center)
+            log_minimum = np.log(minimum)
+            log_maximum = np.log(maximum)
+
+            return (
+                float(np.exp(max(log_center - refinement_width, log_minimum))),
+                float(np.exp(min(log_center + refinement_width, log_maximum))),
+            )

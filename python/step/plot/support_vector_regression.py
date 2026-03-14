@@ -5,7 +5,7 @@ from step.plot.plotter import RegressionPlotter
 
 
 class SupportVectorRegressionPlotter(RegressionPlotter):
-    """Plots support vector regression reconstruction results."""
+    """Plots support vector regression results."""
 
     @override
     def plot(self) -> None:

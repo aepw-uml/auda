@@ -6,7 +6,7 @@ from common.metrics import RegressionMetricName, RegressionMetrics
 from common.names import to_kebab
 from dataset.dataset import Dataset, DatasetSchema
 from dataset.year_pw import YearPW
-from experiment.reconstruction import ReconstructionExperiment
+from experiment.projection import ProjectionExperiment
 from step.model.drift_baseline import DriftBaseline
 from step.model.exponential_smoothing import ExponentialSmoothing
 from step.model.gaussian_process_regression import GaussianProcessRegression
@@ -26,31 +26,29 @@ from step.plot.support_vector_regression import (
 from util.table import Table
 
 
-def getNaivePersistenceReconstruction() -> ReconstructionExperiment:
-    return ReconstructionExperiment(
+def getNaivePersistenceProjection() -> ProjectionExperiment:
+    return ProjectionExperiment(
         name='Naive Persistence',
         description=(
-            'Reconstruct the original time series with naive persistence.'
+            'Project the original time series with naive persistence.'
         ),
         regressor=NaivePersistence,
     )
 
 
-def getDriftBaselineReconstruction() -> ReconstructionExperiment:
-    return ReconstructionExperiment(
+def getDriftBaselineProjection() -> ProjectionExperiment:
+    return ProjectionExperiment(
         name='Drift Baseline',
-        description=(
-            'Reconstruct the original time series with drift baseline.'
-        ),
+        description=('Project the original time series with drift baseline.'),
         regressor=DriftBaseline,
     )
 
 
-def getExponentialSmoothingReconstruction() -> ReconstructionExperiment:
-    experiment = ReconstructionExperiment(
+def getExponentialSmoothingProjection() -> ProjectionExperiment:
+    experiment = ProjectionExperiment(
         name='Exponential Smoothing',
         description=(
-            'Reconstruct the original time series with exponential smoothing.'
+            'Project the original time series with exponential smoothing.'
         ),
         regressor=ExponentialSmoothing,
     )
@@ -60,11 +58,11 @@ def getExponentialSmoothingReconstruction() -> ReconstructionExperiment:
     return experiment
 
 
-def getPolynomialRegressionReconstruction() -> ReconstructionExperiment:
-    experiment = ReconstructionExperiment(
+def getPolynomialRegressionProjection() -> ProjectionExperiment:
+    experiment = ProjectionExperiment(
         name='Polynomial Regression',
         description=(
-            'Reconstruct the original time series with polynomial regression.'
+            'Project the original time series with polynomial regression.'
         ),
         regressor=PolynomialRegression,
     )
@@ -76,18 +74,17 @@ def getPolynomialRegressionReconstruction() -> ReconstructionExperiment:
             'search_space': [[(2.0, 12.0)]],
             'elite_fractions': [0.12, 0.06],
             'refinement_widths': [[2], [0.5]],
+            'sampling_scales': ['uniform'],
         },
     )
 
     return experiment
 
 
-def getRidgeRegressionReconstruction() -> ReconstructionExperiment:
-    experiment = ReconstructionExperiment(
+def getRidgeRegressionProjection() -> ProjectionExperiment:
+    experiment = ProjectionExperiment(
         name='Ridge Regression',
-        description=(
-            'Reconstruct the original time series with ridge regression.'
-        ),
+        description=('Project the original time series with ridge regression.'),
         regressor=RidgeRegression,
     )
 
@@ -98,18 +95,18 @@ def getRidgeRegressionReconstruction() -> ReconstructionExperiment:
             'search_space': [[(2.0, 12.0)], [(1e-6, 1e3)]],
             'elite_fractions': [0.12, 0.06],
             'refinement_widths': [[2, 0.5], [0.5, 0.1]],
+            'sampling_scales': ['uniform', 'log_uniform'],
         },
     )
 
     return experiment
 
 
-def getGaussianProcessReconstruction() -> ReconstructionExperiment:
-    experiment = ReconstructionExperiment(
+def getGaussianProcessProjection() -> ProjectionExperiment:
+    experiment = ProjectionExperiment(
         name='Gaussian Process Regression',
         description=(
-            'Reconstruct the original time series with Gaussian process '
-            'regression.'
+            'Project the original time series with Gaussian process regression.'
         ),
         regressor=GaussianProcessRegression,
     )
@@ -121,27 +118,30 @@ def getGaussianProcessReconstruction() -> ReconstructionExperiment:
             'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
             'elite_fractions': [0.12, 0.06],
             'refinement_widths': [[10.0, 0.5], [2.0, 0.1]],
+            'sampling_scales': ['log_uniform', 'log_uniform'],
         },
     )
 
     return experiment
 
 
-def getSupportVectorRegressionReconstruction(
+def getSupportVectorRegressionProjection(
     tune_gamma: bool = True,
-) -> ReconstructionExperiment:
-    experiment = ReconstructionExperiment(
+) -> ProjectionExperiment:
+    experiment = ProjectionExperiment(
         name='Support Vector Regression',
         description=(
-            'Reconstruct the original time series with support vector '
-            'regression.'
+            'Project the original time series with support vector regression.'
         ),
         regressor=SupportVectorRegression,
     )
 
+    experiment.set_context(
+        plotter_factory=SupportVectorRegressionPlotter,
+    )
+
     if tune_gamma:
         experiment.set_context(
-            plotter_factory=SupportVectorRegressionPlotter,
             tuning_parameters={
                 'hyperparameter_names': ['C', 'epsilon', 'gamma'],
                 'search_space': [
@@ -154,11 +154,15 @@ def getSupportVectorRegressionReconstruction(
                     [10.0, 0.2, 0.1],
                     [2.0, 0.05, 0.02],
                 ],
+                'sampling_scales': [
+                    'log_uniform',
+                    'log_uniform',
+                    'log_uniform',
+                ],
             },
         )
     else:
         experiment.set_context(
-            plotter_factory=SupportVectorRegressionPlotter,
             tuning_parameters={
                 'hyperparameter_names': ['C', 'epsilon'],
                 'search_space': [
@@ -170,13 +174,14 @@ def getSupportVectorRegressionReconstruction(
                     [10.0, 0.2],
                     [2.0, 0.05],
                 ],
+                'sampling_scales': ['log_uniform', 'log_uniform'],
             },
         )
 
     return experiment
 
 
-def run_reconstruction_experiments(
+def run_projection_experiments(
     dataset: Dataset,
     schema: DatasetSchema,
     plot_title: str = '',
@@ -186,9 +191,7 @@ def run_reconstruction_experiments(
     X, y = dataset.X, dataset.y
 
     if y is None:
-        raise ValueError(
-            'Label data is required for reconstruction experiment.'
-        )
+        raise ValueError('Label data is required for projection experiment.')
 
     if X.shape[0] != y.shape[0]:
         raise ValueError(
@@ -201,14 +204,14 @@ def run_reconstruction_experiments(
             'one-dimensional.'
         )
 
-    experiments: list[ReconstructionExperiment] = [
-        getNaivePersistenceReconstruction(),
-        getDriftBaselineReconstruction(),
-        getExponentialSmoothingReconstruction(),
-        getPolynomialRegressionReconstruction(),
-        getRidgeRegressionReconstruction(),
-        getGaussianProcessReconstruction(),
-        getSupportVectorRegressionReconstruction(tune_gamma=svr_tune_gamma),
+    experiments: list[ProjectionExperiment] = [
+        getNaivePersistenceProjection(),
+        getDriftBaselineProjection(),
+        getExponentialSmoothingProjection(),
+        getPolynomialRegressionProjection(),
+        getRidgeRegressionProjection(),
+        getGaussianProcessProjection(),
+        getSupportVectorRegressionProjection(tune_gamma=svr_tune_gamma),
     ]
 
     for experiment in experiments:
@@ -225,8 +228,8 @@ def run_reconstruction_experiments(
         experiment.logger.info(experiment.get_metrics())
         experiment.finish()
 
-    # Module path to save the results of the reconstruction experiments.
-    module_path = Path('results') / 'module' / 'reconstruction'
+    # Module path to save the results of the projection experiments.
+    module_path = Path('results') / 'module' / 'projection'
 
     # Build a metric table and save it to a file.
     metric_table = Table(headers=['Experiment', 'MAE', 'RMSE', 'R²', 'MAPE'])
@@ -244,6 +247,9 @@ def run_reconstruction_experiments(
     metric_table_path: Path = module_path / 'metric_table'
     save_content_to_file(metric_table_path, metric_table.__repr__())
     print(f'Saved metric table to "{metric_table_path}".')
+    print()
+    print(metric_table.__repr__())
+    print()
 
     # Build a hyperparameter table and save it to a file.
     hyperparameter_table = Table(headers=['Experiment', 'Hyperparameters'])
@@ -259,6 +265,9 @@ def run_reconstruction_experiments(
         hyperparameter_table.__repr__(),
     )
     print(f'Saved hyperparameter table to "{hyperparameter_table_path}".')
+    print()
+    print(hyperparameter_table.__repr__())
+    print()
 
     # Save the plots of each experiment.
     plots_dir: Path = module_path / 'plots'
@@ -279,4 +288,9 @@ if __name__ == '__main__':
     # location = 'United States'
     location = 'Japan'
     dataset, schema = YearPW().fetch(location)
-    run_reconstruction_experiments(dataset, schema, metric='r2')
+
+    # We find that tuning the gamma hyperparameter of SVR drops the performance
+    # instead.
+    run_projection_experiments(
+        dataset, schema, metric='mape', svr_tune_gamma=True
+    )

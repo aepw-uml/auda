@@ -16,10 +16,10 @@ from step.evaluator.time_series_cross_validation import (
 from step.model.model import SupervisedLearningModel
 from step.model.standardize_regressor import StandardizedRegressor
 from step.tuner.multistage_random_search import multistage_random_search
-from step.tuner.random_search import Interval, SearchSpace
+from step.tuner.random_search import Interval, SamplingScale, SearchSpace
 
 
-class ReconstructionExperiment(RegressionExperiment):
+class ProjectionExperiment(RegressionExperiment):
     @override
     def __init__(
         self,
@@ -93,6 +93,9 @@ class ReconstructionExperiment(RegressionExperiment):
         hyperparameter_domains: list[Interval] | None = tuning_parameters.get(
             'hyperparameter_domains', None
         )
+        sampling_scales: list[SamplingScale] = tuning_parameters.get(
+            'sampling_scales', []
+        )
         metric: RegressionMetricName = tuning_parameters.get('metric', 'mape')
         expect_higher: bool = tuning_parameters.get('expect_higher', 'auto')
         num_iterations: int = tuning_parameters.get('num_iterations', 50)
@@ -146,6 +149,7 @@ class ReconstructionExperiment(RegressionExperiment):
             elite_fractions,
             refinement_widths,
             evaluate_hyperparameters,
+            sampling_scales,
             hyperparameter_domains,
             metric,
             expect_higher,

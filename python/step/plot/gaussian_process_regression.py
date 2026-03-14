@@ -4,7 +4,7 @@ from step.plot.plotter import RegressionPlotter
 
 
 class GaussianProcessRegressionPlotter(RegressionPlotter):
-    """Plots Gaussian process regression reconstruction results."""
+    """Plots Gaussian process regression results."""
 
     @override
     def plot(self) -> None:
