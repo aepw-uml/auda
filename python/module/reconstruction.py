@@ -7,7 +7,10 @@ from common.names import to_kebab
 from dataset.dataset import Dataset, DatasetSchema
 from dataset.year_pw import YearPW
 from experiment.reconstruction import ReconstructionExperiment
+from step.model.cubic_spline import CubicSpline
 from step.model.gaussian_process_regression import GaussianProcessRegression
+from step.model.linear_interpolation import LinearInterpolation
+from step.model.moving_average_interpolation import MovingAverageInterpolation
 from step.model.polynomial_regression import PolynomialRegression
 from step.model.ridge_regression import RidgeRegression
 from step.model.support_vector_regression import SupportVectorRegression
@@ -21,6 +24,50 @@ from step.plot.support_vector_regression import (
     SupportVectorRegressionPlotter,
 )
 from util.table import Table
+
+
+def getLinearInterpolationReconstruction() -> ReconstructionExperiment:
+    """Builds a linear-interpolation reconstruction experiment."""
+
+    experiment = ReconstructionExperiment(
+        name='Linear Interpolation',
+        description=(
+            'Reconstruct the original time series with linear interpolation.'
+        ),
+        regressor=LinearInterpolation,
+    )
+
+    return experiment
+
+
+def getMovingAverageInterpolationReconstruction() -> ReconstructionExperiment:
+    """Builds a moving-average-interpolation reconstruction experiment."""
+
+    experiment = ReconstructionExperiment(
+        name='Moving Average Interpolation',
+        description=(
+            'Reconstruct the original time series with moving average '
+            'interpolation.'
+        ),
+        regressor=MovingAverageInterpolation,
+    )
+
+    return experiment
+
+
+def getCubicSplineInterpolationReconstruction() -> ReconstructionExperiment:
+    """Builds a cubic-spline-interpolation reconstruction experiment."""
+
+    experiment = ReconstructionExperiment(
+        name='Cubic Spline Interpolation',
+        description=(
+            'Reconstruct the original time series with cubic spline '
+            'interpolation.'
+        ),
+        regressor=CubicSpline,
+    )
+
+    return experiment
 
 
 def getPolynomialRegressionReconstruction() -> ReconstructionExperiment:
@@ -192,6 +239,9 @@ def run_reconstruction_experiments(
         raise ValueError('Labels must be one-dimensional.')
 
     experiments: list[ReconstructionExperiment] = [
+        getLinearInterpolationReconstruction(),
+        getMovingAverageInterpolationReconstruction(),
+        getCubicSplineInterpolationReconstruction(),
         getPolynomialRegressionReconstruction(),
         getRidgeRegressionReconstruction(),
         getGaussianProcessReconstruction(),
