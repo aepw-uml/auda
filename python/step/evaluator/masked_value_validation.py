@@ -11,12 +11,13 @@ def masked_value_validation(
         [np.ndarray, np.ndarray, np.ndarray, np.ndarray], RegressionMetrics
     ],
     validation_rate: float = 0.2,
+    num_masks: int = 5,
     seed: int = 42,
-) -> RegressionMetrics:
-    """Evaluates a model on a randomly masked validation subset.
+) -> list[RegressionMetrics]:
+    """Evaluates a model on multiple randomly masked validation subsets.
 
-    This function samples a random subset of rows for validation and uses the
-    remaining rows for training. It is intended for situations where
+    This function samples multiple random subsets of rows for validation and
+    uses the remaining rows for training. It is intended for situations where
     chronological structure does not need to be preserved.
 
     Args:
@@ -26,10 +27,12 @@ def masked_value_validation(
             validation features, and validation targets, and returns a
             ``RegressionMetrics`` object.
         validation_rate: Fraction of rows to reserve for validation.
+        num_masks: Number of distinct random validation masks to evaluate.
         seed: Random seed used when sampling the validation rows.
 
     Returns:
-        The regression metrics produced by ``evaluate`` on the sampled split.
+        A list of regression metrics produced by ``evaluate`` on the sampled
+        splits.
 
     Raises:
         ValueError: If the inputs have invalid shapes or if
@@ -55,6 +58,9 @@ def masked_value_validation(
             'validation_rate must be greater than 0.0 and less than 1.0.'
         )
 
+    if num_masks <= 0:
+        raise ValueError('num_masks must be greater than 0.')
+
     num_validation = max(int(m * validation_rate), 2)
     if num_validation <= 0 or num_validation >= m:
         raise ValueError(
@@ -63,13 +69,19 @@ def masked_value_validation(
         )
 
     rng = np.random.default_rng(seed)
-    validation_idx = np.sort(rng.choice(m, size=num_validation, replace=False))
-    training_mask = np.ones(m, dtype=bool)
-    training_mask[validation_idx] = False
+    all_metrics: list[RegressionMetrics] = []
+    for _ in range(num_masks):
+        validation_idx = np.sort(
+            rng.choice(m, size=num_validation, replace=False)
+        )
+        training_mask = np.ones(m, dtype=bool)
+        training_mask[validation_idx] = False
 
-    X_train = X[training_mask]
-    y_train = y[training_mask]
-    X_val = X[validation_idx]
-    y_val = y[validation_idx]
+        X_train = X[training_mask]
+        y_train = y[training_mask]
+        X_val = X[validation_idx]
+        y_val = y[validation_idx]
 
-    return evaluate(X_train, y_train, X_val, y_val)
+        all_metrics.append(evaluate(X_train, y_train, X_val, y_val))
+
+    return all_metrics

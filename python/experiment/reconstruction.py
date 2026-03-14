@@ -4,6 +4,7 @@ import numpy as np
 from common.metrics import (
     RegressionMetricName,
     RegressionMetrics,
+    average_regression_metrics,
 )
 from experiment.experiment import RegressionExperiment
 from sklearn.base import RegressorMixin
@@ -94,6 +95,7 @@ class ReconstructionExperiment(RegressionExperiment):
         metric: RegressionMetricName = tuning_parameters.get('metric', 'mape')
         expect_higher: bool = tuning_parameters.get('expect_higher', 'auto')
         num_iterations: int = tuning_parameters.get('num_iterations', 50)
+        num_masks: int = tuning_parameters.get('num_masks', 5)
 
         training_features, training_targets = self.get_training_set()
 
@@ -147,13 +149,16 @@ class ReconstructionExperiment(RegressionExperiment):
                 },
             )
 
-            return masked_value_validation(
+            metrics_list = masked_value_validation(
                 training_features,
                 training_targets,
                 evaluate=evaluate_fold,
                 validation_rate=0.1,
+                num_masks=num_masks,
                 seed=self.seed,
             )
+
+            return average_regression_metrics(metrics_list)
 
         _, best_hyperparameters = multistage_random_search(
             hyperparameter_names,
