@@ -5,7 +5,8 @@ from common.hyperparameters import get_hyperparameters_str
 from common.metrics import RegressionMetricName, RegressionMetrics
 from common.names import to_kebab
 from dataset.dataset import Dataset, DatasetSchema
-from dataset.year_pw import YearPW
+from dataset.year_pwg import YearPWG
+from dataset.year_trc import YearTRC
 from experiment.reconstruction import ReconstructionExperiment
 from step.model.cubic_spline import CubicSpline
 from step.model.gaussian_process_regression import GaussianProcessRegression
@@ -330,10 +331,10 @@ def run_reconstruction_experiments(
 
 
 if __name__ == '__main__':
-    # location = 'United States'
-    # location = 'Japan'
     location = 'United Kingdom'
-    dataset, schema = YearPW().fetch(location)
+    dataset, schema = YearPWG().fetch('United States')
+    dataset, schema = YearPWG().fetch('Japan')
+    dataset, schema = YearTRC().fetch('United States')
 
     run_reconstruction_experiments(
         dataset, schema, metric='mape', svr_tune_gamma=True, seed=150

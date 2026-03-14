@@ -3,7 +3,7 @@ class DataTableName:
 
     DEMOGRAPHY = 'd_demography'
     WASTE_GENERATION_MANAGEMENT = 'd_waste_generation_management'
-    PLASTIC_RESIN_DATA = 'd_plastic_resin_data'
+    PLASTIC_RESIN = 'd_plastic_resin'
 
 
 class DemographyColumn:
@@ -36,8 +36,11 @@ class WasteGenerationManagementColumn:
     PLASTIC_WASTE_COLLECTED_PERCENT = f'{DataTableName.WASTE_GENERATION_MANAGEMENT}.plastic_waste_collected_percent'
 
 
-class PlasticResinDataColumn:
-    """Data columns in the "d_plastic_resin_data" data table."""
+class PlasticResinColumn:
+    """Data columns in the "d_plastic_resin" data table."""
 
-    YEAR = f'{DataTableName.PLASTIC_RESIN_DATA}.year'
-    LOCATION = f'{DataTableName.PLASTIC_RESIN_DATA}.location'
+    YEAR = f'{DataTableName.PLASTIC_RESIN}.year'
+    LOCATION = f'{DataTableName.PLASTIC_RESIN}.location'
+    TOTAL_RESIN_CONSUMPTION = (
+        f'{DataTableName.PLASTIC_RESIN}.total_resin_consumption'
+    )

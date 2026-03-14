@@ -1,4 +1,4 @@
-# Japan Data Examination
+# Japan Plastic Waste Generation Data Examination
 
 | YEAR | VALUE       | APPROACH   | DOCUMENT                                                                                         |
 | ---- | ----------- | ---------- | ------------------------------------------------------------------------------------------------ |

@@ -5,7 +5,7 @@ from common.hyperparameters import get_hyperparameters_str
 from common.metrics import RegressionMetricName, RegressionMetrics
 from common.names import to_kebab
 from dataset.dataset import Dataset, DatasetSchema
-from dataset.year_pw import YearPW
+from dataset.year_trc import YearTRC
 from experiment.projection import ProjectionExperiment
 from step.model.drift_baseline import DriftBaseline
 from step.model.exponential_smoothing import ExponentialSmoothing
@@ -289,9 +289,9 @@ def run_projection_experiments(
 
 
 if __name__ == '__main__':
-    # location = 'United States'
-    location = 'Japan'
-    dataset, schema = YearPW().fetch(location)
+    # dataset, schema = YearPWG().fetch('Japan')
+    # dataset, schema = YearPWG().fetch('United States')
+    dataset, schema = YearTRC().fetch('United States')
 
     # We find that tuning the gamma hyperparameter of SVR drops the performance
     # instead.

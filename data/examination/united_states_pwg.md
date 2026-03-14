@@ -1,4 +1,4 @@
-# United States Data Examination
+# United States Plastic Waste Generation Data Examination
 
 | YEAR | VALUE        | APPROACH   | DOCUMENT                                                                                |
 | ---- | ------------ | ---------- | --------------------------------------------------------------------------------------- |

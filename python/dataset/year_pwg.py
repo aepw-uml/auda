@@ -9,7 +9,7 @@ from .data_tables import DataTableName, WasteGenerationManagementColumn
 from .dataset import Dataset, DatasetFetcher, DatasetSchema
 
 
-class YearPW(DatasetFetcher):
+class YearPWG(DatasetFetcher):
     @override
     def fetch_dataset(self, location: str) -> Dataset:
         table_service = TableService(env.dbUrl)
@@ -65,5 +65,5 @@ class YearPW(DatasetFetcher):
 
     @override
     def fetch(self, location: str) -> tuple[Dataset, DatasetSchema]:
-        cache_key = f'YearPW?location={location}'
+        cache_key = f'YearPWG?location={location}'
         return super().fetch(cache_key, location)
