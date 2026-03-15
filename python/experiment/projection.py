@@ -26,7 +26,7 @@ class ProjectionExperiment(RegressionExperiment):
         description: str,
         regressor: Type[SupervisedLearningModel | RegressorMixin],
         seed: int = 42,
-        train_rate: float = 0.8,
+        train_rate: float = 0.9,
     ) -> None:
         super().__init__(name, description, seed, train_rate)
         self.regressor = regressor
@@ -95,7 +95,9 @@ class ProjectionExperiment(RegressionExperiment):
         )
         metric: RegressionMetricName = tuning_parameters.get('metric', 'mape')
         expect_higher: bool = tuning_parameters.get('expect_higher', 'auto')
-        num_iterations: int = tuning_parameters.get('num_iterations', 50)
+        num_iterations: list[int] = tuning_parameters.get(
+            'num_iterations', [100, 20, 10]
+        )
 
         X_train, y_train = self.get_training_set()
 

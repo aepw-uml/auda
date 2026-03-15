@@ -23,7 +23,7 @@ def multistage_random_search(
     hyperparameter_domains: list[Interval] | None = None,
     metric: RegressionMetricName = 'mape',
     expect_higher: bool | str = 'auto',
-    num_iterations: int = 50,
+    num_iterations: list[int] = [50, 10, 5],
     seed: int = 42,
     logger: Logger | None = None,
 ) -> tuple[list[list[HyperparameterScore]], Hyperparameters]:
@@ -33,9 +33,12 @@ def multistage_random_search(
     it calls ``single_stage`` to evaluate ``num_iterations`` randomly sampled
     hyperparameter vectors within the current search space. After every
     non-final stage, the current stage's top-performing candidates are used to
-    build a refined search space for the next stage. The final stage evaluates
-    the last refined space without producing a further refinement. The best
-    hyperparameters are selected from the final stage only.
+    build a refined search space for the next stage. Refinement also stops
+    early when the best score of the current stage does not improve enough over
+    the best score of the previous stage for the chosen metric. The final
+    stage evaluates the last refined space without producing a further
+    refinement. The best hyperparameters are selected from the last executed
+    stage only.
 
     Args:
         hyperparameter_names: A list of hyperparameter names.
@@ -55,8 +58,7 @@ def multistage_random_search(
             better. If set to 'auto', it will be determined based on the metric
             name (e.g., 'r2' is expected to be higher, while 'mape' is expected
             to be lower).
-        num_iterations: The number of random hyperparameter combinations to
-            evaluate.
+        num_iterations: Number of iterations for each stage.
         seed: The random seed for reproducibility.
         logger: An optional logger to log the progress of the random search.
 
@@ -81,6 +83,7 @@ def multistage_random_search(
 
     all_hyperparameter_scores: list[list[HyperparameterScore]] = []
     hyperparameter_scores: list[HyperparameterScore] = []
+    previous_best_score: float | None = None
     for stage_index in range(num_stages + 1):
         if logger is not None:
             logger.info(
@@ -105,11 +108,36 @@ def multistage_random_search(
             metric=metric,
             expect_higher=expect_higher,
             seed=seed,
-            num_iterations=num_iterations,
+            num_iterations=num_iterations[stage_index],
             logger=logger,
         )
 
         all_hyperparameter_scores.append(hyperparameter_scores)
+
+        sorted_stage_hyperparameter_scores: list[HyperparameterScore] = sorted(
+            hyperparameter_scores,
+            key=lambda x: x[0],
+            reverse=expect_higher,
+        )
+        current_best_score = sorted_stage_hyperparameter_scores[0][0]
+
+        if (
+            previous_best_score is not None
+            and stage_index < num_stages
+            and not has_meaningful_stage_improvement(
+                metric,
+                previous_best_score,
+                current_best_score,
+            )
+        ):
+            if logger is not None:
+                logger.info(
+                    'Stopping refinement early because the latest stage did '
+                    'not improve enough to justify another refinement.'
+                )
+            break
+
+        previous_best_score = current_best_score
 
     sorted_final_hyperparameter_scores: list[HyperparameterScore] = sorted(
         hyperparameter_scores, key=lambda x: x[0], reverse=expect_higher
@@ -117,6 +145,51 @@ def multistage_random_search(
     best_hyperparameters = sorted_final_hyperparameter_scores[0][1]
 
     return all_hyperparameter_scores, best_hyperparameters
+
+
+def has_meaningful_stage_improvement(
+    metric: RegressionMetricName,
+    previous_best_score: float,
+    current_best_score: float,
+) -> bool:
+    """Determines whether the latest stage improved enough to refine again.
+
+    The improvement thresholds are intentionally hardcoded for tiny-dataset
+    tuning:
+    - ``mape`` must improve by at least 1 percentage point in absolute terms
+      or by at least 5 percent relative to the previous best score.
+    - ``mae`` and ``rmse`` must improve by at least 5 percent relative to the
+      previous best score.
+    - ``r2`` must improve by at least 0.02 in absolute terms.
+
+    Args:
+        metric: The metric being optimized.
+        previous_best_score: The best score from the previous stage.
+        current_best_score: The best score from the current stage.
+
+    Returns:
+        Whether the current stage improved enough to justify further
+        refinement.
+    """
+
+    match metric:
+        case 'mape':
+            absolute_improvement = previous_best_score - current_best_score
+            relative_improvement = absolute_improvement / max(
+                abs(previous_best_score), 1e-12
+            )
+            return (
+                absolute_improvement >= 0.01
+                or relative_improvement >= 0.05
+            )
+        case 'mae' | 'rmse':
+            relative_improvement = (
+                previous_best_score - current_best_score
+            ) / max(abs(previous_best_score), 1e-12)
+            return relative_improvement >= 0.05
+        case 'r2':
+            absolute_gain = current_best_score - previous_best_score
+            return absolute_gain >= 0.02
 
 
 def single_stage(

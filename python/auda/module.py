@@ -13,6 +13,7 @@ app = Typer(name='module', help='Manage modules')
     },
 )
 def run_module(ctx: Context, module: str, dataset_name: str) -> None:
+    from dataset.year_ppc import YearPPC
     from dataset.year_pwg import YearPWG
     from dataset.year_trc import YearTRC
     from module.projection import (
@@ -35,6 +36,9 @@ def run_module(ctx: Context, module: str, dataset_name: str) -> None:
         case 'year_pwg':
             location = context.get('location', 'United States')
             dataset, schema = YearPWG().fetch(location)
+        case 'year_ppc':
+            location = context.get('location', 'Japan')
+            dataset, schema = YearPPC().fetch(location)
         case _:
             raise ValueError(f'Unknown dataset: {dataset_name}')
 

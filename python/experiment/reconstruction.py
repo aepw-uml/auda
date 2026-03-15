@@ -94,7 +94,9 @@ class ReconstructionExperiment(RegressionExperiment):
         )
         metric: RegressionMetricName = tuning_parameters.get('metric', 'mape')
         expect_higher: bool = tuning_parameters.get('expect_higher', 'auto')
-        num_iterations: int = tuning_parameters.get('num_iterations', 50)
+        num_iterations: list[int] = tuning_parameters.get(
+            'num_iterations', [50, 10, 5]
+        )
         num_masks: int = tuning_parameters.get('num_masks', 5)
 
         training_features, training_targets = self.get_training_set()

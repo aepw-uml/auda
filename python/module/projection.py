@@ -9,6 +9,7 @@ from dataset.dataset import Dataset, DatasetSchema
 from dataset.year_trc import YearTRC
 from experiment.experiment_group import ExperimentGroup
 from experiment.projection import ProjectionExperiment
+from step.model.arima_regression import ARIMARegression
 from step.model.drift_baseline import DriftBaseline
 from step.model.exponential_smoothing import ExponentialSmoothing
 from step.model.gaussian_process_regression import GaussianProcessRegression
@@ -16,6 +17,7 @@ from step.model.naive_persistence import NaivePersistence
 from step.model.polynomial_regression import PolynomialRegression
 from step.model.ridge_regression import RidgeRegression
 from step.model.support_vector_regression import SupportVectorRegression
+from step.model.theil_sen_regression import TheilSenRegression
 from step.plot.gaussian_process_regression import (
     GaussianProcessRegressionPlotter,
 )
@@ -60,6 +62,33 @@ def getExponentialSmoothingProjection(**_) -> ProjectionExperiment:
     return experiment
 
 
+def getARIMAProjection(**_) -> ProjectionExperiment:
+    experiment = ProjectionExperiment(
+        name='ARIMA Regression',
+        description=('Project the original time series with ARIMA.'),
+        regressor=ARIMARegression,
+    )
+
+    experiment.set_context(use_scaler=False, use_target_scaler=False)
+    experiment.set_hyperparameters(replace=True, p=2, d=0, q=1, trend='n')
+
+    return experiment
+
+
+def getTheilSenProjection(**_) -> ProjectionExperiment:
+    experiment = ProjectionExperiment(
+        name='Theil-Sen Regression',
+        description=(
+            'Project the original time series with robust Theil-Sen regression.'
+        ),
+        regressor=TheilSenRegression,
+    )
+
+    experiment.set_hyperparameters(replace=True, window_size=7)
+
+    return experiment
+
+
 def getPolynomialRegressionProjection(**_) -> ProjectionExperiment:
     experiment = ProjectionExperiment(
         name='Polynomial Regression',
@@ -74,8 +103,8 @@ def getPolynomialRegressionProjection(**_) -> ProjectionExperiment:
         tuning_parameters={
             'hyperparameter_names': ['degree'],
             'search_space': [[(2.0, 9.0)]],
-            'elite_fractions': [0.12, 0.06],
-            'refinement_widths': [[2], [0.5]],
+            'elite_fractions': [0.3, 0.3],
+            'refinement_widths': [[3], [1.0]],
             'sampling_scales': ['uniform'],
         },
     )
@@ -95,8 +124,8 @@ def getRidgeRegressionProjection(**_) -> ProjectionExperiment:
         tuning_parameters={
             'hyperparameter_names': ['degree', 'alpha'],
             'search_space': [[(2.0, 9.0)], [(1e-6, 1e3)]],
-            'elite_fractions': [0.12, 0.06],
-            'refinement_widths': [[2, 0.5], [0.5, 0.1]],
+            'elite_fractions': [0.3, 0.3],
+            'refinement_widths': [[3, 1.0], [1.0, 0.2]],
             'sampling_scales': ['uniform', 'log_uniform'],
         },
     )
@@ -118,8 +147,8 @@ def getGaussianProcessProjection(**_) -> ProjectionExperiment:
         tuning_parameters={
             'hyperparameter_names': ['length_scale', 'noise_level'],
             'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
-            'elite_fractions': [0.12, 0.06],
-            'refinement_widths': [[10.0, 0.5], [2.0, 0.1]],
+            'elite_fractions': [0.3, 0.3],
+            'refinement_widths': [[12.0, 1.0], [3.0, 0.25]],
             'sampling_scales': ['log_uniform', 'log_uniform'],
         },
     )
@@ -151,10 +180,10 @@ def getSupportVectorRegressionProjection(
                     [(0.001, 1.0)],
                     [(0.001, 1.0)],
                 ],
-                'elite_fractions': [0.12, 0.06],
+                'elite_fractions': [0.3, 0.3],
                 'refinement_widths': [
-                    [10.0, 0.2, 0.1],
-                    [2.0, 0.05, 0.02],
+                    [12.0, 0.35, 0.2],
+                    [3.0, 0.1, 0.05],
                 ],
                 'sampling_scales': [
                     'log_uniform',
@@ -168,17 +197,22 @@ def getSupportVectorRegressionProjection(
             tuning_parameters={
                 'hyperparameter_names': ['C', 'epsilon'],
                 'search_space': [
-                    [(0.1, 100.0)],
+                    [(0.1, 1000.0)],
                     [(0.001, 1.0)],
                 ],
-                'elite_fractions': [0.12, 0.06],
+                'elite_fractions': [0.3, 0.3],
                 'refinement_widths': [
-                    [10.0, 0.2],
-                    [2.0, 0.05],
+                    [20.0, 5],
+                    [3.0, 0.1],
                 ],
                 'sampling_scales': ['log_uniform', 'log_uniform'],
             },
         )
+        # experiment.set_hyperparameters(
+        #     replace=True,
+        #     C=100,
+        #     epsilon=0.03,
+        # )
 
     return experiment
 
@@ -248,6 +282,8 @@ def get_projection_experiment_group(
     group.add_experiment(getRidgeRegressionProjection(**context))
     group.add_experiment(getGaussianProcessProjection(**context))
     group.add_experiment(getSupportVectorRegressionProjection(**context))
+    group.add_experiment(getTheilSenProjection(**context))
+    group.add_experiment(getARIMAProjection(**context))
 
     return group
 
@@ -335,5 +371,5 @@ if __name__ == '__main__':
     run_projection_experiments(
         dataset,
         schema,
-        {'metric': 'mape', 'svr_tune_gamma': 'True', 'seed': '151'},
+        {'metric': 'mape', 'svr_tune_gamma': 'False'},
     )

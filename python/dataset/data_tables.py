@@ -44,3 +44,6 @@ class PlasticResinColumn:
     TOTAL_RESIN_CONSUMPTION = (
         f'{DataTableName.PLASTIC_RESIN}.total_resin_consumption'
     )
+    POLYMER_PET_CONSUMPTION = (
+        f'{DataTableName.PLASTIC_RESIN}.polymer_pet_consumption'
+    )

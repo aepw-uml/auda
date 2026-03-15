@@ -91,8 +91,8 @@ def getPolynomialRegressionReconstruction(**_) -> ReconstructionExperiment:
         tuning_parameters={
             'hyperparameter_names': ['degree'],
             'search_space': [[(2.0, 9.0)]],
-            'elite_fractions': [0.12, 0.06],
-            'refinement_widths': [[2], [0.5]],
+            'elite_fractions': [0.3, 0.3],
+            'refinement_widths': [[3], [1.0]],
             'sampling_scales': ['uniform'],
         },
     )
@@ -116,8 +116,8 @@ def getRidgeRegressionReconstruction(**_) -> ReconstructionExperiment:
         tuning_parameters={
             'hyperparameter_names': ['degree', 'alpha'],
             'search_space': [[(2.0, 9.0)], [(1e-6, 1e3)]],
-            'elite_fractions': [0.12, 0.06],
-            'refinement_widths': [[2, 0.5], [0.5, 0.1]],
+            'elite_fractions': [0.3, 0.3],
+            'refinement_widths': [[3, 1.0], [1.0, 0.2]],
             'sampling_scales': ['uniform', 'log_uniform'],
         },
     )
@@ -142,8 +142,8 @@ def getGaussianProcessReconstruction(**_) -> ReconstructionExperiment:
         tuning_parameters={
             'hyperparameter_names': ['length_scale', 'noise_level'],
             'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
-            'elite_fractions': [0.12, 0.06],
-            'refinement_widths': [[10.0, 0.5], [2.0, 0.1]],
+            'elite_fractions': [0.3, 0.3],
+            'refinement_widths': [[12.0, 1.0], [3.0, 0.25]],
             'sampling_scales': ['log_uniform', 'log_uniform'],
         },
     )
@@ -178,10 +178,10 @@ def getSupportVectorRegressionReconstruction(
                     [(0.001, 1.0)],
                     [(0.001, 1.0)],
                 ],
-                'elite_fractions': [0.12, 0.06],
+                'elite_fractions': [0.3, 0.3],
                 'refinement_widths': [
-                    [10.0, 0.2, 0.1],
-                    [2.0, 0.05, 0.02],
+                    [12.0, 0.35, 0.2],
+                    [3.0, 0.1, 0.05],
                 ],
                 'sampling_scales': [
                     'log_uniform',
@@ -198,10 +198,10 @@ def getSupportVectorRegressionReconstruction(
                     [(0.1, 100.0)],
                     [(0.001, 1.0)],
                 ],
-                'elite_fractions': [0.12, 0.06],
+                'elite_fractions': [0.3, 0.3],
                 'refinement_widths': [
-                    [10.0, 0.2],
-                    [2.0, 0.05],
+                    [12.0, 0.35],
+                    [3.0, 0.1],
                 ],
                 'sampling_scales': ['log_uniform', 'log_uniform'],
             },
@@ -395,5 +395,5 @@ if __name__ == '__main__':
     run_reconstruction_experiments(
         dataset,
         schema,
-        {'metric': 'mape', 'svr_tune_gamma': 'True', 'seed': '151'},
+        {'metric': 'mape', 'svr_tune_gamma': 'False'},
     )
