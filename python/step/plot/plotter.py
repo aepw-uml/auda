@@ -74,8 +74,9 @@ class RegressionPlotter(Plotter, ABC):
         model: Callable[[np.ndarray], np.ndarray],
         X_train: np.ndarray,
         y_train: np.ndarray,
-        X_test: np.ndarray,
-        y_test: np.ndarray,
+        X_test: np.ndarray | None,
+        y_test: np.ndarray | None,
+        X_pred: np.ndarray | None,
         curve_description: str = 'Model Prediction',
         parameters: dict[str, str] = {},
         hyperparameters: dict[str, str] = {},
@@ -97,18 +98,22 @@ class RegressionPlotter(Plotter, ABC):
         self.model: Callable[[np.ndarray], np.ndarray] = model
         self.X_train: np.ndarray = X_train
         self.y_train: np.ndarray = y_train
-        self.X_test: np.ndarray = X_test
-        self.y_test: np.ndarray = y_test
+        self.X_test: np.ndarray | None = X_test
+        self.y_test: np.ndarray | None = y_test
+        self.X_pred: np.ndarray | None = X_pred
         self.curve_description: str = curve_description
         self.parameters: dict[str, str] = parameters
         self.hyperparameters: dict[str, str] = hyperparameters
 
+        self.y_pred: np.ndarray | None = None
+        if self.X_pred is not None:
+            self.y_pred = self.model(self.X_pred)
+
     @override
     def plot(self) -> None:
-        """Draws the regression samples and model prediction curve."""
-
         self.plot_training_data()
         self.plot_test_data()
+        self.plot_pred_data()
         self.plot_curve()
         self.set_labels_legend()
 
@@ -125,8 +130,19 @@ class RegressionPlotter(Plotter, ABC):
     def plot_test_data(self) -> None:
         """Plots the test samples on the current axes."""
 
+        if self.X_test is None or self.y_test is None:
+            return
+
         self.ax.scatter(
             self.X_test, self.y_test, color='green', label='Test Samples'
+        )
+
+    def plot_pred_data(self) -> None:
+        if self.X_pred is None or self.y_pred is None:
+            return
+
+        self.ax.scatter(
+            self.X_pred, self.y_pred, color='cyan', label='Predicted Samples'
         )
 
     def get_domain(self) -> tuple[float, float]:
@@ -138,14 +154,38 @@ class RegressionPlotter(Plotter, ABC):
             across the training and test datasets.
         """
 
-        X = np.concatenate((self.X_train, self.X_test), axis=0)
+        X = self.X_train
+
+        if self.X_test is not None:
+            X = np.concatenate((X, self.X_test), axis=0)
+
+        if self.X_pred is not None:
+            X = np.concatenate((X, self.X_pred), axis=0)
 
         return X.min(), X.max()
+
+    def get_curve_x_range(
+        self, extension_rate: float = 0.05
+    ) -> tuple[float, float]:
+        """Returns the x-range used when plotting the model prediction curve.
+
+        Returns:
+            A tuple containing the minimum and maximum x-values used when
+            plotting the model prediction curve.
+        """
+
+        x_min, x_max = self.get_domain()
+        x_range = x_max - x_min
+
+        return (
+            x_min - extension_rate * x_range,
+            x_max + extension_rate * x_range,
+        )
 
     def plot_curve(self) -> None:
         """Plots the model prediction across the observed feature range."""
 
-        x_min, x_max = self.get_domain()
+        x_min, x_max = self.get_curve_x_range()
         x_values = np.linspace(x_min, x_max, 512).reshape(-1, 1)
         y_values = self.model(x_values)
 

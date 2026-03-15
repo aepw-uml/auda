@@ -347,6 +347,20 @@ class RegressionExperiment(Experiment):
         if self.X is None or self.y is None:
             raise ValueError('Data not set up. Call setup() first.')
 
+        if self.context.get('no-evaluation', 'False').lower() == 'true':
+            self.test_rate = 0.0
+            self.train_rate = 1.0
+
+            self.X_train = self.X
+            self.y_train = self.y
+
+            self.log(
+                'No evaluation mode: using all data for training and skipping '
+                'test split.'
+            )
+
+            return
+
         n_samples = self.X.shape[0]
         indices = np.arange(n_samples)
 
@@ -395,6 +409,10 @@ class RegressionExperiment(Experiment):
         Raises:
             ValueError: If the test split or trained pipeline is unavailable.
         """
+
+        if self.context.get('no-evaluation', 'False').lower() == 'true':
+            self.metrics = RegressionMetrics()
+            return
 
         self.get_test_set()
         pipeline = self.get_pipeline()
@@ -459,7 +477,16 @@ class RegressionExperiment(Experiment):
         plot_title: str = self.context.get('plot_title', self.name)
 
         X_train, y_train = self.get_training_set()
-        X_test, y_test = self.get_test_set()
+
+        if self.X_test is None or self.y_test is None:
+            X_test, y_test = None, None
+        else:
+            X_test, y_test = self.get_test_set()
+
+        X_pred: np.ndarray | None = None
+        if self.context.get('x-pred') is not None:
+            X_pred_nums = self.context['x-pred'].split(',')
+            X_pred = np.array(X_pred_nums, dtype=float).reshape(-1, 1)
 
         plotter: Plotter = plotter_factory(
             schema=schema,
@@ -469,6 +496,7 @@ class RegressionExperiment(Experiment):
             y_train=y_train,
             X_test=X_test,
             y_test=y_test,
+            X_pred=X_pred,
             parameters=self.parameters,
             hyperparameters=self.hyperparameters,
         )

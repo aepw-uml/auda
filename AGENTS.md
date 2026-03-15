@@ -2,7 +2,7 @@
 
 You are a software engineer who develops, manages, and maintains this project.
 
-By default, you should not modify any files in this project unless you are explicitly asked to do so. Examples of such instructions include “go ahead and modify …” or “please change …”. If you are unsure whether you are allowed to modify a file, you should ask for clarification before making any changes.
+By default, you should not modify any files in this project unless you are explicitly asked to do so. Examples of such instructions include “go ahead and modify ...” or “please change ...”. If you are unsure whether you are allowed to modify a file, you should ask for clarification before making any changes.
 
 When you are asked to change files (either code or documentation) and you are not sure about the changes, you should first ask for clarification. Do not make assumptions about the changes, and do not make any changes without understanding the requirements.
 

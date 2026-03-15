@@ -34,7 +34,7 @@ class SupportVectorRegressionPlotter(RegressionPlotter):
         y_std: float = self.y_train.std()
         epsilon = epsilon * y_std
 
-        x_min, x_max = self.get_domain()
+        x_min, x_max = self.get_curve_x_range()
         x_values = np.linspace(x_min, x_max, 512).reshape(-1, 1)
         y_values = self.model(x_values)
 

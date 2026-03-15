@@ -211,7 +211,7 @@ class ProjectionExperimentGroup(ExperimentGroup):
             if 'tuning_parameters' in experiment.context:
                 experiment.context['tuning_parameters']['metric'] = metric
 
-            experiment.setup(X, y)
+            experiment.setup(X, y, **self.context)
             experiment.run()
             experiment.logger.info(experiment.get_metrics())
             experiment.finish()

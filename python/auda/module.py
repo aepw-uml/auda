@@ -55,7 +55,11 @@ def parse_kwargs(args: list[str]) -> dict[str, str]:
         if not arg.startswith('--'):
             raise ValueError(f'Invalid argument: {arg}')
 
-        key, value = arg[2:].split('=', 1)
-        context[key] = value
+        if '=' not in arg:
+            key = arg[2:]
+            context[key] = 'true'
+        else:
+            key, value = arg[2:].split('=', 1)
+            context[key] = value
 
     return context

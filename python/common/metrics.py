@@ -15,10 +15,10 @@ class RegressionMetrics:
         mape: Mean Absolute Percentage Error.
     """
 
-    mae: float
-    rmse: float
-    r2: float
-    mape: float
+    mae: float = 0.0
+    rmse: float = 0.0
+    r2: float = 0.0
+    mape: float = 0.0
 
     def __repr__(self) -> str:
         """Returns a compact string representation of the metric values."""
