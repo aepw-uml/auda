@@ -1,0 +1,22 @@
+# macOS system files
+.DS_Store
+
+# MDPI template files
+src/mdpi
+src/Definitions
+
+# latexmk
+indent.log
+src/*.aux
+src/*.fdb_latexmk
+src/*.fls
+src/*.log
+src/*.out
+src/*.pdf
+src/*.synctex.gz
+main.bbl
+main.blg
+*(busy)
+
+# Local files
+local
