@@ -23,12 +23,12 @@ function reproduce() {
     rm -rf results/figure
     rm -rf results/metric_table
     rm -rf results/hyperparameter_table
-    rm -rf results/time
+    rm -rf results/time_table
 
     mkdir -p results/figure
     mkdir -p results/metric_table
     mkdir -p results/hyperparameter_table
-    mkdir -p results/time
+    mkdir -p results/time_table
 
     echo "Module: projection (year_pwg)"
     auda module run projection year_pwg --location=Japan --seed=160
@@ -69,6 +69,6 @@ function reproduce() {
     echo "Module: multiple reconstruction (year_ppc)"
     auda module run multiple_reconstruction year_ppc --location=Japan \
         --seed=120
-    cp results/module/reconstruction/multiple_reconstruction/metric_table \
+    cp results/module/multiple_reconstruction/metric_table \
         results/metric_table/multiple_reconstruction_ppc
 }
