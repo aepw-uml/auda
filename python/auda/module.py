@@ -60,8 +60,9 @@ def run_module(ctx: Context, module: str, dataset_name: str) -> None:
             save_reconstruction_experiment_results(group)
         case 'multiple_reconstruction':
             num_experiments = int(context.get('num_experiments', '8'))
+            seed = int(context.get('seed', '42'))
             _, average_metrics = run_reconstruction_experiment_groups(
-                num_experiments, dataset, schema, context
+                num_experiments, dataset, schema, context, seed=seed
             )
 
             module_path = Path('results') / 'module' / 'multiple_reconstruction'

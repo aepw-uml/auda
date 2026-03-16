@@ -17,3 +17,9 @@ auda module run projection year_pwg --location=Japan --seed=160
 ```bash
 auda module run reconstruction year_ppc --location=Japan --seed=149
 ```
+
+## Multiple Reconstruction of global plastics production
+
+```bash
+auda module run multiple_reconstruction year_ppc --location=Japan --seed=120;
+```
