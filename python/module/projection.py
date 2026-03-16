@@ -9,6 +9,7 @@ from dataset.dataset import Dataset, DatasetSchema
 from dataset.year_trc import YearTRC
 from experiment.experiment_group import ExperimentGroup
 from experiment.projection import ProjectionExperiment
+from module.common import create_time_table, save_time_table
 from step.model.arima_regression import ARIMARegression
 from step.model.drift_baseline import DriftBaseline
 from step.model.exponential_smoothing import ExponentialSmoothing
@@ -377,6 +378,9 @@ def save_projection_experiment_results(
         plot_path: Path = plots_dir / to_kebab(experiment.name)
         file_path: str = plotter.save(plot_path)
         print(f'Saved plot for "{experiment.name}" to "{file_path}".')
+
+    # Save time.
+    save_time_table(module_path, create_time_table(group))
 
 
 if __name__ == '__main__':

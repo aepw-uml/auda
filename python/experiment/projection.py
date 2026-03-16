@@ -142,6 +142,7 @@ class ProjectionExperiment(RegressionExperiment):
 
             return average_regression_metrics(all_regression_metrics)
 
+        self.timer_start('tuning')
         _, best_hyperparameters = multistage_random_search(
             hyperparameter_names,
             search_space,
@@ -156,6 +157,7 @@ class ProjectionExperiment(RegressionExperiment):
             self.seed,
             self.logger,
         )
+        self.timer_stop('tuning')
 
         self.set_hyperparameters(
             replace=True,

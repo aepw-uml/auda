@@ -162,6 +162,7 @@ class ReconstructionExperiment(RegressionExperiment):
 
             return average_regression_metrics(metrics_list)
 
+        self.timer_start('tuning')
         _, best_hyperparameters = multistage_random_search(
             hyperparameter_names,
             search_space,
@@ -176,6 +177,7 @@ class ReconstructionExperiment(RegressionExperiment):
             self.seed,
             self.logger,
         )
+        self.timer_stop('tuning')
 
         self.set_hyperparameters(
             replace=True,
