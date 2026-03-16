@@ -83,8 +83,8 @@ class ReconstructionExperiment(RegressionExperiment):
         elite_fractions: list[float] = tuning_parameters.get(
             'elite_fractions', []
         )
-        refinement_widths: list[list[float]] = tuning_parameters.get(
-            'refinement_widths', []
+        refinement_width_rates: list[list[float]] = tuning_parameters.get(
+            'refinement_width_rates', []
         )
         hyperparameter_domains: list[Interval] | None = tuning_parameters.get(
             'hyperparameter_domains', None
@@ -166,7 +166,7 @@ class ReconstructionExperiment(RegressionExperiment):
             hyperparameter_names,
             search_space,
             elite_fractions,
-            refinement_widths,
+            refinement_width_rates,
             evaluate_hyperparameters,
             sampling_scales,
             hyperparameter_domains,

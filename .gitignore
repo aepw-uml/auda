@@ -21,3 +21,6 @@ __pycache__/
 
 # Local files
 /local/
+
+# Logs
+indent.log

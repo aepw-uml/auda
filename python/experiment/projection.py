@@ -84,8 +84,8 @@ class ProjectionExperiment(RegressionExperiment):
         elite_fractions: list[float] = tuning_parameters.get(
             'elite_fractions', []
         )
-        refinement_widths: list[list[float]] = tuning_parameters.get(
-            'refinement_widths', []
+        refinement_width_rates: list[list[float]] = tuning_parameters.get(
+            'refinement_width_rates', []
         )
         hyperparameter_domains: list[Interval] | None = tuning_parameters.get(
             'hyperparameter_domains', None
@@ -96,7 +96,7 @@ class ProjectionExperiment(RegressionExperiment):
         metric: RegressionMetricName = tuning_parameters.get('metric', 'mape')
         expect_higher: bool = tuning_parameters.get('expect_higher', 'auto')
         num_iterations: list[int] = tuning_parameters.get(
-            'num_iterations', [100, 20, 10]
+            'num_iterations', [200, 20, 10]
         )
 
         X_train, y_train = self.get_training_set()
@@ -146,7 +146,7 @@ class ProjectionExperiment(RegressionExperiment):
             hyperparameter_names,
             search_space,
             elite_fractions,
-            refinement_widths,
+            refinement_width_rates,
             evaluate_hyperparameters,
             sampling_scales,
             hyperparameter_domains,

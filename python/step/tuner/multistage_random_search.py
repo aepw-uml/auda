@@ -17,13 +17,13 @@ def multistage_random_search(
     hyperparameter_names: list[str],
     search_space: SearchSpace,
     elite_fractions: list[float],
-    refinement_widths: list[list[float]],
+    refinement_width_rates: list[list[float]],
     evaluate_hyperparameters: Callable[[Hyperparameters], RegressionMetrics],
     sampling_scales: list[SamplingScale],
     hyperparameter_domains: list[Interval] | None = None,
     metric: RegressionMetricName = 'mape',
     expect_higher: bool | str = 'auto',
-    num_iterations: list[int] = [50, 10, 5],
+    num_iterations: list[int] = [100, 20, 10],
     seed: int = 42,
     logger: Logger | None = None,
 ) -> tuple[list[list[HyperparameterScore]], Hyperparameters]:
@@ -45,8 +45,8 @@ def multistage_random_search(
         search_space: Initial search space for hyperparameters.
         elite_fractions: List of fractions of top candidates to consider as
             elite for each stage.
-        refinement_widths: List of lists of widths for refining the search space
-            around elite candidates for each stage.
+        refinement_width_rates: List of lists of domain-relative refinement
+            rates for each stage.
         evaluate_hyperparameters: A function that takes a list of hyperparameter
             values and returns a RegressionMetrics object containing the
             evaluation metrics for those hyperparameters.
@@ -76,9 +76,10 @@ def multistage_random_search(
     expect_higher = cast(bool, expect_higher)
 
     num_stages: int = len(elite_fractions)
-    if len(refinement_widths) != num_stages:
+    if len(refinement_width_rates) != num_stages:
         raise ValueError(
-            'Length of refinement_widths must match length of elite_fractions.'
+            'Length of refinement_width_rates must match length of '
+            'elite_fractions.'
         )
 
     all_hyperparameter_scores: list[list[HyperparameterScore]] = []
@@ -92,16 +93,16 @@ def multistage_random_search(
 
         if stage_index < num_stages:
             elite_fraction = elite_fractions[stage_index]
-            refinement_width = refinement_widths[stage_index]
+            refinement_width_rate = refinement_width_rates[stage_index]
         else:
             elite_fraction = None
-            refinement_width = None
+            refinement_width_rate = None
 
         hyperparameter_scores, search_space = single_stage(
             hyperparameter_names,
             search_space,
             elite_fraction,
-            refinement_width,
+            refinement_width_rate,
             evaluate_hyperparameters,
             sampling_scales,
             hyperparameter_domains,
@@ -178,10 +179,7 @@ def has_meaningful_stage_improvement(
             relative_improvement = absolute_improvement / max(
                 abs(previous_best_score), 1e-12
             )
-            return (
-                absolute_improvement >= 0.01
-                or relative_improvement >= 0.05
-            )
+            return absolute_improvement >= 0.01 or relative_improvement >= 0.05
         case 'mae' | 'rmse':
             relative_improvement = (
                 previous_best_score - current_best_score
@@ -196,7 +194,7 @@ def single_stage(
     hyperparameter_names: list[str],
     search_space: list[list[Interval]],
     elite_fraction: float | None,
-    refinement_widths: list[float] | None,
+    refinement_width_rates: list[float] | None,
     evaluate_hyperparameters: Callable[[Hyperparameters], RegressionMetrics],
     sampling_scales: list[SamplingScale],
     hyperparameter_domains: list[Interval],
@@ -210,10 +208,11 @@ def single_stage(
 
     This function first calls ``random_search`` on the provided search space.
     It then sorts the sampled candidates by the requested metric. If
-    ``elite_fraction`` and ``refinement_widths`` are provided, it keeps the top
-    ``max(1, int(num_scores * elite_fraction))`` candidates as elites. For each
-    elite candidate and each hyperparameter, it creates a new interval centered
-    on the elite value with the configured refinement width, clipped to the
+    ``elite_fraction`` and ``refinement_width_rates`` are provided, it keeps
+    the top ``max(1, int(num_scores * elite_fraction))`` candidates as elites.
+    For each elite candidate and each hyperparameter, it creates a new
+    interval centered on the elite value with a half-width derived from the
+    configured domain-relative refinement rate and clipped to the
     corresponding overall hyperparameter domain. These intervals become the
     search space for the next stage. If refinement parameters are ``None``,
     this function returns the current stage results and the original search
@@ -224,8 +223,8 @@ def single_stage(
         search_space: Initial search space for hyperparameters.
         elite_fraction: Fraction of top candidates to keep as elite for this
             stage.
-        refinement_widths: List of lists of widths for refining the search space
-            around elite candidates for this stage.
+        refinement_width_rates: List of domain-relative refinement rates for
+            this stage.
         evaluate_hyperparameters: A function that takes a list of hyperparameter
             values and returns a RegressionMetrics object containing the
             evaluation metrics for those hyperparameters.
@@ -259,8 +258,8 @@ def single_stage(
     )
 
     # Stop computing the next search space if we are in the last stage,
-    # indicated by elite_fraction or refinement_widths being None.
-    if elite_fraction is None or refinement_widths is None:
+    # indicated by elite_fraction or refinement_width_rates being None.
+    if elite_fraction is None or refinement_width_rates is None:
         return hyperparameter_scores, search_space
 
     num_elite_candidates = max(1, int(num_scores * elite_fraction))
@@ -276,13 +275,13 @@ def single_stage(
     for candidate in elite_candidates:
         for i in range(len(candidate)):
             hp = candidate[i]
-            refinement_width = refinement_widths[i]
+            refinement_width_rate = refinement_width_rates[i]
             sampling_scale = sampling_scales[i]
 
             next_search_space[i].append(
                 refine_interval(
                     hp,
-                    refinement_width,
+                    refinement_width_rate,
                     hyperparameter_domains[i],
                     sampling_scale,
                 )
@@ -293,21 +292,21 @@ def single_stage(
 
 def refine_interval(
     center: float,
-    refinement_width: float,
+    refinement_width_rate: float,
     domain: Interval,
     sampling_scale: SamplingScale,
 ) -> Interval:
     """Builds a refined interval around a candidate hyperparameter value.
 
-    For ``uniform`` sampling, the refinement is additive in the original
-    parameter space. For ``log_uniform`` sampling, the refinement is additive
-    in log-space so the resulting interval shrinks multiplicatively around the
-    candidate.
+    For ``uniform`` sampling, the half-width is
+    ``refinement_width_rate * (max - min)`` in the original parameter space.
+    For ``log_uniform`` sampling, the half-width is
+    ``refinement_width_rate * (log(max) - log(min))`` in log-space.
 
     Args:
         center: The elite candidate value to refine around.
-        refinement_width: Width of the refinement region in the appropriate
-            sampling space.
+        refinement_width_rate: Domain-relative half-width rate in the
+            appropriate sampling space.
         domain: Overall minimum and maximum allowed values.
         sampling_scale: The sampling scale used for this hyperparameter.
 
@@ -320,12 +319,18 @@ def refine_interval(
     """
 
     minimum, maximum = domain
+    if not 0.0 < refinement_width_rate <= 1.0:
+        raise ValueError(
+            'refinement_width_rate must be greater than 0.0 and less than '
+            'or equal to 1.0.'
+        )
 
     match sampling_scale:
         case 'uniform':
+            half_width = refinement_width_rate * (maximum - minimum)
             return (
-                max(center - refinement_width, minimum),
-                min(center + refinement_width, maximum),
+                max(center - half_width, minimum),
+                min(center + half_width, maximum),
             )
         case 'log_uniform':
             if center <= 0.0 or minimum <= 0.0 or maximum <= 0.0:
@@ -337,8 +342,9 @@ def refine_interval(
             log_center = np.log(center)
             log_minimum = np.log(minimum)
             log_maximum = np.log(maximum)
+            half_width = refinement_width_rate * (log_maximum - log_minimum)
 
             return (
-                float(np.exp(max(log_center - refinement_width, log_minimum))),
-                float(np.exp(min(log_center + refinement_width, log_maximum))),
+                float(np.exp(max(log_center - half_width, log_minimum))),
+                float(np.exp(min(log_center + half_width, log_maximum))),
             )

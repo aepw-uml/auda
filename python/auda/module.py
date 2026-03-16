@@ -13,6 +13,9 @@ app = Typer(name='module', help='Manage modules')
     },
 )
 def run_module(ctx: Context, module: str, dataset_name: str) -> None:
+    from dataset.global_year_plastic_production import (
+        GlobalYearPlasticsProduction,
+    )
     from dataset.year_ppc import YearPPC
     from dataset.year_pwg import YearPWG
     from dataset.year_trc import YearTRC
@@ -21,6 +24,7 @@ def run_module(ctx: Context, module: str, dataset_name: str) -> None:
         save_projection_experiment_results,
     )
     from module.reconstruction import (
+        run_reconstruction_experiment_groups,
         run_reconstruction_experiments,
         save_reconstruction_experiment_results,
     )
@@ -39,6 +43,8 @@ def run_module(ctx: Context, module: str, dataset_name: str) -> None:
         case 'year_ppc':
             location = context.get('location', 'Japan')
             dataset, schema = YearPPC().fetch(location)
+        case 'global_year_plastics_production':
+            dataset, schema = GlobalYearPlasticsProduction().fetch()
         case _:
             raise ValueError(f'Unknown dataset: {dataset_name}')
 
@@ -49,6 +55,11 @@ def run_module(ctx: Context, module: str, dataset_name: str) -> None:
         case 'reconstruction':
             group = run_reconstruction_experiments(dataset, schema, context)
             save_reconstruction_experiment_results(group)
+        case 'multiple_reconstruction':
+            _, average_metrics = run_reconstruction_experiment_groups(
+                10, dataset, schema, context
+            )
+            # TODO: print average metrics
         case _:
             raise ValueError(f'Unknown module: {module}')
 

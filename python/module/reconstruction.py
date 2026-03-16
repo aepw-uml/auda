@@ -1,9 +1,12 @@
+import sys
+from collections import defaultdict
 from pathlib import Path
 from typing import cast, override
 
+import numpy as np
 from common.files import save_content_to_file
 from common.hyperparameters import get_hyperparameters_str
-from common.metrics import RegressionMetrics
+from common.metrics import RegressionMetrics, average_regression_metrics
 from common.names import to_kebab
 from dataset.dataset import Dataset, DatasetSchema
 from dataset.year_pwg import YearPWG
@@ -17,6 +20,7 @@ from step.model.moving_average_interpolation import MovingAverageInterpolation
 from step.model.polynomial_regression import PolynomialRegression
 from step.model.ridge_regression import RidgeRegression
 from step.model.support_vector_regression import SupportVectorRegression
+from step.model.theil_sen_regression import TheilSenRegression
 from step.plot.gaussian_process_regression import (
     GaussianProcessRegressionPlotter,
 )
@@ -75,6 +79,23 @@ def getCubicSplineInterpolationReconstruction(**_) -> ReconstructionExperiment:
     return experiment
 
 
+def getTheilSenReconstruction(**_) -> ReconstructionExperiment:
+    """Builds a Theil-Sen reconstruction experiment."""
+
+    experiment = ReconstructionExperiment(
+        name='Theil-Sen Regression',
+        description=(
+            'Reconstruct the original time series with robust Theil-Sen '
+            'regression.'
+        ),
+        regressor=TheilSenRegression,
+    )
+
+    experiment.set_hyperparameters(replace=True, window_size=7)
+
+    return experiment
+
+
 def getPolynomialRegressionReconstruction(**_) -> ReconstructionExperiment:
     """Builds a polynomial-regression reconstruction experiment."""
 
@@ -92,7 +113,7 @@ def getPolynomialRegressionReconstruction(**_) -> ReconstructionExperiment:
             'hyperparameter_names': ['degree'],
             'search_space': [[(2.0, 9.0)]],
             'elite_fractions': [0.3, 0.3],
-            'refinement_widths': [[3], [1.0]],
+            'refinement_width_rates': [[0.2], [0.1]],
             'sampling_scales': ['uniform'],
         },
     )
@@ -117,7 +138,7 @@ def getRidgeRegressionReconstruction(**_) -> ReconstructionExperiment:
             'hyperparameter_names': ['degree', 'alpha'],
             'search_space': [[(2.0, 9.0)], [(1e-6, 1e3)]],
             'elite_fractions': [0.3, 0.3],
-            'refinement_widths': [[3, 1.0], [1.0, 0.2]],
+            'refinement_width_rates': [[0.2, 0.1], [0.1, 0.05]],
             'sampling_scales': ['uniform', 'log_uniform'],
         },
     )
@@ -143,7 +164,7 @@ def getGaussianProcessReconstruction(**_) -> ReconstructionExperiment:
             'hyperparameter_names': ['length_scale', 'noise_level'],
             'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
             'elite_fractions': [0.3, 0.3],
-            'refinement_widths': [[12.0, 1.0], [3.0, 0.25]],
+            'refinement_width_rates': [[0.2, 0.125], [0.05, 0.03125]],
             'sampling_scales': ['log_uniform', 'log_uniform'],
         },
     )
@@ -179,9 +200,9 @@ def getSupportVectorRegressionReconstruction(
                     [(0.001, 1.0)],
                 ],
                 'elite_fractions': [0.3, 0.3],
-                'refinement_widths': [
-                    [12.0, 0.35, 0.2],
-                    [3.0, 0.1, 0.05],
+                'refinement_width_rates': [
+                    [0.2, 0.11666666666666667, 0.1],
+                    [0.05, 0.03333333333333333, 0.025],
                 ],
                 'sampling_scales': [
                     'log_uniform',
@@ -199,9 +220,9 @@ def getSupportVectorRegressionReconstruction(
                     [(0.001, 1.0)],
                 ],
                 'elite_fractions': [0.3, 0.3],
-                'refinement_widths': [
-                    [12.0, 0.35],
-                    [3.0, 0.1],
+                'refinement_width_rates': [
+                    [0.2, 0.11666666666666667],
+                    [0.05, 0.03333333333333333],
                 ],
                 'sampling_scales': ['log_uniform', 'log_uniform'],
             },
@@ -292,13 +313,15 @@ def get_reconstruction_experiment_group(
     """
 
     group = ReconstructionExperimentGroup(name='Reconstruction Experiments')
+    group.set_context(**context)
+
     group.add_experiment(getLinearInterpolationReconstruction(**context))
     group.add_experiment(getMovingAverageInterpolationReconstruction(**context))
     group.add_experiment(getCubicSplineInterpolationReconstruction(**context))
-    group.add_experiment(getPolynomialRegressionReconstruction(**context))
     group.add_experiment(getRidgeRegressionReconstruction(**context))
     group.add_experiment(getGaussianProcessReconstruction(**context))
     group.add_experiment(getSupportVectorRegressionReconstruction(**context))
+    group.add_experiment(getTheilSenReconstruction(**context))
 
     return group
 
@@ -384,6 +407,43 @@ def save_reconstruction_experiment_results(
         plot_path: Path = plots_dir / to_kebab(experiment.name)
         file_path: str = plotter.save(plot_path)
         print(f'Saved plot for "{experiment.name}" to "{file_path}".')
+
+
+def run_reconstruction_experiment_groups(
+    num_experiments: int,
+    dataset: Dataset,
+    schema: DatasetSchema,
+    context: dict[str, str] | None = None,
+    seed: int = 42,
+) -> tuple[list[ReconstructionExperimentGroup], dict[str, RegressionMetrics]]:
+    rng = np.random.default_rng(seed)
+    experiment_seeds = rng.integers(0, sys.maxsize, size=num_experiments)
+
+    groups: list[ReconstructionExperimentGroup] = []
+    for experiment_seed in experiment_seeds:
+        if context is None:
+            context = {}
+
+        context['seed'] = str(experiment_seed)
+        group = run_reconstruction_experiments(dataset, schema, context)
+        groups.append(group)
+
+    # Average the metrics of all models
+    metrics_lists_by_names: dict[str, list[RegressionMetrics]] = defaultdict(
+        list[RegressionMetrics]
+    )
+
+    for group in groups:
+        for experiment in group.experiments:
+            metrics_lists_by_names[experiment.name].append(
+                experiment.get_metrics()
+            )
+
+    metrics_by_names: dict[str, RegressionMetrics] = {}
+    for name, metrics_list in metrics_lists_by_names.items():
+        metrics_by_names[name] = average_regression_metrics(metrics_list)
+
+    return groups, metrics_by_names
 
 
 if __name__ == '__main__':

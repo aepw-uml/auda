@@ -8,6 +8,7 @@ import numpy as np
 from dataset.dataset import DatasetSchema, combine_names_and_units
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.ticker import MaxNLocator, StrMethodFormatter
 
 
 class Plotter(ABC):
@@ -213,4 +214,6 @@ class RegressionPlotter(Plotter, ABC):
 
         self.ax.set_xlabel(feature_labels[0])
         self.ax.set_ylabel(target_labels[0])
+        self.ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        self.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
         self.ax.legend()
