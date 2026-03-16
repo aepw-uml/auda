@@ -311,19 +311,15 @@ def run_projection_experiments(
     return group
 
 
-def save_projection_experiment_results(
-    group: ProjectionExperimentGroup,
+def save_metric_table(
+    metrics_dict: dict[str, RegressionMetrics], module_path: Path
 ) -> None:
-    # Module path to save the results of the projection experiments.
-    module_path = Path('results') / 'module' / 'projection'
-
     # Build a metric table and save it to a file.
     metric_table = Table(headers=['Experiment', 'MAE', 'RMSE', 'R²', 'MAPE'])
-    for experiment in group.experiments:
-        metrics: RegressionMetrics = experiment.get_metrics()
+    for name, metrics in metrics_dict.items():
         [mae_str, rmse_str, r2_str, mape_str] = metrics.item_strs()
         metric_table.append_row(
-            experiment.name,
+            name,
             mae_str,
             rmse_str,
             r2_str,
@@ -336,6 +332,20 @@ def save_projection_experiment_results(
     print()
     print(metric_table.__repr__())
     print()
+
+
+def save_projection_experiment_results(
+    group: ProjectionExperimentGroup,
+) -> None:
+    # Module path to save the results of the projection experiments.
+    module_path = Path('results') / 'module' / 'projection'
+
+    metrics_dict: dict[str, RegressionMetrics] = {}
+    for experiment in group.experiments:
+        metrics = experiment.get_metrics()
+        if metrics is not None:
+            metrics_dict[experiment.name] = metrics
+    save_metric_table(metrics_dict, module_path)
 
     # Build a hyperparameter table and save it to a file.
     hyperparameter_table = Table(headers=['Experiment', 'Hyperparameters'])

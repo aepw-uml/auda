@@ -1,4 +1,3 @@
-import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import cast, override
@@ -353,17 +352,15 @@ def run_reconstruction_experiments(
     return group
 
 
-def save_reconstruction_experiment_results(
-    group: ReconstructionExperimentGroup,
+def save_metric_table(
+    metrics_dict: dict[str, RegressionMetrics], module_path: Path
 ) -> None:
-    module_path = Path('results') / 'module' / 'reconstruction'
-
+    # Build a metric table and save it to a file.
     metric_table = Table(headers=['Experiment', 'MAE', 'RMSE', 'R²', 'MAPE'])
-    for experiment in group.experiments:
-        metrics: RegressionMetrics = experiment.get_metrics()
+    for name, metrics in metrics_dict.items():
         [mae_str, rmse_str, r2_str, mape_str] = metrics.item_strs()
         metric_table.append_row(
-            experiment.name,
+            name,
             mae_str,
             rmse_str,
             r2_str,
@@ -376,6 +373,19 @@ def save_reconstruction_experiment_results(
     print()
     print(metric_table.__repr__())
     print()
+
+
+def save_reconstruction_experiment_results(
+    group: ReconstructionExperimentGroup,
+) -> None:
+    module_path = Path('results') / 'module' / 'reconstruction'
+
+    metrics_dict: dict[str, RegressionMetrics] = {}
+    for experiment in group.experiments:
+        metrics = experiment.get_metrics()
+        if metrics is not None:
+            metrics_dict[experiment.name] = metrics
+    save_metric_table(metrics_dict, module_path)
 
     hyperparameter_table = Table(headers=['Experiment', 'Hyperparameters'])
     for experiment in group.experiments:
@@ -417,7 +427,7 @@ def run_reconstruction_experiment_groups(
     seed: int = 42,
 ) -> tuple[list[ReconstructionExperimentGroup], dict[str, RegressionMetrics]]:
     rng = np.random.default_rng(seed)
-    experiment_seeds = rng.integers(0, sys.maxsize, size=num_experiments)
+    experiment_seeds = rng.integers(0, 2 << 31, size=num_experiments)
 
     groups: list[ReconstructionExperimentGroup] = []
     for experiment_seed in experiment_seeds:

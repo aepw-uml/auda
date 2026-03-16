@@ -13,6 +13,8 @@ app = Typer(name='module', help='Manage modules')
     },
 )
 def run_module(ctx: Context, module: str, dataset_name: str) -> None:
+    from pathlib import Path
+
     from dataset.global_year_plastic_production import (
         GlobalYearPlasticsProduction,
     )
@@ -26,6 +28,7 @@ def run_module(ctx: Context, module: str, dataset_name: str) -> None:
     from module.reconstruction import (
         run_reconstruction_experiment_groups,
         run_reconstruction_experiments,
+        save_metric_table,
         save_reconstruction_experiment_results,
     )
 
@@ -56,10 +59,13 @@ def run_module(ctx: Context, module: str, dataset_name: str) -> None:
             group = run_reconstruction_experiments(dataset, schema, context)
             save_reconstruction_experiment_results(group)
         case 'multiple_reconstruction':
+            num_experiments = int(context.get('num_experiments', '8'))
             _, average_metrics = run_reconstruction_experiment_groups(
-                10, dataset, schema, context
+                num_experiments, dataset, schema, context
             )
-            # TODO: print average metrics
+
+            module_path = Path('results') / 'module' / 'multiple_reconstruction'
+            save_metric_table(average_metrics, module_path)
         case _:
             raise ValueError(f'Unknown module: {module}')
 
