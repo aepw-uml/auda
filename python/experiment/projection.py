@@ -143,19 +143,21 @@ class ProjectionExperiment(RegressionExperiment):
             return average_regression_metrics(all_regression_metrics)
 
         self.timer_start('tuning')
-        _, best_hyperparameters = multistage_random_search(
-            hyperparameter_names,
-            search_space,
-            elite_fractions,
-            refinement_width_rates,
-            evaluate_hyperparameters,
-            sampling_scales,
-            hyperparameter_domains,
-            metric,
-            expect_higher,
-            num_iterations,
-            self.seed,
-            self.logger,
+        hyperparameter_scores_lists, best_hyperparameters = (
+            multistage_random_search(
+                hyperparameter_names,
+                search_space,
+                elite_fractions,
+                refinement_width_rates,
+                evaluate_hyperparameters,
+                sampling_scales,
+                hyperparameter_domains,
+                metric,
+                expect_higher,
+                num_iterations,
+                self.seed,
+                self.logger,
+            )
         )
         self.timer_stop('tuning')
 
@@ -167,4 +169,8 @@ class ProjectionExperiment(RegressionExperiment):
                     hyperparameter_names, best_hyperparameters
                 )
             },
+        )
+
+        self.context['hyperparameter_scores_lists'] = (
+            hyperparameter_scores_lists
         )

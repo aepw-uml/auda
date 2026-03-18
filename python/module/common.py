@@ -1,7 +1,10 @@
 from pathlib import Path
 
 from common.files import save_content_to_file
+from common.names import to_kebab
 from experiment.experiment_group import ExperimentGroup
+from step.plot.mrs_best_so_far import MrsBestSoFar
+from step.tuner.random_search import HyperparameterScore
 from util.table import Table
 
 
@@ -30,3 +33,23 @@ def save_time_table(
     print()
     print(time_table.__repr__())
     print()
+
+
+def save_best_so_far_plots(module_path: Path, group: ExperimentGroup) -> None:
+    for experiment in group.experiments:
+        if 'hyperparameter_scores_lists' not in experiment.context:
+            continue
+
+        hyperparameter_scores_lists: list[list[HyperparameterScore]] = (
+            experiment.context['hyperparameter_scores_lists']
+        )
+
+        plotter = MrsBestSoFar(hyperparameter_scores_lists)
+        plotter.plot()
+
+        best_so_far_dir: Path = module_path / 'best_so_far'
+        plot_path: Path = best_so_far_dir / f'{to_kebab(experiment.name)}.png'
+        plotter.save(plot_path)
+        print(
+            f'Saved best-so-far plot for "{experiment.name}" to "{plot_path}".'
+        )

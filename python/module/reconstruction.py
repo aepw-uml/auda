@@ -12,6 +12,11 @@ from dataset.year_pwg import YearPWG
 from dataset.year_trc import YearTRC
 from experiment.experiment_group import ExperimentGroup
 from experiment.reconstruction import ReconstructionExperiment
+from module.common import (
+    create_time_table,
+    save_best_so_far_plots,
+    save_time_table,
+)
 from step.model.cubic_spline import CubicSpline
 from step.model.gaussian_process_regression import GaussianProcessRegression
 from step.model.linear_interpolation import LinearInterpolation
@@ -417,6 +422,12 @@ def save_reconstruction_experiment_results(
         plot_path: Path = plots_dir / to_kebab(experiment.name)
         file_path: str = plotter.save(plot_path)
         print(f'Saved plot for "{experiment.name}" to "{file_path}".')
+
+    # Save time.
+    save_time_table(module_path, create_time_table(group))
+
+    # Save best-so-far plots.
+    save_best_so_far_plots(module_path, group)
 
 
 def run_reconstruction_experiment_groups(
