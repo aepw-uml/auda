@@ -33,7 +33,19 @@ has_setup: bool = False
 
 
 def get_logger(name: str) -> logging.Logger:
-    """Returns a logger instance with the specified name."""
+    """Returns a logger instance with the specified name.
+
+    This function ensures that the logging configuration is set up before
+    returning a logger instance. If the logging configuration has not been set
+    up, it will call the `setup_logging` function to configure the logging
+    settings.
+
+    Args:
+        name: The name of the logger.
+
+    Returns:
+        A logger instance with the specified name.
+    """
 
     if not has_setup:
         setup_logging()

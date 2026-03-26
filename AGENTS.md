@@ -8,4 +8,6 @@ When you are asked to change files (either code or documentation) and you are no
 
 When you are asked to improve a document, you should first read it thoroughly, correct issues, ensure consistency, and improve the writing. You can rephrase if needed. Avoid overly formal language in documents and instead use a more conversational tone, so other developers can easily understand the content. You should also avoid overusing bullet points and instead use paragraphs to keep readers engaged.
 
-When you are about to modify a code file (e.g., a Python file), you should first read the [Style Guide](./docs/style_guide.md) to ensure that your changes comply with the coding standards of this project.
+When you are about to modify a code file (e.g., a Python file), you should first read the [Style Guide][1] to ensure that your changes comply with the coding standards of this project.
+
+[1]: ./docs/preference/style_guide.md

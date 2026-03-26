@@ -29,6 +29,7 @@ class Env:
             Environment, self.__get('ENVIRONMENT')
         )
         self.dbUrl: str = self.__get('DB_URL')
+        self.prismDbUrl: str = self.__get('PRISM_DB_URL')
 
     def __get(self, name: str) -> str:
         """Gets environment variable value or raise an error if not set.
