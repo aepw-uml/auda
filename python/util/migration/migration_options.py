@@ -18,3 +18,4 @@ class MigrationOptions:
     is_validated: bool = True
     allow_duplicates: bool = True
     minimal_completeness_score: int = 0
+    minimal_data_source_score: int = 0

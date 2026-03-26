@@ -23,6 +23,11 @@ def start_migration(
         '--minimal-completeness-score',
         help='Minimal completeness score for records to be migrated.',
     ),
+    minimal_data_source_score: int = Option(
+        20,
+        '--minimal-data-source-score',
+        help='Minimal data source score for records to be migrated.',
+    ),
 ) -> None:
     """
     Start the migration process.
@@ -43,6 +48,7 @@ def start_migration(
         is_validated=is_validated,
         allow_duplicates=True,
         minimal_completeness_score=minimal_completeness_score,
+        minimal_data_source_score=minimal_data_source_score,
     )
 
     stopwatch = Stopwatch().start()

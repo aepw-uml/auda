@@ -164,6 +164,11 @@ class MigrationService:
                 PrismDataExtraction.data_completeness_score
                 >= self.options.minimal_completeness_score
             )
+        if self.options.minimal_data_source_score > 0:
+            query = query.where(
+                PrismDataExtraction.data_source_score
+                >= self.options.minimal_data_source_score
+            )
 
         return query
 
