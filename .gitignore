@@ -1,0 +1,23 @@
+# macOS system files
+.DS_Store
+
+# Python cache
+__pycache__/
+
+# Python virtual environment
+/.venv/
+
+# Environment files
+/.env
+
+# Cache directory (diskcache)
+/cache/
+
+# Local files
+/local/
+
+# Result files
+/results/
+
+# Logs
+indent.log
