@@ -7,10 +7,11 @@ class Table:
     """Table class for creating and formatting tables.
 
     Attributes:
-        tables: A list of lists representing the table data.
         headers: A list of strings representing the column headers.
         bold_headers: A boolean indicating whether to bold the headers.
         fmt: A string representing the table format in tabulate.
+        colalign: A list of strings representing the column alignment.
+        table: A list of lists representing the table data.
     """
 
     def __init__(
@@ -60,6 +61,9 @@ class Table:
 
         This function uses the `tabulate` library to format the table in a
         readable way.
+
+        Returns:
+            A string representation of the table.
         """
 
         headers = self.headers

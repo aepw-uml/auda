@@ -3,7 +3,12 @@ from typing import Self
 
 
 class Stopwatch:
-    """Measures elapsed wall-clock time between explicit start and stop calls."""
+    """Measures elapsed wall-clock time between explicit start and stop calls.
+
+    Attributes:
+        start_time: The timestamp when the stopwatch was started.
+        stop_time: The timestamp when the stopwatch was stopped.
+    """
 
     def __init__(self):
         """Initializes the stopwatch without any recorded timestamps."""
@@ -53,7 +58,8 @@ class Stopwatch:
         """Calculates the elapsed duration in whole milliseconds.
 
         Returns:
-            The elapsed duration between the start and stop times in milliseconds.
+            The elapsed duration between the start and stop times in
+            milliseconds.
         """
 
         return int(self.duration_seconds_float() * 1000)

@@ -3,6 +3,7 @@ from typing import Literal, cast
 
 from dotenv import load_dotenv
 
+# Define a type for the allowed environment values.
 Environment = Literal['DEVELOPMENT', 'TESTING', 'PRODUCTION']
 
 
@@ -55,4 +56,5 @@ class Env:
         return value
 
 
+# Define a global Env instance that can be used across the application.
 env: Env = Env('.env')
