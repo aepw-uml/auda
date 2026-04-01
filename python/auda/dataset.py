@@ -1,15 +1,9 @@
-from common.dataset import DatasetFetcher
-from dataset import PredictedFeatures, YearPPC
+from dataset import dataset_map
 from typer import Context, Typer
 
 from auda.common import AllowCustomArgs
 
 app = Typer(name='dataset', help='Manage datasets')
-
-dataset_map: dict[str, type[DatasetFetcher]] = {
-    'YearPPC': YearPPC,
-    'PredictedFeatures': PredictedFeatures,
-}
 
 
 @app.command(
