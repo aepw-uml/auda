@@ -4,6 +4,7 @@ from typing import Annotated
 import typer
 from typer import Typer
 
+from auda.dataset import app as dataset_app
 from auda.migration import app as migration_app
 from auda.module import app as module_app
 
@@ -22,4 +23,5 @@ def main(
 
 
 app.add_typer(migration_app)
+app.add_typer(dataset_app)
 app.add_typer(module_app)
