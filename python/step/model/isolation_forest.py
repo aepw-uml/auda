@@ -26,7 +26,7 @@ def isolation_forest(
     y: np.ndarray,
     contamination: float = 0.05,
     seed: int = 417,
-) -> IsolationForest:
+) -> IsolationForestResult:
     """Fits an isolation forest model on the feature matrix.
 
     Args:
@@ -37,7 +37,8 @@ def isolation_forest(
         seed: Random seed used for reproducibility.
 
     Returns:
-        A fitted ``IsolationForest`` model.
+        An ``IsolationForestResult`` containing the fitted model and the
+        filtered training data.
     """
 
     _ = y
@@ -48,33 +49,6 @@ def isolation_forest(
     )
     model.fit(X)
 
-    return model
-
-
-def remove_outliers(
-    X: np.ndarray,
-    y: np.ndarray,
-    contamination: float = 0.05,
-    seed: int = 417,
-) -> IsolationForestResult:
-    """Fits isolation forest and removes rows predicted as outliers.
-
-    Args:
-        X: Training feature matrix.
-        y: Training target vector.
-        contamination: Expected proportion of outliers in the training set.
-        seed: Random seed used for reproducibility.
-
-    Returns:
-        The fitted model, inlier mask, and filtered training data.
-    """
-
-    model = isolation_forest(
-        X=X,
-        y=y,
-        contamination=contamination,
-        seed=seed,
-    )
     inlier_mask = model.fit_predict(X) == 1
 
     return IsolationForestResult(
