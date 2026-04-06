@@ -26,7 +26,7 @@ class RegressionMetrics:
         [mae_str, rmse_str, r2_str, mape_str] = self.item_strs()
 
         return (
-            f'Metrics(mae={mae_str}, mse={rmse_str}, '
+            f'Metrics(mae={mae_str}, rmse={rmse_str}, '
             f'r2={r2_str}, mape={mape_str})'
         )
 
