@@ -27,12 +27,11 @@ def isolation_forest(
     contamination: float = 0.05,
     seed: int = 417,
 ) -> IsolationForestResult:
-    """Fits an isolation forest model on the feature matrix.
+    """Fits an isolation forest model on the joint feature-target space.
 
     Args:
         X: Training feature matrix.
-        y: Training target vector. This argument is accepted to match the
-            project step interface, but the model is fit on ``X`` only.
+        y: Training target vector.
         contamination: Expected proportion of outliers in the training set.
         seed: Random seed used for reproducibility.
 
@@ -41,15 +40,16 @@ def isolation_forest(
         filtered training data.
     """
 
-    _ = y
+    y_column = y.reshape(-1, 1)
+    joint_data = np.column_stack([X, y_column])
     model = IsolationForest(
         contamination=contamination,  # type: ignore
         n_estimators=200,
         random_state=seed,
     )
-    model.fit(X)
+    model.fit(joint_data)
 
-    inlier_mask = model.fit_predict(X) == 1
+    inlier_mask = model.predict(joint_data) == 1
 
     return IsolationForestResult(
         model=model,
