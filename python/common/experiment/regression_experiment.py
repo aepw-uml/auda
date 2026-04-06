@@ -8,6 +8,7 @@ from sklearn.metrics import (
     mean_squared_error,
     r2_score,
 )
+from step.model.isolation_forest import isolation_forest
 
 from .experiment import Experiment
 
@@ -50,6 +51,32 @@ class RegressionExperiment(Experiment):
         self.y_train: np.ndarray | None = None
         self.X_test: np.ndarray | None = None
         self.y_test: np.ndarray | None = None
+
+    @override
+    def anomaly_detection(self) -> None:
+        self.log('Running anomaly detection...')
+
+        if self.X is None or self.y is None:
+            raise ValueError('Data not set up. Call setup() first.')
+
+        contamination = float(self.context.get('anomaly_contamination', 0.05))
+
+        result = isolation_forest(self.X, self.y, contamination, self.seed)
+        self.context['isolation_forest_result'] = result
+        self.context['X_original'] = self.X
+        self.context['y_original'] = self.y
+
+        self.X = result.X_inliers
+        self.y = result.y_inliers
+
+        # Log the number of samples removed and remaining after anomaly
+        # detection.
+        num_removed = np.sum(~result.inlier_mask)
+        num_remaining = np.sum(result.inlier_mask)
+        self.log(
+            f'Anomaly detection removed {num_removed} samples, '
+            f'leaving {num_remaining} samples for training.'
+        )
 
     @override
     def setup(self, X: np.ndarray, y: np.ndarray, **kwargs) -> None:

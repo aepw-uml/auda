@@ -102,6 +102,16 @@ class Experiment(ABC):
 
         self.set_context(**kwargs)
 
+    def anomaly_detection(self) -> None:
+        """Performs anomaly detection on the dataset.
+
+        Subclasses should implement this method to identify and handle anomalies
+        in the dataset, such as outliers or missing values. The results of
+        anomaly detection can be stored in the experiment context for later use.
+        """
+
+        pass
+
     def split(self) -> None:
         """Splits the dataset into a training set and a test set based on the
         specified train size.
@@ -147,13 +157,24 @@ class Experiment(ABC):
 
         self.log('Evaluating...')
 
+    def finish(self) -> Any:
+        """Performs any finalization steps after the experiment has run.
+
+        The base implementation only logs completion. Subclasses can override
+        this hook to persist artifacts or emit summaries.
+        """
+
+        self.log('Experiment finished.')
+
     def run(self) -> None:
         """Runs the experiment from start to finish."""
 
+        self.anomaly_detection()
         self.split()
         self.tune()
         self.train()
         self.evaluate()
+        self.finish()
 
     def get_model(self) -> Any:
         """Returns the trained regression model from the pipeline.
