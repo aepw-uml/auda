@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from copy import deepcopy
-from typing import cast, override
+from typing import Literal, cast, override
 
 import numpy as np
 import torch
@@ -9,6 +9,79 @@ from common.experiment.experiment_group import ExperimentGroup
 from common.experiment.regression_experiment import RegressionExperiment
 from sklearn.preprocessing import StandardScaler
 from torch import nn
+
+TargetTransformName = Literal['none', 'log1p']
+
+
+def _resolve_target_transform(value: object) -> TargetTransformName:
+    """Validates and returns the configured target transform name.
+
+    Args:
+        value: Raw transform name from experiment context.
+
+    Returns:
+        The validated target transform name.
+
+    Raises:
+        ValueError: If the provided transform name is unsupported.
+    """
+
+    if value is None:
+        return 'none'
+
+    transform = str(value).strip().lower()
+    if transform in ('', 'none'):
+        return 'none'
+    if transform == 'log1p':
+        return 'log1p'
+
+    raise ValueError(f'Unsupported target transform: {value}')
+
+
+def _transform_targets(
+    y: np.ndarray,
+    target_transform: TargetTransformName,
+) -> np.ndarray:
+    """Transforms target values for model training.
+
+    Args:
+        y: Target array on the original scale.
+        target_transform: Configured transform name.
+
+    Returns:
+        Target array in the model training space.
+
+    Raises:
+        ValueError: If ``log1p`` is requested for negative targets.
+    """
+
+    if target_transform == 'none':
+        return y
+
+    if np.any(y < 0):
+        raise ValueError('log1p target transform requires non-negative y.')
+
+    return np.log1p(y)
+
+
+def _inverse_transform_targets(
+    y: np.ndarray,
+    target_transform: TargetTransformName,
+) -> np.ndarray:
+    """Restores target values from model space to the original scale.
+
+    Args:
+        y: Target array in the model training space.
+        target_transform: Configured transform name.
+
+    Returns:
+        Target array on the original scale.
+    """
+
+    if target_transform == 'none':
+        return y
+
+    return np.expm1(y)
 
 
 def _split_training_validation(
@@ -259,6 +332,7 @@ class _ForecastingMLP(nn.Module):
         )
         self.x_scaler: StandardScaler | None = None
         self.y_scaler: StandardScaler | None = None
+        self.target_transform: TargetTransformName = 'none'
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Runs a forward pass through the network.
@@ -298,13 +372,20 @@ class _ForecastingMLP(nn.Module):
         if was_training:
             self.train()
 
-        return self.y_scaler.inverse_transform(y_scaled).reshape(-1)
+        y_model_space = self.y_scaler.inverse_transform(y_scaled).reshape(-1)
+        return _inverse_transform_targets(
+            y_model_space,
+            self.target_transform,
+        )
 
 
 class NNForecastingExperiment(RegressionExperiment):
     @override
     def tune(self) -> None:
         X_train, y_train = self.get_training_set()
+        target_transform = _resolve_target_transform(
+            self.context.get('target_transform')
+        )
 
         default_num_epochs = int(self.context.get('num_epochs', 500))
         validation_fraction = float(
@@ -376,12 +457,20 @@ class NNForecastingExperiment(RegressionExperiment):
             y_scaler = StandardScaler()
 
             X_subtrain_scaled = x_scaler.fit_transform(X_subtrain)
+            y_subtrain_model = _transform_targets(
+                y_subtrain,
+                target_transform,
+            )
             y_subtrain_scaled = y_scaler.fit_transform(
-                y_subtrain.reshape(-1, 1)
+                y_subtrain_model.reshape(-1, 1)
             )
             X_validation_scaled = x_scaler.transform(X_validation)
+            y_validation_model = _transform_targets(
+                y_validation,
+                target_transform,
+            )
             y_validation_scaled = y_scaler.transform(
-                y_validation.reshape(-1, 1)
+                y_validation_model.reshape(-1, 1)
             )
 
             model = _ForecastingMLP(input_dim=X_train.shape[1])
@@ -438,6 +527,9 @@ class NNForecastingExperiment(RegressionExperiment):
 
         torch.manual_seed(self.seed)
         np.random.seed(self.seed)
+        target_transform = _resolve_target_transform(
+            self.context.get('target_transform')
+        )
 
         validation_fraction = float(
             self.context.get('validation_fraction', 0.2)
@@ -456,6 +548,7 @@ class NNForecastingExperiment(RegressionExperiment):
         model = _ForecastingMLP(input_dim=X_train.shape[1])
         model.x_scaler = x_scaler
         model.y_scaler = y_scaler
+        model.target_transform = target_transform
 
         batch_size = int(self.hyperparameters.get('batch_size', 64))
         learning_rate = float(self.hyperparameters.get('learning_rate', 1e-3))
@@ -472,7 +565,8 @@ class NNForecastingExperiment(RegressionExperiment):
             f'batch_size={batch_size}, '
             f'learning_rate={learning_rate}, '
             f'weight_decay={weight_decay}, '
-            f'num_epochs={num_epochs}.'
+            f'num_epochs={num_epochs}, '
+            f'target_transform={target_transform}.'
         )
 
         X_fit = X_train
@@ -491,15 +585,22 @@ class NNForecastingExperiment(RegressionExperiment):
                 seed=self.seed,
             )
             X_fit = X_subtrain
-            y_fit = y_subtrain.reshape(-1, 1)
+            y_fit = _transform_targets(
+                y_subtrain,
+                target_transform,
+            ).reshape(-1, 1)
 
             X_fit_scaled = x_scaler.fit_transform(X_fit)
             y_fit_scaled = y_scaler.fit_transform(y_fit)
+            y_validation_model = _transform_targets(
+                y_validation,
+                target_transform,
+            )
             validation_data = (
                 cast(np.ndarray, x_scaler.transform(X_validation)),
                 cast(
                     np.ndarray,
-                    y_scaler.transform(y_validation.reshape(-1, 1)),
+                    y_scaler.transform(y_validation_model.reshape(-1, 1)),
                 ),
             )
             self.log(
@@ -511,6 +612,10 @@ class NNForecastingExperiment(RegressionExperiment):
             )
         else:
             X_fit_scaled = x_scaler.fit_transform(X_fit)
+            y_fit = _transform_targets(
+                y_fit.reshape(-1),
+                target_transform,
+            ).reshape(-1, 1)
             y_fit_scaled = y_scaler.fit_transform(y_fit)
             if early_stopping_patience <= 0:
                 self.log('Early stopping disabled because patience <= 0.')
