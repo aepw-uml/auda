@@ -176,8 +176,8 @@ class RegressionExperiment(Experiment):
         """Evaluates the pipeline on the test split and stores metrics.
 
         This implementation predicts on ``X_test`` and stores a
-        ``RegressionMetrics`` instance in ``self.metrics`` containing MAE, MSE,
-        R-squared, and MAPE.
+        ``RegressionMetrics`` instance in ``self.metrics`` containing MAE,
+        RMSE, R-squared, MAPE, and WAPE.
 
         Raises:
             ValueError: If the test split or trained pipeline is unavailable.
@@ -192,9 +192,14 @@ class RegressionExperiment(Experiment):
         rmse = mean_squared_error(y_test, y_pred) ** 0.5
         r2 = r2_score(y_test, y_pred)
         mape = mean_absolute_percentage_error(y_test, y_pred)
+        y_scale = float(np.abs(y_test).sum())
+        if y_scale == 0.0:
+            wape = 0.0
+        else:
+            wape = float(np.abs(y_test - y_pred).sum() / y_scale)
 
         self.context['metrics'] = RegressionMetrics(
-            mae=mae, rmse=rmse, r2=r2, mape=mape
+            mae=mae, rmse=rmse, r2=r2, mape=mape, wape=wape
         )
 
     @override

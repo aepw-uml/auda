@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal
 
-RegressionMetricName = Literal['mae', 'rmse', 'r2', 'mape']
+RegressionMetricName = Literal['mae', 'rmse', 'r2', 'mape', 'wape']
 
 
 @dataclass(frozen=True)
@@ -10,32 +10,37 @@ class RegressionMetrics:
 
     Attributes:
         mae: Mean Absolute Error.
-        mse: Mean Squared Error.
+        rmse: Root Mean Squared Error.
         r2: R-squared score.
         mape: Mean Absolute Percentage Error.
+        wape: Weighted Absolute Percentage Error.
     """
 
     mae: float = 0.0
     rmse: float = 0.0
     r2: float = 0.0
     mape: float = 0.0
+    wape: float = 0.0
 
     def __repr__(self) -> str:
         """Returns a compact string representation of the metric values."""
 
-        [mae_str, rmse_str, r2_str, mape_str] = self.item_strs()
+        [mae_str, rmse_str, r2_str, mape_str, wape_str] = self.item_strs()
 
         return (
             f'Metrics(mae={mae_str}, rmse={rmse_str}, '
-            f'r2={r2_str}, mape={mape_str})'
+            f'r2={r2_str}, mape={mape_str}, wape={wape_str})'
         )
 
     def item_strs(self) -> list[str]:
+        """Formats metric values for display."""
+
         return [
             f'{self.mae:.3e}'.replace('e+', 'e'),
             f'{self.rmse:.3e}'.replace('e+', 'e'),
             f'{self.r2:.3f}',
             f'{self.mape * 100:.2f}%',
+            f'{self.wape * 100:.2f}%',
         ]
 
     def get_value_by_name(self, name: RegressionMetricName) -> float:
@@ -57,6 +62,8 @@ class RegressionMetrics:
                 return self.r2
             case 'mape':
                 return self.mape
+            case 'wape':
+                return self.wape
 
 
 def average_regression_metrics(
@@ -77,4 +84,5 @@ def average_regression_metrics(
         rmse=sum(m.rmse for m in all_regression_metrics) / n,
         r2=sum(m.r2 for m in all_regression_metrics) / n,
         mape=sum(m.mape for m in all_regression_metrics) / n,
+        wape=sum(m.wape for m in all_regression_metrics) / n,
     )
