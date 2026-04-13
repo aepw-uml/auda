@@ -18,24 +18,20 @@ def run_task(ctx: Context, dataset_name: str, task: str) -> None:
         print(f"Dataset '{dataset_name}' not found.")
         return
 
-    dataset, _ = dataset_cls().fetch(**AllowCustomArgs.parse_kwargs(ctx.args))
+    dataset, schema = dataset_cls().fetch(
+        **AllowCustomArgs.parse_kwargs(ctx.args)
+    )
 
     match task:
+        case 'Reconstruction':
+            pass
+        case 'Projection':
+            from task.projection_task import ProjectionTask
+
+            ProjectionTask().run(dataset, schema, **context)
         case 'NNForecasting':
-            from experiment.nn_forecasting_experiment import (
-                NNForecastingExperiment,
-            )
+            from task.nn_forecasting_task import NNForecastingTask
 
-            X, y = dataset.X, dataset.y
-            assert y is not None, (
-                'Target variable y is required for regression tasks.'
-            )
-
-            experiment = NNForecastingExperiment(
-                name='NN Forecasting', description=''
-            )
-            experiment.setup(X=X, y=y, **context)
-            experiment.run()
-            print(experiment.get_metrics())
+            NNForecastingTask().run(dataset, schema, **context)
         case _:
             raise ValueError(f'Unknown task: {task}')

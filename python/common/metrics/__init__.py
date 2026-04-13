@@ -1,3 +1,3 @@
-from .regression_metrics import RegressionMetrics
+from .regression_metrics import RegressionMetricName, RegressionMetrics
 
-__all__ = ['RegressionMetrics']
+__all__ = ['RegressionMetrics', 'RegressionMetricName']

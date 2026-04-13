@@ -1,7 +1,6 @@
 from typing import Any, Type, override
 
 from common.experiment.regression_experiment import RegressionExperiment
-from sklearn.base import RegressorMixin
 from step.model.model import SupervisedLearningModel
 from step.model.standardize_regressor import StandardizedRegressor
 
@@ -12,26 +11,28 @@ class ProjectionExperiment(RegressionExperiment):
         self,
         name: str,
         description: str,
-        regressor: Type[SupervisedLearningModel | RegressorMixin],
+        regressor_cls: Type[SupervisedLearningModel],
         train_size: float = 0.9,
         seed: int = 417,
     ) -> None:
         super().__init__(name, description, train_size, seed)
-        self.regressor = regressor
+        self.regressor_cls = regressor_cls
         self.context['split_shuffle'] = False
 
     @override
     def train(self) -> None:
         super().train()
 
-        self.pipeline = StandardizedRegressor(
-            regressor_cls=self.regressor,
+        self.model = StandardizedRegressor(
+            regressor_cls=self.regressor_cls,
             regressor_kwargs=self.context,
             use_x_scaler=self.context.get('use_scaler', True),
             use_y_scaler=self.context.get('use_target_scaler', True),
         )
 
-        self.parameters = self.pipeline.regressor_.parameters
+        self.model.fit(self.X_train, self.y_train)
+
+        self.parameters = self.model.regressor_.parameters
 
     @override
     def tune(self) -> None:
