@@ -65,6 +65,7 @@ class PredictedFeatures(DatasetFetcher):
         )
 
     @override
-    def fetch(self) -> tuple[Dataset, DatasetSchema]:
+    def fetch(self, **kwargs) -> tuple[Dataset, DatasetSchema]:
+        _ = kwargs
         cache_key = 'SignificantFeatures'
         return super().fetch(cache_key)
