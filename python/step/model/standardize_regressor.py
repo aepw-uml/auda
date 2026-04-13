@@ -3,12 +3,14 @@ from typing import Any, Self, Type
 import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.preprocessing import StandardScaler
+from step.model.model import SupervisedLearningModel
 
 
 class StandardizedRegressor(BaseEstimator, RegressorMixin):
     def __init__(
         self,
-        regressor_cls: Type,
+        regressor_cls: Type[SupervisedLearningModel],
+        hyperparameters: dict[str, Any] | None = None,
         regressor_kwargs: dict[str, Any] | None = None,
         use_x_scaler: bool = True,
         use_y_scaler: bool = True,
@@ -26,6 +28,7 @@ class StandardizedRegressor(BaseEstimator, RegressorMixin):
         """
 
         self.regressor_cls: Type = regressor_cls
+        self.hyperparameters: dict[str, Any] = hyperparameters or {}
         self.regressor_kwargs: dict[str, Any] = regressor_kwargs or {}
         self.use_x_scaler: bool = use_x_scaler
         self.use_y_scaler: bool = use_y_scaler
@@ -52,7 +55,7 @@ class StandardizedRegressor(BaseEstimator, RegressorMixin):
             y_fit = self.y_scaler_.fit_transform(y.reshape(-1, 1)).ravel()
 
         kwargs = self.regressor_kwargs or {}
-        self.regressor_ = self.regressor_cls(**kwargs)
+        self.regressor_ = self.regressor_cls(self.hyperparameters, **kwargs)
         self.regressor_.fit(X_fit, y_fit)
 
         return self
