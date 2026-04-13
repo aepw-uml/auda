@@ -62,6 +62,12 @@ class RegressionExperiment(Experiment):
         if bool(self.context.get('use_isolation_forest', False)):
             return
 
+        if self.X.shape[0] < 10:
+            self.log(
+                'Dataset has fewer than 10 samples; skipping anomaly detection.'
+            )
+            return
+
         contamination = float(self.context.get('anomaly_contamination', 0.05))
 
         result = isolation_forest(self.X, self.y, contamination, self.seed)
