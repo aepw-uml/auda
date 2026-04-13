@@ -59,6 +59,9 @@ class RegressionExperiment(Experiment):
         if self.X is None or self.y is None:
             raise ValueError('Data not set up. Call setup() first.')
 
+        if bool(self.context.get('use_isolation_forest', False)):
+            return
+
         contamination = float(self.context.get('anomaly_contamination', 0.05))
 
         result = isolation_forest(self.X, self.y, contamination, self.seed)
@@ -161,8 +164,7 @@ class RegressionExperiment(Experiment):
         """Validates that training data is ready before model training.
 
         Subclasses should override or extend this method to fit a regression
-        pipeline and assign it to ``self.pipeline`` after calling
-        ``super().train()``.
+        model and assign it to ``self.model`` after calling ``super().train()``.
 
         Raises:
             ValueError: If the training split has not been created yet.
@@ -173,14 +175,14 @@ class RegressionExperiment(Experiment):
 
     @override
     def evaluate(self) -> None:
-        """Evaluates the pipeline on the test split and stores metrics.
+        """Evaluates the model on the test split and stores metrics.
 
         This implementation predicts on ``X_test`` and stores a
         ``RegressionMetrics`` instance in ``self.metrics`` containing MAE,
         RMSE, R-squared, MAPE, and WAPE.
 
         Raises:
-            ValueError: If the test split or trained pipeline is unavailable.
+            ValueError: If the test split or trained model is unavailable.
         """
 
         X_test, y_test = self.get_test_set()
@@ -270,7 +272,7 @@ class RegressionExperiment(Experiment):
     #     plotter: Plotter = plotter_factory(
     #         schema=schema,
     #         title=plot_title,
-    #         model=self.pipeline.predict,
+    #         model=self.model.predict,
     #         X_train=X_train,
     #         y_train=y_train,
     #         X_test=X_test,

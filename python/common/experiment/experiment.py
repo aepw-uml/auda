@@ -59,7 +59,7 @@ class Experiment(ABC):
         self.hyperparameters: Vars = {}
         self.parameters: Vars = {}
 
-    def set_context(self, **kwargs: Vars) -> None:
+    def set_context(self, **kwargs) -> None:
         """Updates the experiment context with additional key-value pairs.
 
         This method provides a convenient way to persist arbitrary metadata or
@@ -138,7 +138,7 @@ class Experiment(ABC):
         pass
 
     def train(self) -> None:
-        """Fits the experiment pipeline on the training split.
+        """Fits the experiment model on the training split.
 
         Subclasses should update ``self.model`` and fit it using the training
         data produced by ``split()``. If ``tune()`` stores selected
@@ -148,7 +148,7 @@ class Experiment(ABC):
         pass
 
     def evaluate(self) -> None:
-        """Evaluates the trained pipeline and stores the resulting metrics.
+        """Evaluates the trained model and stores the resulting metrics.
 
         Subclasses should use the held-out test split to generate predictions,
         compute task-appropriate metrics, and store the result in the "metrics"
@@ -177,10 +177,10 @@ class Experiment(ABC):
         self.finish()
 
     def get_model(self) -> Any:
-        """Returns the trained regression model from the pipeline.
+        """Returns the trained regression model.
 
         Raises:
-            ValueError: If the pipeline is not trained or does not have a
+            ValueError: If the model is not trained or does not have a
                 predict method.
         """
 
@@ -189,7 +189,7 @@ class Experiment(ABC):
 
         if not hasattr(self.model, 'predict'):
             raise ValueError(
-                'Pipeline does not have a predict method. Ensure it is a '
+                'Model does not have a predict method. Ensure it is a '
                 'regression model.'
             )
 

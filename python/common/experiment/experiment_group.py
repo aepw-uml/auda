@@ -48,6 +48,7 @@ class ExperimentGroup:
             experiment: The Experiment instance to add to the group.
         """
 
+        experiment.set_context(**self.context)
         self.experiments.append(experiment)
 
     def run(self, dataset: Dataset) -> None:
