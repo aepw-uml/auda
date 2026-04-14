@@ -2,7 +2,7 @@ from typing import cast, override
 
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.experiment_group import ExperimentGroup
-from common.experiment.projection_experiment import ProjectionExperiment
+from common.experiment.forecasting_experiment import ForecastingExperiment
 from step.model.arima_regression import ARIMARegression
 from step.model.drift_baseline import DriftBaseline
 from step.model.exponential_smoothing import ExponentialSmoothing
@@ -22,29 +22,29 @@ from step.plot.support_vector_regression import SupportVectorRegressionPlotter
 from step.plot.theil_sen_regression import TheilSenRegressionPlotter
 
 
-def getNaivePersistenceProjection(**_) -> ProjectionExperiment:
-    return ProjectionExperiment(
+def getNaivePersistenceForecasting(**_) -> ForecastingExperiment:
+    return ForecastingExperiment(
         name='Naive Persistence',
         description=(
-            'Project the original time series with naive persistence.'
+            'Forecast the original time series with naive persistence.'
         ),
         regressor_cls=NaivePersistence,
     )
 
 
-def getDriftBaselineProjection(**_) -> ProjectionExperiment:
-    return ProjectionExperiment(
+def getDriftBaselineForecasting(**_) -> ForecastingExperiment:
+    return ForecastingExperiment(
         name='Drift Baseline',
-        description=('Project the original time series with drift baseline.'),
+        description=('Forecast the original time series with drift baseline.'),
         regressor_cls=DriftBaseline,
     )
 
 
-def getExponentialSmoothingProjection(**_) -> ProjectionExperiment:
-    experiment = ProjectionExperiment(
+def getExponentialSmoothingForecasting(**_) -> ForecastingExperiment:
+    experiment = ForecastingExperiment(
         name='Exponential Smoothing',
         description=(
-            'Project the original time series with exponential smoothing.'
+            'Forecast the original time series with exponential smoothing.'
         ),
         regressor_cls=ExponentialSmoothing,
     )
@@ -52,10 +52,10 @@ def getExponentialSmoothingProjection(**_) -> ProjectionExperiment:
     return experiment
 
 
-def getARIMAProjection(**context) -> ProjectionExperiment:
-    experiment = ProjectionExperiment(
+def getARIMAForecasting(**context) -> ForecastingExperiment:
+    experiment = ForecastingExperiment(
         name='ARIMA Regression',
-        description=('Project the original time series with ARIMA.'),
+        description=('Forecast the original time series with ARIMA.'),
         regressor_cls=ARIMARegression,
     )
 
@@ -76,11 +76,12 @@ def getARIMAProjection(**context) -> ProjectionExperiment:
     return experiment
 
 
-def getTheilSenProjection(**_) -> ProjectionExperiment:
-    experiment = ProjectionExperiment(
+def getTheilSenForecasting(**_) -> ForecastingExperiment:
+    experiment = ForecastingExperiment(
         name='Theil-Sen Regression',
         description=(
-            'Project the original time series with robust Theil-Sen regression.'
+            'Forecast the original time series with robust Theil-Sen '
+            'regression.'
         ),
         regressor_cls=TheilSenRegression,
     )
@@ -96,11 +97,11 @@ def getTheilSenProjection(**_) -> ProjectionExperiment:
     return experiment
 
 
-def getPolynomialRegressionProjection(**_) -> ProjectionExperiment:
-    experiment = ProjectionExperiment(
+def getPolynomialRegressionForecasting(**_) -> ForecastingExperiment:
+    experiment = ForecastingExperiment(
         name='Polynomial Regression',
         description=(
-            'Project the original time series with polynomial regression.'
+            'Forecast the original time series with polynomial regression.'
         ),
         regressor_cls=PolynomialRegression,
     )
@@ -119,10 +120,10 @@ def getPolynomialRegressionProjection(**_) -> ProjectionExperiment:
     return experiment
 
 
-def getRidgeRegressionProjection(**_) -> ProjectionExperiment:
-    experiment = ProjectionExperiment(
+def getRidgeRegressionForecasting(**_) -> ForecastingExperiment:
+    experiment = ForecastingExperiment(
         name='Ridge Regression',
-        description=('Project the original time series with ridge regression.'),
+        description=('Forecast the original time series with ridge regression.'),
         regressor_cls=RidgeRegression,
     )
 
@@ -140,11 +141,12 @@ def getRidgeRegressionProjection(**_) -> ProjectionExperiment:
     return experiment
 
 
-def getGaussianProcessProjection(**_) -> ProjectionExperiment:
-    experiment = ProjectionExperiment(
+def getGaussianProcessForecasting(**_) -> ForecastingExperiment:
+    experiment = ForecastingExperiment(
         name='Gaussian Process Regression',
         description=(
-            'Project the original time series with Gaussian process regression.'
+            'Forecast the original time series with Gaussian process '
+            'regression.'
         ),
         regressor_cls=GaussianProcessRegression,
     )
@@ -162,13 +164,13 @@ def getGaussianProcessProjection(**_) -> ProjectionExperiment:
     return experiment
 
 
-def getSupportVectorRegressionProjection(
+def getSupportVectorRegressionForecasting(
     **context: str,
-) -> ProjectionExperiment:
-    experiment = ProjectionExperiment(
+) -> ForecastingExperiment:
+    experiment = ForecastingExperiment(
         name='Support Vector Regression',
         description=(
-            'Project the original time series with support vector regression.'
+            'Forecast the original time series with support vector regression.'
         ),
         regressor_cls=SupportVectorRegression,
     )
@@ -211,7 +213,7 @@ def getSupportVectorRegressionProjection(
     return experiment
 
 
-class ProjectionExperimentGroup(ExperimentGroup):
+class ForecastingExperimentGroup(ExperimentGroup):
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema) -> None:
         super().run(dataset)
@@ -226,7 +228,7 @@ class ProjectionExperimentGroup(ExperimentGroup):
         self.logger.info(f'Using metric "{metric}" for hyperparameter tuning.')
 
         for experiment in self.experiments:
-            experiment = cast(ProjectionExperiment, experiment)
+            experiment = cast(ForecastingExperiment, experiment)
 
             # Set the random seed for reproducibility.
             experiment.seed = seed
@@ -249,7 +251,7 @@ class ProjectionExperimentGroup(ExperimentGroup):
 
         if y is None:
             raise ValueError(
-                'Label data is required for projection experiment.'
+                'Label data is required for forecasting experiment.'
             )
 
         if X.shape[0] != y.shape[0]:

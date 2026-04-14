@@ -18,7 +18,7 @@ from step.tuner.types import (
 )
 
 
-class ProjectionExperiment(RegressionExperiment):
+class ForecastingExperiment(RegressionExperiment):
     @override
     def __init__(
         self,

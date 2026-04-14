@@ -27,10 +27,10 @@ def run_task(ctx: Context, dataset_name: str, task: str) -> None:
             from task.reconstruction_task import ReconstructionTask
 
             ReconstructionTask().run(dataset, schema, **context)
-        case 'Projection':
-            from task.projection_task import ProjectionTask
+        case 'Forecasting':
+            from task.forecasting_task import ForecastingTask
 
-            ProjectionTask().run(dataset, schema, **context)
+            ForecastingTask().run(dataset, schema, **context)
         case 'NNForecasting':
             from task.nn_forecasting_task import NNForecastingTask
 
