@@ -1,7 +1,7 @@
 from typing import Any, Type, override
 
 from common.experiment.regression_experiment import RegressionExperiment
-from common.metrics import RegressionMetrics, average_regression_metrics
+from common.metrics import RegressionMetrics
 from common.metrics.regression_metrics import RegressionMetricName
 from sklearn.base import np
 from step.evaluator.time_series_cross_validation import (
@@ -9,11 +9,12 @@ from step.evaluator.time_series_cross_validation import (
 )
 from step.model.model import SupervisedLearningModel
 from step.model.standardize_regressor import StandardizedRegressor
-from step.tuner.random_search import (
+from step.tuner.grid_search import grid_search
+from step.tuner.random_search import random_search
+from step.tuner.types import (
     HyperparameterScore,
     SamplingScale,
     SearchSpace,
-    random_search,
 )
 
 
@@ -59,69 +60,75 @@ class ProjectionExperiment(RegressionExperiment):
             )
 
         self.logger.info('Tuning model with provided parameters...')
-        search_type = tuning_parameters.get('search_type', 'random')
+        search_type = self.context.get('tune_search_type', 'random')
+        hyperparameter_names: list[str] = tuning_parameters.get(
+            'hyperparameter_names', []
+        )
+        search_space: SearchSpace = tuning_parameters.get('search_space', [])
+        sampling_scales: list[SamplingScale] = tuning_parameters.get(
+            'sampling_scales', []
+        )
+        metric: RegressionMetricName = tuning_parameters.get('metric', 'mape')
+        num_iterations: int = tuning_parameters.get('num_iterations', 500)
+        num_points_per_interval: int = tuning_parameters.get(
+            'num_points_per_interval', 5
+        )
 
-        if search_type == 'grid':
-            pass
-        elif search_type == 'random':
-            hyperparameter_names: list[str] = tuning_parameters.get(
-                'hyperparameter_names', []
-            )
-            search_space: SearchSpace = tuning_parameters.get(
-                'search_space', []
-            )
-            sampling_scales: list[SamplingScale] = tuning_parameters.get(
-                'sampling_scales', []
-            )
-            metric: RegressionMetricName = tuning_parameters.get(
-                'metric', 'mape'
-            )
-            num_iterations: int = tuning_parameters.get('num_iterations', 500)
+        def evaluate_fold(
+            X_train_fold: np.ndarray,
+            y_train_fold: np.ndarray,
+            X_val_fold: np.ndarray,
+            y_val_fold: np.ndarray,
+        ) -> RegressionMetrics:
+            X_train, y_train = self.X_train, self.y_train
+            X_test, y_test = self.X_test, self.y_test
+            enable_logging = self.context.get('enable_logging', True)
 
-            def evaluate_fold(
-                X_train_fold: np.ndarray,
-                y_train_fold: np.ndarray,
-                X_val_fold: np.ndarray,
-                y_val_fold: np.ndarray,
-            ) -> RegressionMetrics:
-                X_train, y_train = self.X_train, self.y_train
-                X_test, y_test = self.X_test, self.y_test
+            self.X_train, self.y_train = X_train_fold, y_train_fold
+            self.X_test, self.y_test = X_val_fold, y_val_fold
+            self.context['enable_logging'] = False
 
-                self.X_train, self.y_train = X_train_fold, y_train_fold
-                self.X_test, self.y_test = X_val_fold, y_val_fold
-                self.context['enable_logging'] = False
-
+            try:
                 self.train()
                 self.evaluate()
-                metrics = self.get_metrics()
-
+                return self.get_metrics()
+            finally:
                 self.X_train, self.y_train = X_train, y_train
                 self.X_test, self.y_test = X_test, y_test
-                self.context['enable_logging'] = True
+                self.context['enable_logging'] = enable_logging
 
-                return metrics
+        X_train, y_train = self.get_training_set()
 
-            X_train, y_train = self.get_training_set()
+        def evaluate_hyperparameters(
+            hyperparameters: list[float],
+        ) -> list[RegressionMetrics]:
+            self.hyperparameters = {
+                **self.hyperparameters,
+                **{
+                    name: value
+                    for name, value in zip(
+                        hyperparameter_names, hyperparameters
+                    )
+                },
+            }
+            all_regression_metrics = time_series_cross_validation(
+                X_train, y_train, evaluate_fold
+            )
 
-            def evaluate_hyperparameters(
-                hyperparameters: list[float],
-            ) -> RegressionMetrics:
-                self.hyperparameters = {
-                    **self.hyperparameters,
-                    **{
-                        name: value
-                        for name, value in zip(
-                            hyperparameter_names, hyperparameters
-                        )
-                    },
-                }
-                all_regression_metrics = time_series_cross_validation(
-                    X_train, y_train, evaluate_fold
-                )
+            return all_regression_metrics
 
-                return average_regression_metrics(all_regression_metrics)
-
-            self.timer_start('tuning')
+        self.timer_start('tuning')
+        if search_type == 'grid':
+            hyperparameter_scores: list[HyperparameterScore] = grid_search(
+                hyperparameter_names=hyperparameter_names,
+                search_space=search_space,
+                evaluate_hyperparameters=evaluate_hyperparameters,
+                sampling_scales=sampling_scales,
+                metric=metric,
+                num_points_per_interval=num_points_per_interval,
+                logger=self.logger,
+            )
+        elif search_type == 'random':
             hyperparameter_scores: list[HyperparameterScore] = random_search(
                 hyperparameter_names=hyperparameter_names,
                 search_space=search_space,
@@ -132,20 +139,28 @@ class ProjectionExperiment(RegressionExperiment):
                 seed=self.seed,
                 logger=self.logger,
             )
-            self.timer_stop('tuning')
-
-            sorted_hyperparameter_scores = sorted(
-                hyperparameter_scores, key=lambda x: x[0]
+        else:
+            raise ValueError(
+                f'Unsupported search_type "{search_type}". '
+                'Expected "grid" or "random".'
             )
-            index = int(num_iterations * 0.01)
-            best_hyperparameters = sorted_hyperparameter_scores[index][1]
+        self.timer_stop('tuning')
 
-            self.context['hyperparameter_scores'] = hyperparameter_scores
-            self.hyperparameters = {
+        sorted_hyperparameter_scores = sorted(
+            hyperparameter_scores, key=lambda x: x[0]
+        )
+        index = int(len(hyperparameter_scores) * 0.01)
+        best_hyperparameters = sorted_hyperparameter_scores[index][1]
+
+        self.context['hyperparameter_scores'] = hyperparameter_scores
+        self.hyperparameters = {
+            **self.hyperparameters,
+            **{
                 name: value
                 for name, value in zip(
                     hyperparameter_names, best_hyperparameters
                 )
-            }
+            },
+        }
 
         self.logger.info(f'Best hyperparameters: {self.hyperparameters}')

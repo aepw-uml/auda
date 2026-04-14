@@ -108,9 +108,11 @@ def getPolynomialRegressionProjection(**_) -> ProjectionExperiment:
     experiment.set_context(
         plotter_factory=PolynomialRegressionPlotter,
         tuning_parameters={
+            'search_type': 'grid',
             'hyperparameter_names': ['degree'],
             'search_space': [[(2.0, 9.0)]],
             'sampling_scales': ['uniform'],
+            'num_points_per_interval': 8,
         },
     )
 
@@ -127,9 +129,11 @@ def getRidgeRegressionProjection(**_) -> ProjectionExperiment:
     experiment.set_context(
         plotter_factory=RidgeRegressionPlotter,
         tuning_parameters={
+            'search_type': 'grid',
             'hyperparameter_names': ['degree', 'alpha'],
             'search_space': [[(2.0, 9.0)], [(1e-6, 1e3)]],
             'sampling_scales': ['uniform', 'log_uniform'],
+            'num_points_per_interval': 8,
         },
     )
 
@@ -148,6 +152,7 @@ def getGaussianProcessProjection(**_) -> ProjectionExperiment:
     experiment.set_context(
         plotter_factory=GaussianProcessRegressionPlotter,
         tuning_parameters={
+            'search_type': 'grid',
             'hyperparameter_names': ['length_scale', 'noise_level'],
             'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
             'sampling_scales': ['log_uniform', 'log_uniform'],
@@ -170,6 +175,7 @@ def getSupportVectorRegressionProjection(
 
     if bool(context.get('svr_tune_gamma', 0)):
         tuning_parameters = {
+            'search_type': 'grid',
             'hyperparameter_names': ['C', 'epsilon', 'gamma'],
             'search_space': [
                 [(0.1, 100.0)],
@@ -184,6 +190,7 @@ def getSupportVectorRegressionProjection(
         }
     else:
         tuning_parameters = {
+            'search_type': 'grid',
             'hyperparameter_names': ['C', 'epsilon'],
             'search_space': [
                 [(0.1, 100.0)],

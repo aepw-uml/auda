@@ -1,22 +1,25 @@
 from itertools import product
 from logging import Logger
-from typing import Callable, Literal
+from typing import Callable
 
 import numpy as np
 from common.metrics import RegressionMetricName, RegressionMetrics
-
-Interval = tuple[float, float]
-Hyperparameters = list[float]
-HyperparameterScore = tuple[float, Hyperparameters]
-Domain = list[Interval]
-SearchSpace = list[Domain]
-SamplingScale = Literal['uniform', 'log_uniform']
+from common.metrics.regression_metrics import average_regression_metrics
+from step.tuner.types import (
+    Domain,
+    Hyperparameters,
+    HyperparameterScore,
+    SamplingScale,
+    SearchSpace,
+)
 
 
 def grid_search(
     hyperparameter_names: list[str],
     search_space: SearchSpace,
-    evaluate_hyperparameters: Callable[[Hyperparameters], RegressionMetrics],
+    evaluate_hyperparameters: Callable[
+        [Hyperparameters], list[RegressionMetrics]
+    ],
     sampling_scales: list[SamplingScale],
     metric: RegressionMetricName = 'mape',
     num_points_per_interval: int = 5,
@@ -39,8 +42,8 @@ def grid_search(
             corresponds to a hyperparameter and contains the intervals from
             which to build grid values.
         evaluate_hyperparameters: A function that takes a list of hyperparameter
-            values and returns a RegressionMetrics object containing the
-            evaluation metrics for those hyperparameters.
+            values and returns the per-fold regression metrics for those
+            hyperparameters.
         sampling_scales: A list of sampling scales for each hyperparameter.
         metric: The name of the metric to optimize.
         num_points_per_interval: The number of grid values to generate inside
@@ -48,8 +51,8 @@ def grid_search(
         logger: An optional logger to log the progress of the grid search.
 
     Returns:
-        A list of ``(score, hyperparameters)`` tuples in the order they were
-        evaluated.
+        A list of ``(score, hyperparameters, metrics_list)`` tuples in the
+        order they were evaluated.
     """
 
     if len(search_space) != len(hyperparameter_names):
@@ -81,9 +84,12 @@ def grid_search(
     hyperparameter_scores: list[HyperparameterScore] = []
     for i, hyperparameters_tuple in enumerate(product(*hyperparameter_grids)):
         hyperparameters = list(hyperparameters_tuple)
-        metrics: RegressionMetrics = evaluate_hyperparameters(hyperparameters)
+        metrics_list: list[RegressionMetrics] = evaluate_hyperparameters(
+            hyperparameters
+        )
+        metrics: RegressionMetrics = average_regression_metrics(metrics_list)
         score: float = metrics.get_value_by_name(metric)
-        hyperparameter_scores.append((score, hyperparameters))
+        hyperparameter_scores.append((score, hyperparameters, metrics_list))
 
         if logger is not None:
             hyperparameters_str = ', '.join(
