@@ -1,6 +1,13 @@
+from pathlib import Path
 from typing import override
 
 from common.dataset import Dataset, DatasetSchema
+from common.experiment.persistence import (
+    save_hyperparameter_table,
+    save_metric_table,
+    save_plots,
+    save_time_table,
+)
 from common.task import Task
 from experiment.projection_experiment import (
     ProjectionExperimentGroup,
@@ -33,3 +40,18 @@ class ProjectionTask(Task):
 
         for experiment in group.experiments:
             experiment.get_metrics()
+
+        # Task path to save the results of the projection experiments.
+        task_path = Path('results') / 'projection'
+
+        # Save the metric table for the projection experiments.
+        save_metric_table(group, task_path)
+
+        # Save a hyperparameter table and save it to a file.
+        save_hyperparameter_table(group, task_path)
+
+        # Save the plots of each experiment.
+        save_plots(group, task_path)
+
+        # Save time.
+        save_time_table(group, task_path)
