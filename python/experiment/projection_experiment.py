@@ -107,6 +107,11 @@ def getPolynomialRegressionProjection(**_) -> ProjectionExperiment:
 
     experiment.set_context(
         plotter_factory=PolynomialRegressionPlotter,
+        tuning_parameters={
+            'hyperparameter_names': ['degree'],
+            'search_space': [[(2.0, 9.0)]],
+            'sampling_scales': ['uniform'],
+        },
     )
 
     return experiment
@@ -121,6 +126,11 @@ def getRidgeRegressionProjection(**_) -> ProjectionExperiment:
 
     experiment.set_context(
         plotter_factory=RidgeRegressionPlotter,
+        tuning_parameters={
+            'hyperparameter_names': ['degree', 'alpha'],
+            'search_space': [[(2.0, 9.0)], [(1e-6, 1e3)]],
+            'sampling_scales': ['uniform', 'log_uniform'],
+        },
     )
 
     return experiment
@@ -137,6 +147,11 @@ def getGaussianProcessProjection(**_) -> ProjectionExperiment:
 
     experiment.set_context(
         plotter_factory=GaussianProcessRegressionPlotter,
+        tuning_parameters={
+            'hyperparameter_names': ['length_scale', 'noise_level'],
+            'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
+            'sampling_scales': ['log_uniform', 'log_uniform'],
+        },
     )
 
     return experiment
@@ -153,8 +168,37 @@ def getSupportVectorRegressionProjection(
         regressor_cls=SupportVectorRegression,
     )
 
+    if bool(context.get('svr_tune_gamma', 0)):
+        tuning_parameters = {
+            'hyperparameter_names': ['C', 'epsilon', 'gamma'],
+            'search_space': [
+                [(0.1, 100.0)],
+                [(0.001, 1.0)],
+                [(0.001, 1.0)],
+            ],
+            'sampling_scales': [
+                'log_uniform',
+                'log_uniform',
+                'log_uniform',
+            ],
+        }
+    else:
+        tuning_parameters = {
+            'hyperparameter_names': ['C', 'epsilon'],
+            'search_space': [
+                [(0.1, 100.0)],
+                [(0.001, 1.0)],
+            ],
+            'sampling_scales': [
+                'log_uniform',
+                'log_uniform',
+            ],
+        }
+
     experiment.set_context(
-        plotter_factory=SupportVectorRegressionPlotter, **context
+        plotter_factory=SupportVectorRegressionPlotter,
+        tuning_parameters=tuning_parameters,
+        **context,
     )
 
     return experiment
@@ -191,7 +235,6 @@ class ProjectionExperimentGroup(ExperimentGroup):
             experiment.setup(X, y, **self.context)
             experiment.run()
             experiment.logger.info(experiment.get_metrics())
-            experiment.finish()
 
     @override
     def check_dataset(self, dataset: Dataset) -> None:
