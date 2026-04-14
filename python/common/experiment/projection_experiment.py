@@ -76,7 +76,7 @@ class ProjectionExperiment(RegressionExperiment):
             metric: RegressionMetricName = tuning_parameters.get(
                 'metric', 'mape'
             )
-            num_iterations: int = tuning_parameters.get('num_iterations', 200)
+            num_iterations: int = tuning_parameters.get('num_iterations', 500)
 
             def evaluate_fold(
                 X_train_fold: np.ndarray,
@@ -134,12 +134,11 @@ class ProjectionExperiment(RegressionExperiment):
             )
             self.timer_stop('tuning')
 
-            # TODO: Pick the good but not the best hyperparameters to avoid
-            # overfitting to the validation set.
             sorted_hyperparameter_scores = sorted(
                 hyperparameter_scores, key=lambda x: x[0]
             )
-            best_hyperparameters = sorted_hyperparameter_scores[0][1]
+            index = int(num_iterations * 0.01)
+            best_hyperparameters = sorted_hyperparameter_scores[index][1]
 
             self.context['hyperparameter_scores'] = hyperparameter_scores
             self.hyperparameters = {

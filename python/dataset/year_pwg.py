@@ -64,6 +64,7 @@ class YearPWG(DatasetFetcher):
         )
 
     @override
-    def fetch(self, location: str) -> tuple[Dataset, DatasetSchema]:
+    def fetch(self, location: str, **kwargs) -> tuple[Dataset, DatasetSchema]:
+        _ = kwargs
         cache_key = f'YearPWG?location={location}'
         return super().fetch(cache_key, location)
