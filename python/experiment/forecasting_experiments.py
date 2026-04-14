@@ -123,7 +123,9 @@ def getPolynomialRegressionForecasting(**_) -> ForecastingExperiment:
 def getRidgeRegressionForecasting(**_) -> ForecastingExperiment:
     experiment = ForecastingExperiment(
         name='Ridge Regression',
-        description=('Forecast the original time series with ridge regression.'),
+        description=(
+            'Forecast the original time series with ridge regression.'
+        ),
         regressor_cls=RidgeRegression,
     )
 

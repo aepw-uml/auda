@@ -129,7 +129,7 @@ class RegressionExperiment(Experiment):
             raise ValueError('Data not set up. Call setup() first.')
 
         enable_evaluation = (
-            self.context.get('evaluation.enabled', 'False').lower() == 'true'
+            self.context.get('enable_evaluation', 'False').lower() == 'true'
         )
         if enable_evaluation:
             self.train_size = 1.0
@@ -147,7 +147,7 @@ class RegressionExperiment(Experiment):
         n_samples = self.X.shape[0]
         indices = np.arange(n_samples)
 
-        if self.context.get('split_shuffle', True):
+        if bool(self.context.get('split_shuffle', 0)):
             np.random.seed(self.seed)
             np.random.shuffle(indices)
 

@@ -28,7 +28,7 @@ class ReconstructionExperiment(RegressionExperiment):
     ) -> None:
         super().__init__(name, description, train_size, seed)
         self.regressor_cls = regressor_cls
-        self.context['split_shuffle'] = False
+        self.context['split_shuffle'] = True
 
     @override
     def train(self) -> None:

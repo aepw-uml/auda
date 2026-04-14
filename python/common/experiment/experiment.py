@@ -29,7 +29,7 @@ class Experiment(ABC):
             experiment's execution.
 
     ContextKeys:
-        logging.enable: A boolean indicating whether logging is enabled; default
+        enable_logging: A boolean indicating whether logging is enabled; default
             to True.
     """
 
@@ -85,7 +85,7 @@ class Experiment(ABC):
         """
 
         enable_logging = (
-            self.context.get('logging.enable', 'True').lower() == 'true'
+            self.context.get('enable_logging', 'True').lower() == 'true'
         )
         if self.logger is not None and enable_logging:
             self.logger.info(message)
