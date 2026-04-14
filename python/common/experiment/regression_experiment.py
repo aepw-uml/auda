@@ -1,6 +1,7 @@
-from typing import cast, override
+from typing import Type, cast, override
 
 import numpy as np
+from common.dataset import DatasetSchema
 from common.metrics import RegressionMetrics
 from sklearn.metrics import (
     mean_absolute_error,
@@ -9,6 +10,7 @@ from sklearn.metrics import (
     r2_score,
 )
 from step.model.isolation_forest import isolation_forest
+from step.plot.plotter import Plotter, RegressionPlotter
 
 from .experiment import Experiment
 
@@ -59,7 +61,7 @@ class RegressionExperiment(Experiment):
         if self.X is None or self.y is None:
             raise ValueError('Data not set up. Call setup() first.')
 
-        if bool(self.context.get('use_isolation_forest', False)):
+        if not bool(self.context.get('use_isolation_forest', 0)):
             return
 
         if self.X.shape[0] < 10:
@@ -244,49 +246,54 @@ class RegressionExperiment(Experiment):
 
         return self.X_test, self.y_test
 
-    # def plot(self) -> Plotter | None:
-    #     """Returns a RegressionPlotter instance for visualizing the regression
-    #     results.
-    #     """
-    #
-    #     plotter_factory: Type[RegressionPlotter] | None = self.context.get(
-    #         'plotter_factory'
-    #     )
-    #     if plotter_factory is None:
-    #         return None
-    #
-    #     schema: DatasetSchema | None = self.context.get('schema')
-    #     if schema is None:
-    #         raise ValueError(
-    #             'Dataset schema is required in context to create plotter.'
-    #         )
-    #
-    #     plot_title: str = self.context.get('plot_title', self.name)
-    #
-    #     X_train, y_train = self.get_training_set()
-    #
-    #     if self.X_test is None or self.y_test is None:
-    #         X_test, y_test = None, None
-    #     else:
-    #         X_test, y_test = self.get_test_set()
-    #
-    #     X_pred: np.ndarray | None = None
-    #     if self.context.get('x-pred') is not None:
-    #         X_pred_nums = self.context['x-pred'].split(',')
-    #         X_pred = np.array(X_pred_nums, dtype=float).reshape(-1, 1)
-    #
-    #     plotter: Plotter = plotter_factory(
-    #         schema=schema,
-    #         title=plot_title,
-    #         model=self.model.predict,
-    #         X_train=X_train,
-    #         y_train=y_train,
-    #         X_test=X_test,
-    #         y_test=y_test,
-    #         X_pred=X_pred,
-    #         parameters=self.parameters,
-    #         hyperparameters=self.hyperparameters,
-    #     )
-    #
-    #     plotter.plot()
-    #     return plotter
+    def plot(self) -> Plotter | None:
+        """Returns a RegressionPlotter instance for visualizing the regression
+        results.
+
+        Returns:
+            A RegressionPlotter instance if a plotter factory is available in
+            the context, or None if no plotting is configured for this
+            experiment.
+        """
+
+        plotter_factory: Type[RegressionPlotter] | None = self.context.get(
+            'plotter_factory'
+        )
+        if plotter_factory is None:
+            return None
+
+        schema: DatasetSchema | None = self.context.get('schema')
+        if schema is None:
+            raise ValueError(
+                'Dataset schema is required in context to create plotter.'
+            )
+
+        plot_title: str = self.context.get('plot_title', self.name)
+
+        X_train, y_train = self.get_training_set()
+
+        if self.X_test is None or self.y_test is None:
+            X_test, y_test = None, None
+        else:
+            X_test, y_test = self.get_test_set()
+
+        X_pred: np.ndarray | None = None
+        if self.context.get('x-pred') is not None:
+            X_pred_nums = self.context['x-pred'].split(',')
+            X_pred = np.array(X_pred_nums, dtype=float).reshape(-1, 1)
+
+        plotter: Plotter = plotter_factory(
+            schema=schema,
+            title=plot_title,
+            model=self.model.predict,
+            X_train=X_train,
+            y_train=y_train,
+            X_test=X_test,
+            y_test=y_test,
+            X_pred=X_pred,
+            parameters=self.parameters,
+            hyperparameters=self.hyperparameters,
+        )
+
+        plotter.plot()
+        return plotter

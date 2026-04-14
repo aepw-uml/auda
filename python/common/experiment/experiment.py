@@ -1,7 +1,9 @@
+import time
 from abc import ABC
 from typing import Any
 
 from common.vars import Vars
+from step.plot.plotter import Plotter
 from util.logging import get_logger
 
 
@@ -145,7 +147,7 @@ class Experiment(ABC):
         hyperparameters, ``train()`` should use them.
         """
 
-        pass
+        self.log('Training model...')
 
     def evaluate(self) -> None:
         """Evaluates the trained model and stores the resulting metrics.
@@ -207,3 +209,43 @@ class Experiment(ABC):
             raise ValueError('Metrics not available. Call evaluate() first.')
 
         return metrics
+
+    def plot(self) -> Plotter | None:
+        """Returns a Plotter instance for visualizing the experiment results.
+
+        The base class can return a Plotter instance if the experiment is
+        designed to produce visualizations, but subclasses can override this
+        method to return None if plotting is not applicable.
+        """
+
+        return None
+
+    def timer_start(self, name: str) -> None:
+        """Starts a timer with the given name for measuring execution time.
+
+        Args:
+            name: The name of the timer to start.
+        """
+
+        self.context[f'{name}_start'] = time.perf_counter()
+
+    def timer_stop(self, name: str) -> None:
+        """Stops the timer with the given name and logs the elapsed time.
+
+        Args:
+            name: The name of the timer to stop.
+        """
+
+        start_time = self.context.get(f'{name}_start')
+        if start_time is None:
+            self.log(f'Timer "{name}" was not started.')
+            return
+
+        end_time = time.perf_counter()
+        elapsed_ms = (end_time - start_time) * 1000
+        self.log(
+            f'Timer "{name}" stopped. Elapsed time: {elapsed_ms} milliseconds.'
+        )
+
+        self.context.pop(f'{name}_start', None)
+        self.context[f'{name}_elapsed_ms'] = elapsed_ms
