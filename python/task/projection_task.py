@@ -9,7 +9,7 @@ from common.experiment.persistence import (
     save_time_table,
 )
 from common.task import Task
-from experiment.projection_experiment import (
+from experiment.projection_experiments import (
     ProjectionExperimentGroup,
     getARIMAProjection,
     getDriftBaselineProjection,

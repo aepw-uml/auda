@@ -24,7 +24,9 @@ def run_task(ctx: Context, dataset_name: str, task: str) -> None:
 
     match task:
         case 'Reconstruction':
-            pass
+            from task.reconstruction_task import ReconstructionTask
+
+            ReconstructionTask().run(dataset, schema, **context)
         case 'Projection':
             from task.projection_task import ProjectionTask
 

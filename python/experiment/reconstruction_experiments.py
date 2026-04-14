@@ -1,0 +1,384 @@
+from pathlib import Path
+from typing import cast, override
+
+import numpy as np
+from common.dataset import Dataset, DatasetSchema
+from common.experiment.experiment_group import ExperimentGroup
+from common.experiment.persistence import (
+    save_hyperparameter_table,
+    save_metric_table,
+    save_plots,
+    save_time_table,
+)
+from common.experiment.reconstruction_experiment import (
+    ReconstructionExperiment,
+)
+from common.metrics import RegressionMetrics, average_regression_metrics
+from step.model.cubic_spline import CubicSpline
+from step.model.gaussian_process_regression import GaussianProcessRegression
+from step.model.linear_interpolation import LinearInterpolation
+from step.model.moving_average_interpolation import MovingAverageInterpolation
+from step.model.polynomial_regression import PolynomialRegression
+from step.model.ridge_regression import RidgeRegression
+from step.model.support_vector_regression import SupportVectorRegression
+from step.model.theil_sen_regression import TheilSenRegression
+from step.plot.gaussian_process_regression import (
+    GaussianProcessRegressionPlotter,
+)
+from step.plot.polynomial_regression import PolynomialRegressionPlotter
+from step.plot.ridge_regression import RidgeRegressionPlotter
+from step.plot.support_vector_regression import SupportVectorRegressionPlotter
+from step.plot.theil_sen_regression import TheilSenRegressionPlotter
+
+
+def getLinearInterpolationReconstruction(**_) -> ReconstructionExperiment:
+    """Builds a linear-interpolation reconstruction experiment."""
+
+    return ReconstructionExperiment(
+        name='Linear Interpolation',
+        description=(
+            'Reconstruct the original time series with linear interpolation.'
+        ),
+        regressor_cls=LinearInterpolation,
+    )
+
+
+def getMovingAverageInterpolationReconstruction(
+    **_,
+) -> ReconstructionExperiment:
+    """Builds a moving-average-interpolation reconstruction experiment."""
+
+    return ReconstructionExperiment(
+        name='Moving Average Interpolation',
+        description=(
+            'Reconstruct the original time series with moving average '
+            'interpolation.'
+        ),
+        regressor_cls=MovingAverageInterpolation,
+    )
+
+
+def getCubicSplineInterpolationReconstruction(**_) -> ReconstructionExperiment:
+    """Builds a cubic-spline-interpolation reconstruction experiment."""
+
+    return ReconstructionExperiment(
+        name='Cubic Spline Interpolation',
+        description=(
+            'Reconstruct the original time series with cubic spline '
+            'interpolation.'
+        ),
+        regressor_cls=CubicSpline,
+    )
+
+
+def getTheilSenReconstruction(**_) -> ReconstructionExperiment:
+    """Builds a Theil-Sen reconstruction experiment."""
+
+    experiment = ReconstructionExperiment(
+        name='Theil-Sen Regression',
+        description=(
+            'Reconstruct the original time series with robust Theil-Sen '
+            'regression.'
+        ),
+        regressor_cls=TheilSenRegression,
+    )
+    experiment.set_context(plotter_factory=TheilSenRegressionPlotter)
+    experiment.hyperparameters = {
+        'replace': True,
+        'window_size': 7,
+    }
+    return experiment
+
+
+def getPolynomialRegressionReconstruction(**_) -> ReconstructionExperiment:
+    """Builds a polynomial-regression reconstruction experiment."""
+
+    experiment = ReconstructionExperiment(
+        name='Polynomial Regression',
+        description=(
+            'Reconstruct the original time series with polynomial regression.'
+        ),
+        regressor_cls=PolynomialRegression,
+    )
+
+    experiment.set_context(
+        plotter_factory=PolynomialRegressionPlotter,
+        tuning_parameters={
+            'search_type': 'grid',
+            'hyperparameter_names': ['degree'],
+            'search_space': [[(2.0, 9.0)]],
+            'sampling_scales': ['uniform'],
+            'num_points_per_interval': 8,
+        },
+    )
+
+    return experiment
+
+
+def getRidgeRegressionReconstruction(**_) -> ReconstructionExperiment:
+    """Builds a ridge-regression reconstruction experiment."""
+
+    experiment = ReconstructionExperiment(
+        name='Ridge Regression',
+        description=(
+            'Reconstruct the original time series with ridge regression.'
+        ),
+        regressor_cls=RidgeRegression,
+    )
+
+    experiment.set_context(
+        plotter_factory=RidgeRegressionPlotter,
+        tuning_parameters={
+            'search_type': 'grid',
+            'hyperparameter_names': ['degree', 'alpha'],
+            'search_space': [[(2.0, 9.0)], [(1e-6, 1e3)]],
+            'sampling_scales': ['uniform', 'log_uniform'],
+            'num_points_per_interval': 8,
+        },
+    )
+
+    return experiment
+
+
+def getGaussianProcessReconstruction(**_) -> ReconstructionExperiment:
+    """Builds a Gaussian-process reconstruction experiment."""
+
+    experiment = ReconstructionExperiment(
+        name='Gaussian Process Regression',
+        description=(
+            'Reconstruct the original time series with Gaussian process '
+            'regression.'
+        ),
+        regressor_cls=GaussianProcessRegression,
+    )
+
+    experiment.set_context(
+        plotter_factory=GaussianProcessRegressionPlotter,
+        tuning_parameters={
+            'search_type': 'grid',
+            'hyperparameter_names': ['length_scale', 'noise_level'],
+            'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
+            'sampling_scales': ['log_uniform', 'log_uniform'],
+        },
+    )
+
+    return experiment
+
+
+def getSupportVectorRegressionReconstruction(
+    **context: str,
+) -> ReconstructionExperiment:
+    """Builds a support-vector-regression reconstruction experiment."""
+
+    experiment = ReconstructionExperiment(
+        name='Support Vector Regression',
+        description=(
+            'Reconstruct the original time series with support vector '
+            'regression.'
+        ),
+        regressor_cls=SupportVectorRegression,
+    )
+
+    if str(context.get('svr_tune_gamma', 'False')).lower() == 'true':
+        tuning_parameters = {
+            'search_type': 'grid',
+            'hyperparameter_names': ['C', 'epsilon', 'gamma'],
+            'search_space': [
+                [(0.1, 100.0)],
+                [(0.001, 1.0)],
+                [(0.001, 1.0)],
+            ],
+            'sampling_scales': [
+                'log_uniform',
+                'log_uniform',
+                'log_uniform',
+            ],
+        }
+    else:
+        tuning_parameters = {
+            'search_type': 'grid',
+            'hyperparameter_names': ['C', 'epsilon'],
+            'search_space': [
+                [(0.1, 100.0)],
+                [(0.001, 1.0)],
+            ],
+            'sampling_scales': [
+                'log_uniform',
+                'log_uniform',
+            ],
+        }
+
+    experiment.set_context(
+        plotter_factory=SupportVectorRegressionPlotter,
+        tuning_parameters=tuning_parameters,
+        **context,
+    )
+
+    return experiment
+
+
+class ReconstructionExperimentGroup(ExperimentGroup):
+    """Runs the configured reconstruction experiments."""
+
+    @override
+    def run(self, dataset: Dataset, schema: DatasetSchema) -> None:
+        """Runs the experiments after injecting shared context.
+
+        Args:
+            dataset: Dataset containing the feature matrix and target vector.
+            schema: Schema describing the dataset columns and units.
+        """
+
+        super().run(dataset)
+
+        X, y = dataset.X, dataset.y
+        assert y is not None
+
+        seed = int(self.context.get('seed', 42))
+        self.logger.info(f'Using seed {seed}.')
+
+        metric = self.context.get('metric', 'mape')
+        self.logger.info(f'Using metric "{metric}" for hyperparameter tuning.')
+
+        for experiment in self.experiments:
+            experiment = cast(ReconstructionExperiment, experiment)
+            experiment.seed = seed
+            experiment.context['schema'] = schema
+
+            if 'tuning_parameters' in experiment.context:
+                experiment.context['tuning_parameters']['metric'] = metric
+
+            experiment.setup(X, y, **self.context)
+            experiment.run()
+            experiment.logger.info(experiment.get_metrics())
+
+    @override
+    def check_dataset(self, dataset: Dataset) -> None:
+        """Validates the dataset required by reconstruction experiments.
+
+        Args:
+            dataset: Dataset containing the feature matrix and target vector.
+
+        Raises:
+            ValueError: If the dataset is incompatible with reconstruction.
+        """
+
+        X, y = dataset.X, dataset.y
+
+        if y is None:
+            raise ValueError(
+                'Label data is required for reconstruction experiments.'
+            )
+
+        if X.shape[0] != y.shape[0]:
+            raise ValueError(
+                'Number of samples in features and labels must be the same.'
+            )
+
+        if y.ndim != 1:
+            raise ValueError('Labels must be one-dimensional.')
+
+
+def get_reconstruction_experiment_group(
+    context: dict[str, str],
+) -> ReconstructionExperimentGroup:
+    """Builds the reconstruction experiment group.
+
+    Args:
+        context: Shared context to inject into every reconstruction experiment.
+
+    Returns:
+        The configured reconstruction experiment group.
+    """
+
+    group = ReconstructionExperimentGroup(name='Reconstruction Experiments')
+    group.set_context(**context)
+    group.add(getLinearInterpolationReconstruction(**context))
+    group.add(getMovingAverageInterpolationReconstruction(**context))
+    group.add(getCubicSplineInterpolationReconstruction(**context))
+    group.add(getRidgeRegressionReconstruction(**context))
+    group.add(getGaussianProcessReconstruction(**context))
+    group.add(getSupportVectorRegressionReconstruction(**context))
+    group.add(getTheilSenReconstruction(**context))
+    return group
+
+
+def run_reconstruction_experiments(
+    dataset: Dataset,
+    schema: DatasetSchema,
+    context: dict[str, str] | None = None,
+) -> ReconstructionExperimentGroup:
+    """Runs the reconstruction experiments.
+
+    Args:
+        dataset: Dataset containing the feature matrix and target vector.
+        schema: Schema describing the dataset columns and units.
+        context: Optional shared context for the experiment group.
+
+    Returns:
+        The reconstruction experiment group after all experiments finish.
+    """
+
+    if context is None:
+        context = {}
+
+    group = get_reconstruction_experiment_group(context)
+    group.run(dataset, schema)
+    return group
+
+
+def save_reconstruction_experiment_results(
+    group: ReconstructionExperimentGroup,
+) -> None:
+    """Saves reconstruction metrics, hyperparameters, plots, and timings."""
+
+    task_path = Path('results') / 'reconstruction'
+    save_metric_table(group, task_path)
+    save_hyperparameter_table(group, task_path)
+    save_plots(group, task_path)
+    save_time_table(group, task_path)
+
+
+def run_reconstruction_experiment_groups(
+    num_experiments: int,
+    dataset: Dataset,
+    schema: DatasetSchema,
+    context: dict[str, str] | None = None,
+    seed: int = 42,
+) -> tuple[list[ReconstructionExperimentGroup], dict[str, RegressionMetrics]]:
+    """Runs multiple reconstruction experiment groups with different seeds.
+
+    Args:
+        num_experiments: Number of experiment groups to run.
+        dataset: Dataset containing the feature matrix and target vector.
+        schema: Schema describing the dataset columns and units.
+        context: Optional shared context for every experiment group.
+        seed: Seed used to sample the per-run experiment seeds.
+
+    Returns:
+        A tuple containing the experiment groups and their averaged metrics by
+        experiment name.
+    """
+
+    rng = np.random.default_rng(seed)
+    experiment_seeds = rng.integers(0, 2 << 31, size=num_experiments)
+
+    groups: list[ReconstructionExperimentGroup] = []
+    for experiment_seed in experiment_seeds:
+        run_context = {} if context is None else dict(context)
+        run_context['seed'] = str(int(experiment_seed))
+        group = run_reconstruction_experiments(dataset, schema, run_context)
+        groups.append(group)
+
+    metrics_lists_by_name: dict[str, list[RegressionMetrics]] = {}
+    for group in groups:
+        for experiment in group.experiments:
+            metrics_lists_by_name.setdefault(experiment.name, []).append(
+                experiment.get_metrics()
+            )
+
+    metrics_by_name: dict[str, RegressionMetrics] = {}
+    for name, metrics_list in metrics_lists_by_name.items():
+        metrics_by_name[name] = average_regression_metrics(metrics_list)
+
+    return groups, metrics_by_name
