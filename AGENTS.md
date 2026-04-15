@@ -10,4 +10,6 @@ When you are asked to improve a document, you should first read it thoroughly, c
 
 When you are about to modify a code file (e.g., a Python file), you should first read the [Style Guide][1] to ensure that your changes comply with the coding standards of this project.
 
+Read files in `docs/prompt/command` and `.local/prompt/command` directories to understand the commands that I will let you do.
+
 [1]: ./docs/preference/style_guide.md

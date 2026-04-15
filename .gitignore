@@ -14,7 +14,7 @@ __pycache__/
 /cache/
 
 # Local files
-/local/
+/.local/
 
 # Result files
 /results/
