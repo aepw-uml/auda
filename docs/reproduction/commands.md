@@ -1,25 +1,31 @@
 ### Reproduction Commands
 
+## Forecasting of Japan plastic waste generation
+
+```bash
+auda task run YearPWG Forecasting --location=Japan --seed=470
+```
+
 ## Forecasting of global plastics production
 
 ```bash
-auda task run YearPWG Forecasting --location=Japan --seed=471
+auda task run GlobalYearPlasticsProduction Forecasting --seed=471
 ```
 
-## Forecasting of Japanese plastic waste generation
+## Reconstruction of United States plastic waste generation
 
 ```bash
-auda task run YearPWG Reconstruction --location=Japan --seed=471
+auda task run YearPWG Reconstruction '--location=United States' --seed=471
 ```
 
-## Reconstruction of global plastics production
+## Multiple Reconstruction of Japan polymer PET consumption
 
 ```bash
-auda task run YearPPC reconstruction year_ppc --location=Japan --seed=149
+auda task run YearPPC MultipleReconstruction --location=Japan --seed=471;
 ```
 
-## Multiple Reconstruction of global plastics production
+## Neural Network Forecasting
 
 ```bash
-auda module run multiple_reconstruction year_ppc --location=Japan --seed=120;
+auda task run PlasticWasteDrivers NNForecasting --seed=471
 ```
