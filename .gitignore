@@ -21,3 +21,6 @@ __pycache__/
 
 # Logs
 indent.log
+
+# Paper draft
+/paper_draft/
