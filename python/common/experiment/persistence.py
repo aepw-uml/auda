@@ -9,9 +9,10 @@ from util.names import to_kebab
 from util.table import Table
 
 
-def save_metric_table(group: ExperimentGroup, task_path: Path) -> None:
-    """Builds a metric table from the given metrics dictionary and saves it to
-    a file.
+def save_metric_table(
+    metrics_dict: dict[str, RegressionMetrics], task_path: Path
+) -> None:
+    """Saves a metric table for the given metrics dictionary to a file.
 
     Args:
         metrics_dict: A dictionary mapping experiment names to their
@@ -19,12 +20,6 @@ def save_metric_table(group: ExperimentGroup, task_path: Path) -> None:
         task_path: The path to the task directory where the metric table will be
             saved.
     """
-
-    metrics_dict: dict[str, RegressionMetrics] = {
-        experiment.name: experiment.get_metrics()
-        for experiment in group.experiments
-        if experiment.get_metrics() is not None
-    }
 
     metric_table = Table(
         headers=['Experiment', 'MAE', 'RMSE', 'R²', 'MAPE', 'WAPE']
@@ -45,6 +40,28 @@ def save_metric_table(group: ExperimentGroup, task_path: Path) -> None:
 
     print(f'Saved metric table to "{metric_table_path}".\n')
     print(metric_table.__repr__() + '\n')
+
+
+def build_and_save_metric_table(
+    group: ExperimentGroup, task_path: Path
+) -> None:
+    """Builds a metric table from the given metrics dictionary and saves it to
+    a file.
+
+    Args:
+        metrics_dict: A dictionary mapping experiment names to their
+            corresponding regression metrics.
+        task_path: The path to the task directory where the metric table will be
+            saved.
+    """
+
+    metrics_dict: dict[str, RegressionMetrics] = {
+        experiment.name: experiment.get_metrics()
+        for experiment in group.experiments
+        if experiment.get_metrics() is not None
+    }
+
+    save_metric_table(metrics_dict, task_path)
 
 
 def get_hyperparameters_str(hyperparameters: dict[str, Any]) -> str:

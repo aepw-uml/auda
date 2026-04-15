@@ -3,8 +3,8 @@ from typing import override
 
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.persistence import (
+    build_and_save_metric_table,
     save_hyperparameter_table,
-    save_metric_table,
     save_plots,
     save_time_table,
 )
@@ -45,7 +45,7 @@ class ForecastingTask(Task):
         task_path = Path('results') / 'forecasting'
 
         # Save the metric table for the forecasting experiments.
-        save_metric_table(group, task_path)
+        build_and_save_metric_table(group, task_path)
 
         # Save a hyperparameter table and save it to a file.
         save_hyperparameter_table(group, task_path)

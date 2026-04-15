@@ -27,6 +27,12 @@ def run_task(ctx: Context, dataset_name: str, task: str) -> None:
             from task.reconstruction_task import ReconstructionTask
 
             ReconstructionTask().run(dataset, schema, **context)
+        case 'MultipleReconstruction':
+            from task.multiple_reconstruction_task import (
+                MultipleReconstructionTask,
+            )
+
+            MultipleReconstructionTask().run(dataset, schema, **context)
         case 'Forecasting':
             from task.forecasting_task import ForecastingTask
 

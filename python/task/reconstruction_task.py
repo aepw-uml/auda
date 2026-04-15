@@ -3,8 +3,8 @@ from typing import override
 
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.persistence import (
+    build_and_save_metric_table,
     save_hyperparameter_table,
-    save_metric_table,
     save_plots,
     save_time_table,
 )
@@ -34,7 +34,7 @@ class ReconstructionTask(Task):
             experiment.get_metrics()
 
         task_path = Path('results') / 'reconstruction'
-        save_metric_table(group, task_path)
+        build_and_save_metric_table(group, task_path)
         save_hyperparameter_table(group, task_path)
         save_plots(group, task_path)
         save_time_table(group, task_path)

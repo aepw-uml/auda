@@ -5,8 +5,8 @@ import numpy as np
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.experiment_group import ExperimentGroup
 from common.experiment.persistence import (
+    build_and_save_metric_table,
     save_hyperparameter_table,
-    save_metric_table,
     save_plots,
     save_time_table,
 )
@@ -333,7 +333,7 @@ def save_reconstruction_experiment_results(
     """Saves reconstruction metrics, hyperparameters, plots, and timings."""
 
     task_path = Path('results') / 'reconstruction'
-    save_metric_table(group, task_path)
+    build_and_save_metric_table(group, task_path)
     save_hyperparameter_table(group, task_path)
     save_plots(group, task_path)
     save_time_table(group, task_path)
