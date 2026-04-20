@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import Any
 
-from common.experiment.experiment_group import ExperimentGroup
 from common.files import save_content_to_file
 from common.metrics.regression_metrics import RegressionMetrics
+from common.task import Task
 from step.plot.plotter import Plotter
 from util.names import to_kebab
 from util.table import Table
@@ -43,7 +43,8 @@ def save_metric_table(
 
 
 def build_and_save_metric_table(
-    group: ExperimentGroup, task_path: Path
+    task: Task,
+    task_path: Path,
 ) -> None:
     """Builds a metric table from the given metrics dictionary and saves it to
     a file.
@@ -57,7 +58,7 @@ def build_and_save_metric_table(
 
     metrics_dict: dict[str, RegressionMetrics] = {
         experiment.name: experiment.get_metrics()
-        for experiment in group.experiments
+        for experiment in task.experiments
         if experiment.get_metrics() is not None
     }
 
@@ -86,18 +87,17 @@ def get_hyperparameters_str(hyperparameters: dict[str, Any]) -> str:
     return ', '.join(items)
 
 
-def save_hyperparameter_table(group: ExperimentGroup, task_path: Path) -> None:
-    """Saves a hyperparameter table for the given experiment group to a file.
+def save_hyperparameter_table(task: Task, task_path: Path) -> None:
+    """Saves a hyperparameter table for the given task to a file.
 
     Args:
-        group: The experiment group containing the experiments with their
-            hyperparameters.
+        task: The task containing the experiments with their hyperparameters.
         task_path: The path to the task directory where the hyperparameter table
             will be saved.
     """
 
     hyperparameter_table = Table(headers=['Experiment', 'Hyperparameters'])
-    for experiment in group.experiments:
+    for experiment in task.experiments:
         hyerparameters_str = get_hyperparameters_str(experiment.hyperparameters)
         hyperparameter_table.append_row(
             experiment.name,
@@ -113,9 +113,9 @@ def save_hyperparameter_table(group: ExperimentGroup, task_path: Path) -> None:
     print(hyperparameter_table.__repr__() + '\n')
 
 
-def save_plots(group: ExperimentGroup, task_path: Path) -> None:
+def save_plots(task: Task, task_path: Path) -> None:
     plots_dir: Path = task_path / 'plots'
-    for experiment in group.experiments:
+    for experiment in task.experiments:
         experiment.context['plot_title'] = ''
         plotter: Plotter | None = experiment.plot()
         if plotter is None:
@@ -126,16 +126,15 @@ def save_plots(group: ExperimentGroup, task_path: Path) -> None:
         print(f'Saved plot for "{experiment.name}" to "{file_path}".')
 
 
-def create_time_table(group: ExperimentGroup) -> dict[str, str]:
-    """Creates a time table for the given experiment group.
+def create_time_table(task: Task) -> dict[str, str]:
+    """Creates a time table for the given task.
 
     Args:
-        group: The experiment group containing the experiments with their tuning
-            times.
+        task: The task containing the experiments with their tuning times.
     """
 
     tuning_time_ms_dict: dict[str, str] = {}
-    for experiment in group.experiments:
+    for experiment in task.experiments:
         if 'tuning_elapsed_ms' not in experiment.context:
             tuning_time_ms_dict[experiment.name] = 'N/A'
         else:
@@ -146,19 +145,18 @@ def create_time_table(group: ExperimentGroup) -> dict[str, str]:
 
 
 def save_time_table(
-    group: ExperimentGroup,
+    task: Task,
     task_path: Path,
 ) -> None:
-    """Saves a time table for the given experiment group to a file.
+    """Saves a time table for the given task to a file.
 
     Args:
-        group: The experiment group containing the experiments with their tuning
-            times.
+        task: The task containing the experiments with their tuning times.
         task_path: The path to the task directory where the time table will
             be saved.
     """
 
-    tuning_time_ms_dict: dict[str, str] = create_time_table(group)
+    tuning_time_ms_dict: dict[str, str] = create_time_table(task)
     time_table = Table(headers=['Experiment', 'Tuning Time (ms)'])
     for name, tuning_time_ms in tuning_time_ms_dict.items():
         time_table.append_row(name, tuning_time_ms)

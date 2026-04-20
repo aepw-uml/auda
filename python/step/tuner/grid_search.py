@@ -5,11 +5,11 @@ from typing import Callable
 import numpy as np
 from common.metrics import RegressionMetrics
 from step.tuner.types import (
-    Configuration,
     Domain,
     Hyperparameters,
     SamplingScale,
     SearchSpace,
+    Trial,
 )
 
 
@@ -22,7 +22,7 @@ def grid_search(
     sampling_scales: list[SamplingScale],
     num_points_per_interval: int = 5,
     logger: Logger | None = None,
-) -> list[Configuration]:
+) -> list[Trial]:
     """Enumerates and evaluates a deterministic hyperparameter grid.
 
     For each hyperparameter, this function generates
@@ -31,8 +31,7 @@ def grid_search(
     combined with a Cartesian product, and each resulting hyperparameter vector
     is passed to ``evaluate_hyperparameters``. The requested metric value is
     stored together with the evaluated hyperparameters. The function returns
-    all ``(score, hyperparameters)`` pairs in evaluation order and does not
-    sort or rank them.
+    all trials in evaluation order and does not sort or rank them.
 
     Args:
         hyperparameter_names: A list of hyperparameter names.
@@ -79,13 +78,13 @@ def grid_search(
     total_iterations = int(
         np.prod([len(grid) for grid in hyperparameter_grids], dtype=int)
     )
-    hyperparameter_scores: list[Configuration] = []
+    trials: list[Trial] = []
     for i, hyperparameters_tuple in enumerate(product(*hyperparameter_grids)):
         hyperparameters = list(hyperparameters_tuple)
         metrics_list: list[RegressionMetrics] = evaluate_hyperparameters(
             hyperparameters
         )
-        hyperparameter_scores.append((hyperparameters, metrics_list))
+        trials.append((hyperparameters, metrics_list))
 
         if logger is not None:
             hyperparameters_str = ', '.join(
@@ -101,7 +100,7 @@ def grid_search(
                 f'Hyperparameters = ({hyperparameters_str}). '
             )
 
-    return hyperparameter_scores
+    return trials
 
 
 def build_hyperparameter_grid(

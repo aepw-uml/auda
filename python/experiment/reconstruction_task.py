@@ -3,7 +3,6 @@ from typing import cast, override
 
 import numpy as np
 from common.dataset import Dataset, DatasetSchema
-from common.experiment.experiment_group import ExperimentGroup
 from common.experiment.persistence import (
     build_and_save_metric_table,
     save_hyperparameter_table,
@@ -14,6 +13,7 @@ from common.experiment.reconstruction_experiment import (
     ReconstructionExperiment,
 )
 from common.metrics import RegressionMetrics, average_regression_metrics
+from common.task import Task
 from step.evaluator.complexity_key import (
     gaussian_process_regression_complexity_key,
     ridge_regression_complexity_key,
@@ -206,8 +206,8 @@ def get_support_vector_regression_reconstruction(
     return experiment
 
 
-class ReconstructionExperimentGroup(ExperimentGroup):
-    """Runs the configured reconstruction experiments."""
+class ReconstructionTask(Task):
+    """Runs the configured reconstruction experiments for one task."""
 
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema) -> None:
@@ -268,100 +268,100 @@ class ReconstructionExperimentGroup(ExperimentGroup):
             raise ValueError('Labels must be one-dimensional.')
 
 
-def get_reconstruction_experiment_group(
+def get_reconstruction_task(
     context: dict[str, str],
-) -> ReconstructionExperimentGroup:
-    """Builds the reconstruction experiment group.
+) -> ReconstructionTask:
+    """Builds the reconstruction task.
 
     Args:
         context: Shared context to inject into every reconstruction experiment.
 
     Returns:
-        The configured reconstruction experiment group.
+        The configured reconstruction task.
     """
 
-    group = ReconstructionExperimentGroup(name='Reconstruction Experiments')
-    group.set_context(**context)
-    group.add(get_linear_interpolation_reconstruction(**context))
-    group.add(get_moving_average_interpolation_reconstruction(**context))
-    group.add(get_cubic_spline_interpolation_reconstruction(**context))
-    group.add(get_ridge_regression_reconstruction(**context))
-    group.add(get_gaussian_process_reconstruction(**context))
-    group.add(get_support_vector_regression_reconstruction(**context))
-    group.add(get_theil_sen_reconstruction(**context))
-    return group
+    task = ReconstructionTask(name='Reconstruction')
+    task.set_context(**context)
+    task.add(get_linear_interpolation_reconstruction(**context))
+    task.add(get_moving_average_interpolation_reconstruction(**context))
+    task.add(get_cubic_spline_interpolation_reconstruction(**context))
+    task.add(get_ridge_regression_reconstruction(**context))
+    task.add(get_gaussian_process_reconstruction(**context))
+    task.add(get_support_vector_regression_reconstruction(**context))
+    task.add(get_theil_sen_reconstruction(**context))
+    return task
 
 
-def run_reconstruction_experiments(
+def run_reconstruction_task(
     dataset: Dataset,
     schema: DatasetSchema,
     context: dict[str, str] | None = None,
-) -> ReconstructionExperimentGroup:
-    """Runs the reconstruction experiments.
+) -> ReconstructionTask:
+    """Runs the reconstruction task.
 
     Args:
         dataset: Dataset containing the feature matrix and target vector.
         schema: Schema describing the dataset columns and units.
-        context: Optional shared context for the experiment group.
+        context: Optional shared context for the task.
 
     Returns:
-        The reconstruction experiment group after all experiments finish.
+        The reconstruction task after all experiments finish.
     """
 
     if context is None:
         context = {}
 
-    group = get_reconstruction_experiment_group(context)
-    group.run(dataset, schema)
-    return group
+    task = get_reconstruction_task(context)
+    task.run(dataset, schema)
+    return task
 
 
-def save_reconstruction_experiment_results(
-    group: ReconstructionExperimentGroup,
+def save_reconstruction_task_results(
+    task: ReconstructionTask,
 ) -> None:
     """Saves reconstruction metrics, hyperparameters, plots, and timings."""
 
     task_path = Path('results') / 'reconstruction'
-    build_and_save_metric_table(group, task_path)
-    save_hyperparameter_table(group, task_path)
-    save_plots(group, task_path)
-    save_time_table(group, task_path)
+    build_and_save_metric_table(task, task_path)
+    save_hyperparameter_table(task, task_path)
+    save_plots(task, task_path)
+    save_time_table(task, task_path)
 
 
-def run_reconstruction_experiment_groups(
+def run_reconstruction_tasks(
     num_experiments: int,
     dataset: Dataset,
     schema: DatasetSchema,
     context: dict[str, str] | None = None,
     seed: int = 42,
-) -> tuple[list[ReconstructionExperimentGroup], dict[str, RegressionMetrics]]:
-    """Runs multiple reconstruction experiment groups with different seeds.
+) -> tuple[list[ReconstructionTask], dict[str, RegressionMetrics]]:
+    """Runs multiple reconstruction tasks with different seeds.
 
     Args:
-        num_experiments: Number of experiment groups to run.
+        num_experiments: Number of tasks to run.
         dataset: Dataset containing the feature matrix and target vector.
         schema: Schema describing the dataset columns and units.
-        context: Optional shared context for every experiment group.
-        seed: Seed used to sample the per-run experiment seeds.
+        context: Optional shared context for every task.
+        seed: Seed used to sample the per-run task seeds.
 
     Returns:
-        A tuple containing the experiment groups and their averaged metrics by
-        experiment name.
+        A tuple containing the tasks and their averaged metrics by experiment
+        name.
     """
 
     rng = np.random.default_rng(seed)
     experiment_seeds = rng.integers(0, 2 << 31, size=num_experiments)
 
-    groups: list[ReconstructionExperimentGroup] = []
+    tasks: list[ReconstructionTask] = []
     for experiment_seed in experiment_seeds:
         run_context = {} if context is None else dict(context)
         run_context['seed'] = str(int(experiment_seed))
-        group = run_reconstruction_experiments(dataset, schema, run_context)
-        groups.append(group)
+        task = run_reconstruction_task(dataset, schema, run_context)
+        tasks.append(task)
 
     metrics_lists_by_name: dict[str, list[RegressionMetrics]] = {}
-    for group in groups:
-        for experiment in group.experiments:
+    for task in tasks:
+        for experiment in task.experiments:
             metrics_lists_by_name.setdefault(experiment.name, []).append(
                 experiment.get_metrics()
             )
@@ -370,4 +370,4 @@ def run_reconstruction_experiment_groups(
     for name, metrics_list in metrics_lists_by_name.items():
         metrics_by_name[name] = average_regression_metrics(metrics_list)
 
-    return groups, metrics_by_name
+    return tasks, metrics_by_name

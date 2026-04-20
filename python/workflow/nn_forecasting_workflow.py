@@ -1,19 +1,19 @@
 from typing import override
 
 from common.dataset import Dataset, DatasetSchema
-from common.task import Task
+from common.workflow import Workflow
 from experiment.nn_forecasting_experiment import (
     NNForecastingExperiment,
-    NNForecastingExperimentGroup,
+    NNForecastingTask,
 )
 
 
-class NNForecastingTask(Task):
+class NNForecastingWorkflow(Workflow):
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema, **context) -> None:
-        group = NNForecastingExperimentGroup('NN Forecasting')
-        group.set_context(**context)
-        group.add(
+        task = NNForecastingTask('NN Forecasting')
+        task.set_context(**context)
+        task.add(
             NNForecastingExperiment(
                 'NN Forecasting',
                 'Forecast the plastic waste generation using a neural network '
@@ -21,7 +21,7 @@ class NNForecastingTask(Task):
             )
         )
 
-        group.run(dataset, schema)
+        task.run(dataset, schema)
 
-        for experiment in group.experiments:
+        for experiment in task.experiments:
             print(experiment.get_metrics())

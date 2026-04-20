@@ -4,7 +4,7 @@ from common.metrics import RegressionMetrics
 
 Interval = tuple[float, float]
 Hyperparameters = list[float]
-Configuration = tuple[Hyperparameters, list[RegressionMetrics]]
+Trial = tuple[Hyperparameters, list[RegressionMetrics]]
 Domain = list[Interval]
 SearchSpace = list[Domain]
 SamplingScale = Literal['uniform', 'log_uniform']
@@ -12,7 +12,7 @@ SamplingScale = Literal['uniform', 'log_uniform']
 __all__ = [
     'Interval',
     'Hyperparameters',
-    'Configuration',
+    'Trial',
     'Domain',
     'SearchSpace',
     'SamplingScale',

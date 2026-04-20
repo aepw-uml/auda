@@ -13,10 +13,10 @@ from step.model.standardize_regressor import StandardizedRegressor
 from step.tuner.grid_search import grid_search
 from step.tuner.random_search import random_search
 from step.tuner.types import (
-    Configuration,
     Hyperparameters,
     SamplingScale,
     SearchSpace,
+    Trial,
 )
 
 
@@ -127,7 +127,7 @@ class ForecastingExperiment(RegressionExperiment):
 
         self.timer_start('tuning')
         if search_type == 'grid':
-            configurations: list[Configuration] = grid_search(
+            trials: list[Trial] = grid_search(
                 hyperparameter_names=hyperparameter_names,
                 search_space=search_space,
                 evaluate_hyperparameters=evaluate_hyperparameters,
@@ -136,7 +136,7 @@ class ForecastingExperiment(RegressionExperiment):
                 logger=self.logger,
             )
         elif search_type == 'random':
-            configurations: list[Configuration] = random_search(
+            trials: list[Trial] = random_search(
                 hyperparameter_names=hyperparameter_names,
                 search_space=search_space,
                 evaluate_hyperparameters=evaluate_hyperparameters,
@@ -153,22 +153,22 @@ class ForecastingExperiment(RegressionExperiment):
         self.timer_stop('tuning')
 
         scores_list: list[list[float]] = []
-        for _, metrics_list in configurations:
+        for _, metrics_list in trials:
             scores_list.append(
                 [metrics.get_value_by_name(metric) for metrics in metrics_list]
             )
 
-        configuration_scores: list[tuple[Hyperparameters, list[float]]] = [
-            (configuration[0], scores)
-            for configuration, scores in zip(configurations, scores_list)
+        trial_scores: list[tuple[Hyperparameters, list[float]]] = [
+            (trial[0], scores)
+            for trial, scores in zip(trials, scores_list)
         ]
         best_hyperparameters = one_standard_error(
-            configuration_scores,
+            trial_scores,
             complexity_key,
             prefer_lower=metric != 'r2',
         )
 
-        self.context['configuration'] = configurations
+        self.context['trials'] = trials
         self.hyperparameters = {
             **self.hyperparameters,
             **{

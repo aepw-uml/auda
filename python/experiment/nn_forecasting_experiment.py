@@ -5,8 +5,8 @@ from typing import Literal, cast, override
 import numpy as np
 import torch
 from common.dataset import Dataset, DatasetSchema
-from common.experiment.experiment_group import ExperimentGroup
 from common.experiment.regression_experiment import RegressionExperiment
+from common.task import Task
 from sklearn.preprocessing import StandardScaler
 from torch import nn
 
@@ -447,7 +447,7 @@ class NNForecastingExperiment(RegressionExperiment):
             },
         ]
 
-        self.log('Tuning neural network with candidate configurations.')
+        self.log('Tuning neural network with candidate trials.')
 
         best_config: dict[str, int | float] | None = None
         best_validation_loss = float('inf')
@@ -508,7 +508,7 @@ class NNForecastingExperiment(RegressionExperiment):
                 best_config = config
 
         if best_config is None:
-            raise ValueError('No valid hyperparameter configuration was found.')
+            raise ValueError('No valid hyperparameter trial was found.')
 
         self.hyperparameters = {
             **best_config,
@@ -655,7 +655,7 @@ class NNForecastingExperiment(RegressionExperiment):
         super().evaluate()
 
 
-class NNForecastingExperimentGroup(ExperimentGroup):
+class NNForecastingTask(Task):
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema) -> None:
         super().run(dataset)

@@ -5,97 +5,86 @@ from step.tuner.types import Hyperparameters
 
 
 def one_standard_error(
-    configurations: list[tuple[Hyperparameters, list[float]]],
+    trials: list[tuple[Hyperparameters, list[float]]],
     complexity_key: Callable[[Hyperparameters], tuple[float, ...]],
     *,
     prefer_lower=True,
 ) -> Hyperparameters:
     """
-    Selects the hyperparameter configuration that is within one standard error
-    of the best configuration and has the lowest complexity.
+    Selects the hyperparameter setting that is within one standard error of the
+    best trial and has the lowest complexity.
 
     Args:
-        configurations: A list of tuples, where each tuple contains a
-            hyperparameter configuration and a list of scores for that
-            configuration.
+        trials: A list of tuples, where each tuple contains the evaluated
+            hyperparameters and their per-fold scores.
         complexity_key: A function that returns a sorting key where lower
-            values correspond to simpler hyperparameter configurations.
+            values correspond to simpler hyperparameter settings.
         prefer_lower: Whether to prefer lower scores over higher scores. If
-            True, configurations with mean scores less than or equal to the
-            threshold will be selected. If False, configurations with mean
+            True, trials with mean scores less than or equal to the threshold
+            will be selected. If False, trials with mean
             scores greater than or equal to the threshold will be selected.
 
     Returns:
-        The hyperparameter configuration that is within one standard error of
-        the best configuration and has the lowest complexity.
+        The hyperparameter setting that is within one standard error of the
+        best trial and has the lowest complexity.
 
     Raises:
-        ValueError: If no configurations are provided.
+        ValueError: If no trials are provided.
     """
 
-    if len(configurations) == 0:
-        raise ValueError('No configurations provided.')
+    if len(trials) == 0:
+        raise ValueError('No trials provided.')
 
-    candidates = one_standard_error_candidates(
-        configurations, prefer_lower=prefer_lower
-    )
+    candidates = one_standard_error_candidates(trials, prefer_lower=prefer_lower)
     return min(candidates, key=complexity_key)
 
 
 def one_standard_error_candidates(
-    configurations: list[tuple[Hyperparameters, list[float]]],
+    trials: list[tuple[Hyperparameters, list[float]]],
     *,
     prefer_lower=True,
 ) -> list[Hyperparameters]:
-    """Selects hyperparameter configurations that are within one standard error
-    of the best configuration.
+    """Selects trial candidates that are within one standard error of the best
+    trial.
 
     Args:
-        configurations: A list of tuples, where each tuple contains a
-            hyperparameter configuration and a list of scores for that
-            configuration.
+        trials: A list of tuples, where each tuple contains the evaluated
+            hyperparameters and their per-fold scores.
         prefer_lower: Whether to prefer lower scores over higher scores. If
-            True, configurations with mean scores less than or equal to the
-            threshold will be selected. If False, configurations with mean
+            True, trials with mean scores less than or equal to the threshold
+            will be selected. If False, trials with mean
             scores greater than or equal to the threshold will be selected.
 
     Returns:
-        A list of hyperparameter configurations that are within one standard
-        error of the best configuration.
+        Hyperparameter settings belonging to trials within one standard error
+        of the best trial.
     """
 
-    if len(configurations) == 0:
-        raise ValueError('No configurations provided.')
+    if len(trials) == 0:
+        raise ValueError('No trials provided.')
 
-    configuration_means: list[tuple[Hyperparameters, float]] = [
-        (configuration, mean(scores))
-        for configuration, scores in configurations
+    trial_means: list[tuple[Hyperparameters, float]] = [
+        (hyperparameters, mean(scores))
+        for hyperparameters, scores in trials
     ]
 
-    # Find the mean and scores of the configuration with the lowest mean score.
-    best_configuration_mean = configuration_means[0][1]
-    best_configuration_scores = configurations[0][1]
-    for i in range(1, len(configuration_means)):
-        _, configuration_mean = configuration_means[i]
-        if configuration_mean < best_configuration_mean:
-            best_configuration_mean = configuration_mean
-            best_configuration_scores = configurations[i][1]
+    best_trial_mean = trial_means[0][1]
+    best_trial_scores = trials[0][1]
+    for i in range(1, len(trial_means)):
+        _, trial_mean = trial_means[i]
+        if trial_mean < best_trial_mean:
+            best_trial_mean = trial_mean
+            best_trial_scores = trials[i][1]
 
-    # Calculate the threshold as the mean of the best configuration plus one
-    # standard error.
-    threshold = best_configuration_mean + 0.1 * standard_error(
-        best_configuration_scores
-    )
+    threshold = best_trial_mean + 0.1 * standard_error(best_trial_scores)
 
-    # Only keep configurations whose mean score is less than or equal to the
-    # threshold.
     return [
-        configuration
-        for configuration, mean in configuration_means
+        hyperparameters
+        for hyperparameters, mean_score in trial_means
         if prefer_lower
-        and mean <= threshold
+        and mean_score <= threshold
         or not prefer_lower
-        and mean >= threshold
+        and mean_score >= threshold
     ]
 
 

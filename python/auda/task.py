@@ -24,22 +24,26 @@ def run_task(ctx: Context, dataset_name: str, task: str) -> None:
 
     match task:
         case 'Reconstruction':
-            from task.reconstruction_task import ReconstructionTask
-
-            ReconstructionTask().run(dataset, schema, **context)
-        case 'MultipleReconstruction':
-            from task.multiple_reconstruction_task import (
-                MultipleReconstructionTask,
+            from workflow.reconstruction_workflow import (
+                ReconstructionWorkflow,
             )
 
-            MultipleReconstructionTask().run(dataset, schema, **context)
+            ReconstructionWorkflow().run(dataset, schema, **context)
+        case 'MultipleReconstruction':
+            from workflow.multiple_reconstruction_workflow import (
+                MultipleReconstructionWorkflow,
+            )
+
+            MultipleReconstructionWorkflow().run(
+                dataset, schema, **context
+            )
         case 'Forecasting':
-            from task.forecasting_task import ForecastingTask
+            from workflow.forecasting_workflow import ForecastingWorkflow
 
-            ForecastingTask().run(dataset, schema, **context)
+            ForecastingWorkflow().run(dataset, schema, **context)
         case 'NNForecasting':
-            from task.nn_forecasting_task import NNForecastingTask
+            from workflow.nn_forecasting_workflow import NNForecastingWorkflow
 
-            NNForecastingTask().run(dataset, schema, **context)
+            NNForecastingWorkflow().run(dataset, schema, **context)
         case _:
             raise ValueError(f'Unknown task: {task}')

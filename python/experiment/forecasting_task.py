@@ -1,8 +1,8 @@
 from typing import cast, override
 
 from common.dataset import Dataset, DatasetSchema
-from common.experiment.experiment_group import ExperimentGroup
 from common.experiment.forecasting_experiment import ForecastingExperiment
+from common.task import Task
 from step.evaluator.complexity_key import (
     gaussian_process_regression_complexity_key,
     ridge_regression_complexity_key,
@@ -194,7 +194,7 @@ def get_support_vector_regression_forecasting(
     return experiment
 
 
-class ForecastingExperimentGroup(ExperimentGroup):
+class ForecastingTask(Task):
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema) -> None:
         super().run(dataset)
@@ -232,7 +232,7 @@ class ForecastingExperimentGroup(ExperimentGroup):
 
         if y is None:
             raise ValueError(
-                'Label data is required for forecasting experiment.'
+                'Label data is required for forecasting task.'
             )
 
         if X.shape[0] != y.shape[0]:

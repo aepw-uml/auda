@@ -4,11 +4,11 @@ from typing import Callable
 import numpy as np
 from common.metrics import RegressionMetrics
 from step.tuner.types import (
-    Configuration,
     Domain,
     Hyperparameters,
     SamplingScale,
     SearchSpace,
+    Trial,
 )
 
 
@@ -22,8 +22,8 @@ def random_search(
     num_iterations: int = 100,
     seed: int = 42,
     logger: Logger | None = None,
-) -> list[Configuration]:
-    """Samples and evaluates random hyperparameter combinations.
+) -> list[Trial]:
+    """Samples and evaluates random hyperparameter trials.
 
     For each iteration, this function draws one value for each hyperparameter
     by first choosing one interval uniformly at random from that
@@ -31,8 +31,7 @@ def random_search(
     interval. The resulting hyperparameter vector is passed to
     ``evaluate_hyperparameters``, and the requested metric value is stored
     together with the sampled hyperparameters. The function returns all sampled
-    `(score, hyperparameters)` pairs in evaluation order and does not sort or
-    rank them.
+    trials in evaluation order and does not sort or rank them.
 
     Args:
         hyperparameter_names: A list of hyperparameter names.
@@ -60,7 +59,7 @@ def random_search(
             'Length of search_space must match length of hyperparameter_names.'
         )
 
-    hyperparameter_scores: list[Configuration] = []
+    trials: list[Trial] = []
     for i in range(num_iterations):
         hyperparameters: Hyperparameters = [
             select_random_hyperparameter(intervals, rng, sampling_scales[i])
@@ -70,7 +69,7 @@ def random_search(
         metrics_list: list[RegressionMetrics] = evaluate_hyperparameters(
             hyperparameters
         )
-        hyperparameter_scores.append((hyperparameters, metrics_list))
+        trials.append((hyperparameters, metrics_list))
 
         if logger is not None:
             hyperparameters_str = ', '.join(
@@ -87,7 +86,7 @@ def random_search(
                 f'Hyperparameters = ({hyperparameters_str}).'
             )
 
-    return hyperparameter_scores
+    return trials
 
 
 def select_random_hyperparameter(

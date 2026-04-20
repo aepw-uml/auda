@@ -3,18 +3,18 @@ from typing import override
 
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.persistence import save_metric_table
-from common.task import Task
-from experiment.reconstruction_experiments import (
-    run_reconstruction_experiment_groups,
+from common.workflow import Workflow
+from experiment.reconstruction_task import (
+    run_reconstruction_tasks,
 )
 
 
-class MultipleReconstructionTask(Task):
+class MultipleReconstructionWorkflow(Workflow):
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema, **context) -> None:
         num_experiments = int(context.get('num_experiments', '16'))
         seed = int(context.get('seed', '42'))
-        _, average_metrics = run_reconstruction_experiment_groups(
+        _, average_metrics = run_reconstruction_tasks(
             num_experiments, dataset, schema, context, seed=seed
         )
 

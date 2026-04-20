@@ -10,7 +10,7 @@ class SupervisedLearningModel(BaseEstimator, ABC):
     """Base class for supervised learning models in the project.
 
     Attributes:
-        hyperparameters: Configuration values provided when the model is
+        hyperparameters: Hyperparameter values provided when the model is
             created.
         parameters: Learned model state populated during fitting.
     """
@@ -19,7 +19,7 @@ class SupervisedLearningModel(BaseEstimator, ABC):
         """Initializes the model with hyperparameters.
 
         Args:
-            hyperparameters: Configuration values used by subclasses.
+            hyperparameters: Hyperparameter values used by subclasses.
             **kwargs: Additional keyword arguments accepted for API
                 compatibility.
         """

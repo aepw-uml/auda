@@ -8,18 +8,18 @@ from common.experiment.persistence import (
     save_plots,
     save_time_table,
 )
-from common.task import Task
-from experiment.reconstruction_experiments import (
-    get_reconstruction_experiment_group,
+from common.workflow import Workflow
+from experiment.reconstruction_task import (
+    get_reconstruction_task,
 )
 
 
-class ReconstructionTask(Task):
+class ReconstructionWorkflow(Workflow):
     """Runs reconstruction experiments and saves their artifacts."""
 
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema, **context) -> None:
-        """Runs the reconstruction task.
+        """Runs the reconstruction workflow.
 
         Args:
             dataset: Dataset containing the feature matrix and target vector.
@@ -27,14 +27,14 @@ class ReconstructionTask(Task):
             **context: Shared task and experiment configuration.
         """
 
-        group = get_reconstruction_experiment_group(context)
-        group.run(dataset, schema)
+        task = get_reconstruction_task(context)
+        task.run(dataset, schema)
 
-        for experiment in group.experiments:
+        for experiment in task.experiments:
             experiment.get_metrics()
 
         task_path = Path('results') / 'reconstruction'
-        build_and_save_metric_table(group, task_path)
-        save_hyperparameter_table(group, task_path)
-        save_plots(group, task_path)
-        save_time_table(group, task_path)
+        build_and_save_metric_table(task, task_path)
+        save_hyperparameter_table(task, task_path)
+        save_plots(task, task_path)
+        save_time_table(task, task_path)
