@@ -20,7 +20,7 @@ from step.plot.support_vector_regression import SupportVectorRegressionPlotter
 from step.plot.theil_sen_regression import TheilSenRegressionPlotter
 
 
-def getNaivePersistenceForecasting(**_) -> ForecastingExperiment:
+def get_naive_persistence_forecasting(**_) -> ForecastingExperiment:
     return ForecastingExperiment(
         name='Naive Persistence',
         description=(
@@ -30,7 +30,7 @@ def getNaivePersistenceForecasting(**_) -> ForecastingExperiment:
     )
 
 
-def getDriftBaselineForecasting(**_) -> ForecastingExperiment:
+def get_drift_baseline_forecasting(**_) -> ForecastingExperiment:
     return ForecastingExperiment(
         name='Drift Baseline',
         description=('Forecast the original time series with drift baseline.'),
@@ -38,7 +38,7 @@ def getDriftBaselineForecasting(**_) -> ForecastingExperiment:
     )
 
 
-def getExponentialSmoothingForecasting(**_) -> ForecastingExperiment:
+def get_exponential_smoothing_forecasting(**_) -> ForecastingExperiment:
     experiment = ForecastingExperiment(
         name='Exponential Smoothing',
         description=(
@@ -50,7 +50,7 @@ def getExponentialSmoothingForecasting(**_) -> ForecastingExperiment:
     return experiment
 
 
-def getARIMAForecasting(**context) -> ForecastingExperiment:
+def get_arima_forecasting(**context) -> ForecastingExperiment:
     experiment = ForecastingExperiment(
         name='ARIMA Regression',
         description=('Forecast the original time series with ARIMA.'),
@@ -74,7 +74,7 @@ def getARIMAForecasting(**context) -> ForecastingExperiment:
     return experiment
 
 
-def getTheilSenForecasting(**_) -> ForecastingExperiment:
+def get_theil_sen_forecasting(**_) -> ForecastingExperiment:
     experiment = ForecastingExperiment(
         name='Theil-Sen Regression',
         description=(
@@ -95,7 +95,7 @@ def getTheilSenForecasting(**_) -> ForecastingExperiment:
     return experiment
 
 
-def getRidgeRegressionForecasting(**_) -> ForecastingExperiment:
+def get_ridge_regression_forecasting(**_) -> ForecastingExperiment:
     experiment = ForecastingExperiment(
         name='Ridge Regression',
         description=(
@@ -118,7 +118,7 @@ def getRidgeRegressionForecasting(**_) -> ForecastingExperiment:
     return experiment
 
 
-def getGaussianProcessForecasting(**_) -> ForecastingExperiment:
+def get_gaussian_process_forecasting(**_) -> ForecastingExperiment:
     experiment = ForecastingExperiment(
         name='Gaussian Process Regression',
         description=(
@@ -140,7 +140,7 @@ def getGaussianProcessForecasting(**_) -> ForecastingExperiment:
     return experiment
 
 
-def getSupportVectorRegressionForecasting(
+def get_support_vector_regression_forecasting(
     **context: str,
 ) -> ForecastingExperiment:
     experiment = ForecastingExperiment(

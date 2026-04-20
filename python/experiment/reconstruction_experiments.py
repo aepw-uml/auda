@@ -31,7 +31,9 @@ from step.plot.support_vector_regression import SupportVectorRegressionPlotter
 from step.plot.theil_sen_regression import TheilSenRegressionPlotter
 
 
-def getLinearInterpolationReconstruction(**_) -> ReconstructionExperiment:
+def get_linear_interpolation_reconstruction(
+    **_,
+) -> ReconstructionExperiment:
     """Builds a linear-interpolation reconstruction experiment."""
 
     return ReconstructionExperiment(
@@ -43,7 +45,7 @@ def getLinearInterpolationReconstruction(**_) -> ReconstructionExperiment:
     )
 
 
-def getMovingAverageInterpolationReconstruction(
+def get_moving_average_interpolation_reconstruction(
     **_,
 ) -> ReconstructionExperiment:
     """Builds a moving-average-interpolation reconstruction experiment."""
@@ -58,7 +60,9 @@ def getMovingAverageInterpolationReconstruction(
     )
 
 
-def getCubicSplineInterpolationReconstruction(**_) -> ReconstructionExperiment:
+def get_cubic_spline_interpolation_reconstruction(
+    **_,
+) -> ReconstructionExperiment:
     """Builds a cubic-spline-interpolation reconstruction experiment."""
 
     return ReconstructionExperiment(
@@ -71,7 +75,7 @@ def getCubicSplineInterpolationReconstruction(**_) -> ReconstructionExperiment:
     )
 
 
-def getTheilSenReconstruction(**_) -> ReconstructionExperiment:
+def get_theil_sen_reconstruction(**_) -> ReconstructionExperiment:
     """Builds a Theil-Sen reconstruction experiment."""
 
     experiment = ReconstructionExperiment(
@@ -90,7 +94,9 @@ def getTheilSenReconstruction(**_) -> ReconstructionExperiment:
     return experiment
 
 
-def getPolynomialRegressionReconstruction(**_) -> ReconstructionExperiment:
+def get_polynomial_regression_reconstruction(
+    **_,
+) -> ReconstructionExperiment:
     """Builds a polynomial-regression reconstruction experiment."""
 
     experiment = ReconstructionExperiment(
@@ -115,7 +121,9 @@ def getPolynomialRegressionReconstruction(**_) -> ReconstructionExperiment:
     return experiment
 
 
-def getRidgeRegressionReconstruction(**_) -> ReconstructionExperiment:
+def get_ridge_regression_reconstruction(
+    **_,
+) -> ReconstructionExperiment:
     """Builds a ridge-regression reconstruction experiment."""
 
     experiment = ReconstructionExperiment(
@@ -140,7 +148,9 @@ def getRidgeRegressionReconstruction(**_) -> ReconstructionExperiment:
     return experiment
 
 
-def getGaussianProcessReconstruction(**_) -> ReconstructionExperiment:
+def get_gaussian_process_reconstruction(
+    **_,
+) -> ReconstructionExperiment:
     """Builds a Gaussian-process reconstruction experiment."""
 
     experiment = ReconstructionExperiment(
@@ -165,7 +175,7 @@ def getGaussianProcessReconstruction(**_) -> ReconstructionExperiment:
     return experiment
 
 
-def getSupportVectorRegressionReconstruction(
+def get_support_vector_regression_reconstruction(
     **context: str,
 ) -> ReconstructionExperiment:
     """Builds a support-vector-regression reconstruction experiment."""
@@ -293,13 +303,13 @@ def get_reconstruction_experiment_group(
 
     group = ReconstructionExperimentGroup(name='Reconstruction Experiments')
     group.set_context(**context)
-    group.add(getLinearInterpolationReconstruction(**context))
-    group.add(getMovingAverageInterpolationReconstruction(**context))
-    group.add(getCubicSplineInterpolationReconstruction(**context))
-    group.add(getRidgeRegressionReconstruction(**context))
-    group.add(getGaussianProcessReconstruction(**context))
-    group.add(getSupportVectorRegressionReconstruction(**context))
-    group.add(getTheilSenReconstruction(**context))
+    group.add(get_linear_interpolation_reconstruction(**context))
+    group.add(get_moving_average_interpolation_reconstruction(**context))
+    group.add(get_cubic_spline_interpolation_reconstruction(**context))
+    group.add(get_ridge_regression_reconstruction(**context))
+    group.add(get_gaussian_process_reconstruction(**context))
+    group.add(get_support_vector_regression_reconstruction(**context))
+    group.add(get_theil_sen_reconstruction(**context))
     return group
 
 

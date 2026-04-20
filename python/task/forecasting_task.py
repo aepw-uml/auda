@@ -11,14 +11,14 @@ from common.experiment.persistence import (
 from common.task import Task
 from experiment.forecasting_experiments import (
     ForecastingExperimentGroup,
-    getARIMAForecasting,
-    getDriftBaselineForecasting,
-    getExponentialSmoothingForecasting,
-    getGaussianProcessForecasting,
-    getNaivePersistenceForecasting,
-    getRidgeRegressionForecasting,
-    getSupportVectorRegressionForecasting,
-    getTheilSenForecasting,
+    get_arima_forecasting,
+    get_drift_baseline_forecasting,
+    get_exponential_smoothing_forecasting,
+    get_gaussian_process_forecasting,
+    get_naive_persistence_forecasting,
+    get_ridge_regression_forecasting,
+    get_support_vector_regression_forecasting,
+    get_theil_sen_forecasting,
 )
 
 
@@ -27,14 +27,14 @@ class ForecastingTask(Task):
     def run(self, dataset: Dataset, schema: DatasetSchema, **context) -> None:
         group = ForecastingExperimentGroup(name='Forecasting Experiments')
         group.set_context(**context)
-        group.add(getNaivePersistenceForecasting(**context))
-        group.add(getDriftBaselineForecasting(**context))
-        group.add(getExponentialSmoothingForecasting(**context))
-        group.add(getRidgeRegressionForecasting(**context))
-        group.add(getGaussianProcessForecasting(**context))
-        group.add(getSupportVectorRegressionForecasting(**context))
-        group.add(getTheilSenForecasting(**context))
-        group.add(getARIMAForecasting(**context))
+        group.add(get_naive_persistence_forecasting(**context))
+        group.add(get_drift_baseline_forecasting(**context))
+        group.add(get_exponential_smoothing_forecasting(**context))
+        group.add(get_ridge_regression_forecasting(**context))
+        group.add(get_gaussian_process_forecasting(**context))
+        group.add(get_support_vector_regression_forecasting(**context))
+        group.add(get_theil_sen_forecasting(**context))
+        group.add(get_arima_forecasting(**context))
 
         group.run(dataset, schema)
 
