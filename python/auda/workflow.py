@@ -3,15 +3,15 @@ from typer import Context, Typer
 
 from auda.common import AllowCustomArgs
 
-app = Typer(name='task', help='Manage tasks')
+app = Typer(name='workflow', help='Manage workflows')
 
 
 @app.command(
     name='run',
-    help='Run a task',
+    help='Run a workflow',
     context_settings=AllowCustomArgs.context_settings,
 )
-def run_task(ctx: Context, dataset_name: str, task: str) -> None:
+def run_workflow(ctx: Context, dataset_name: str, workflow: str) -> None:
     context: dict[str, str] = AllowCustomArgs.parse_kwargs(ctx.args)
     dataset_cls = dataset_map.get(dataset_name)
     if not dataset_cls:
@@ -22,7 +22,7 @@ def run_task(ctx: Context, dataset_name: str, task: str) -> None:
         **AllowCustomArgs.parse_kwargs(ctx.args)
     )
 
-    match task:
+    match workflow:
         case 'Reconstruction':
             from workflow.reconstruction_workflow import (
                 ReconstructionWorkflow,
@@ -34,9 +34,7 @@ def run_task(ctx: Context, dataset_name: str, task: str) -> None:
                 MultipleReconstructionWorkflow,
             )
 
-            MultipleReconstructionWorkflow().run(
-                dataset, schema, **context
-            )
+            MultipleReconstructionWorkflow().run(dataset, schema, **context)
         case 'Forecasting':
             from workflow.forecasting_workflow import ForecastingWorkflow
 
@@ -45,5 +43,11 @@ def run_task(ctx: Context, dataset_name: str, task: str) -> None:
             from workflow.nn_forecasting_workflow import NNForecastingWorkflow
 
             NNForecastingWorkflow().run(dataset, schema, **context)
+        case 'MultivariateForecasting':
+            from workflow.multivariate_forecasting_workflow import (
+                MultivariateForecastingWorkflow,
+            )
+
+            MultivariateForecastingWorkflow().run(dataset, schema, **context)
         case _:
-            raise ValueError(f'Unknown task: {task}')
+            raise ValueError(f'Unknown workflow: {workflow}')
