@@ -53,6 +53,9 @@ class ForecastingExperiment(RegressionExperiment):
 
     @override
     def tune(self) -> None:
+        if self.context.get('enable_tuning') == '0':
+            return self.logger.info('Tuning is disabled. Skipping tuning step.')
+
         tuning_parameters: dict[str, Any] | None = self.context.get(
             'tuning_parameters'
         )
@@ -159,8 +162,7 @@ class ForecastingExperiment(RegressionExperiment):
             )
 
         trial_scores: list[tuple[Hyperparameters, list[float]]] = [
-            (trial[0], scores)
-            for trial, scores in zip(trials, scores_list)
+            (trial[0], scores) for trial, scores in zip(trials, scores_list)
         ]
         best_hyperparameters = one_standard_error(
             trial_scores,

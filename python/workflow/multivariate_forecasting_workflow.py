@@ -19,9 +19,11 @@ class MultivariateForecastingWorkflow(Workflow):
     def run(self, dataset: Dataset, schema: DatasetSchema, **context) -> None:
         task = MultivariateForecastingTask(name='MultivariateForecasting')
         task.set_context(**context)
+
+        task.add(get_nn_forecasting())
         task.add(get_support_vector_regression_forecasting())
         task.add(get_gaussian_process_forecasting())
-        task.add(get_nn_forecasting())
+
         task.run(dataset, schema)
 
         for experiment in task.experiments:

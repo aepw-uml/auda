@@ -34,4 +34,5 @@ auda workflow run PlasticWasteDrivers NNForecasting --seed=471
 
 ```bash
 auda workflow run PlasticWasteDrivers MultivariateForecasting --seed=471 --location=Japan
+auda workflow run PlasticWasteDrivers MultivariateForecasting --seed=471 --location=Slovenia --enable_tuning=0
 ```
