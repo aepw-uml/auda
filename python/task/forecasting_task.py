@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import override
+from typing import Literal, override
 
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.persistence import (
@@ -25,6 +25,18 @@ from experiment.forecasting_experiments import (
 class ForecastingTask(Task):
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema, **context) -> None:
+        self._run(dataset, schema, tune_search_type='grid', **context)
+        self._run(dataset, schema, tune_search_type='random', **context)
+
+    def _run(
+        self,
+        dataset: Dataset,
+        schema: DatasetSchema,
+        tune_search_type: Literal['grid', 'random'],
+        **context,
+    ) -> None:
+        context['tune_search_type'] = tune_search_type
+
         group = ForecastingExperimentGroup(name='Forecasting Experiments')
         group.set_context(**context)
         group.add(get_naive_persistence_forecasting(**context))
@@ -42,7 +54,7 @@ class ForecastingTask(Task):
             experiment.get_metrics()
 
         # Task path to save the results of the forecasting experiments.
-        task_path = Path('results') / 'forecasting'
+        task_path = Path('results') / f'forecasting_{tune_search_type}_search'
 
         # Save the metric table for the forecasting experiments.
         build_and_save_metric_table(group, task_path)

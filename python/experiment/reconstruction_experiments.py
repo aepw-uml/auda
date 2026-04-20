@@ -14,18 +14,21 @@ from common.experiment.reconstruction_experiment import (
     ReconstructionExperiment,
 )
 from common.metrics import RegressionMetrics, average_regression_metrics
+from step.evaluator.complexity_key import (
+    gaussian_process_regression_complexity_key,
+    ridge_regression_complexity_key,
+    support_vector_regression_complexity_key,
+)
 from step.model.cubic_spline import CubicSpline
 from step.model.gaussian_process_regression import GaussianProcessRegression
 from step.model.linear_interpolation import LinearInterpolation
 from step.model.moving_average_interpolation import MovingAverageInterpolation
-from step.model.polynomial_regression import PolynomialRegression
 from step.model.ridge_regression import RidgeRegression
 from step.model.support_vector_regression import SupportVectorRegression
 from step.model.theil_sen_regression import TheilSenRegression
 from step.plot.gaussian_process_regression import (
     GaussianProcessRegressionPlotter,
 )
-from step.plot.polynomial_regression import PolynomialRegressionPlotter
 from step.plot.ridge_regression import RidgeRegressionPlotter
 from step.plot.support_vector_regression import SupportVectorRegressionPlotter
 from step.plot.theil_sen_regression import TheilSenRegressionPlotter
@@ -94,33 +97,6 @@ def get_theil_sen_reconstruction(**_) -> ReconstructionExperiment:
     return experiment
 
 
-def get_polynomial_regression_reconstruction(
-    **_,
-) -> ReconstructionExperiment:
-    """Builds a polynomial-regression reconstruction experiment."""
-
-    experiment = ReconstructionExperiment(
-        name='Polynomial Regression',
-        description=(
-            'Reconstruct the original time series with polynomial regression.'
-        ),
-        regressor_cls=PolynomialRegression,
-    )
-
-    experiment.set_context(
-        plotter_factory=PolynomialRegressionPlotter,
-        tuning_parameters={
-            'search_type': 'grid',
-            'hyperparameter_names': ['degree'],
-            'search_space': [[(2.0, 9.0)]],
-            'sampling_scales': ['uniform'],
-            'num_points_per_interval': 8,
-        },
-    )
-
-    return experiment
-
-
 def get_ridge_regression_reconstruction(
     **_,
 ) -> ReconstructionExperiment:
@@ -141,7 +117,7 @@ def get_ridge_regression_reconstruction(
             'hyperparameter_names': ['degree', 'alpha'],
             'search_space': [[(2.0, 9.0)], [(1e-6, 1e3)]],
             'sampling_scales': ['uniform', 'log_uniform'],
-            'num_points_per_interval': 8,
+            'complexity_key': ridge_regression_complexity_key,
         },
     )
 
@@ -169,6 +145,7 @@ def get_gaussian_process_reconstruction(
             'hyperparameter_names': ['length_scale', 'noise_level'],
             'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
             'sampling_scales': ['log_uniform', 'log_uniform'],
+            'complexity_key': gaussian_process_regression_complexity_key,
         },
     )
 
@@ -203,6 +180,7 @@ def get_support_vector_regression_reconstruction(
                 'log_uniform',
                 'log_uniform',
             ],
+            'complexity_key': support_vector_regression_complexity_key,
         }
     else:
         tuning_parameters = {
@@ -216,6 +194,7 @@ def get_support_vector_regression_reconstruction(
                 'log_uniform',
                 'log_uniform',
             ],
+            'complexity_key': support_vector_regression_complexity_key,
         }
 
     experiment.set_context(

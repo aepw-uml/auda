@@ -3,8 +3,7 @@ from logging import Logger
 from typing import Callable
 
 import numpy as np
-from common.metrics import RegressionMetricName, RegressionMetrics
-from common.metrics.regression_metrics import average_regression_metrics
+from common.metrics import RegressionMetrics
 from step.tuner.types import (
     Configuration,
     Domain,
@@ -21,7 +20,6 @@ def grid_search(
         [Hyperparameters], list[RegressionMetrics]
     ],
     sampling_scales: list[SamplingScale],
-    metric: RegressionMetricName = 'mape',
     num_points_per_interval: int = 5,
     logger: Logger | None = None,
 ) -> list[Configuration]:
@@ -87,8 +85,6 @@ def grid_search(
         metrics_list: list[RegressionMetrics] = evaluate_hyperparameters(
             hyperparameters
         )
-        metrics: RegressionMetrics = average_regression_metrics(metrics_list)
-        score: float = metrics.get_value_by_name(metric)
         hyperparameter_scores.append((hyperparameters, metrics_list))
 
         if logger is not None:
@@ -102,8 +98,7 @@ def grid_search(
             )
             logger.info(
                 f'[{i + 1}/{total_iterations}] '
-                f'Hyperparameters = ({hyperparameters_str}); '
-                f'score = {score:.3e}'
+                f'Hyperparameters = ({hyperparameters_str}). '
             )
 
     return hyperparameter_scores

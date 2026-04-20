@@ -6,7 +6,7 @@ from step.tuner.types import Hyperparameters
 
 def one_standard_error(
     configurations: list[tuple[Hyperparameters, list[float]]],
-    calculate_complexity: Callable[[Hyperparameters], float],
+    complexity_key: Callable[[Hyperparameters], tuple[float, ...]],
     *,
     prefer_lower=True,
 ) -> Hyperparameters:
@@ -18,8 +18,8 @@ def one_standard_error(
         configurations: A list of tuples, where each tuple contains a
             hyperparameter configuration and a list of scores for that
             configuration.
-        calculate_complexity: A function that takes a hyperparameter
-            configuration and returns a measure of its complexity.
+        complexity_key: A function that returns a sorting key where lower
+            values correspond to simpler hyperparameter configurations.
         prefer_lower: Whether to prefer lower scores over higher scores. If
             True, configurations with mean scores less than or equal to the
             threshold will be selected. If False, configurations with mean
@@ -39,7 +39,7 @@ def one_standard_error(
     candidates = one_standard_error_candidates(
         configurations, prefer_lower=prefer_lower
     )
-    return min(candidates, key=calculate_complexity)
+    return min(candidates, key=complexity_key)
 
 
 def one_standard_error_candidates(
@@ -83,7 +83,7 @@ def one_standard_error_candidates(
 
     # Calculate the threshold as the mean of the best configuration plus one
     # standard error.
-    threshold = best_configuration_mean + standard_error(
+    threshold = best_configuration_mean + 0.1 * standard_error(
         best_configuration_scores
     )
 

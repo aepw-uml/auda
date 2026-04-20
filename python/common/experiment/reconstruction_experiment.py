@@ -71,19 +71,18 @@ class ReconstructionExperiment(RegressionExperiment):
         sampling_scales: list[SamplingScale] = tuning_parameters.get(
             'sampling_scales', []
         )
-        metric: RegressionMetricName = tuning_parameters.get('metric', 'mape')
-        num_iterations: int = tuning_parameters.get('num_iterations', 500)
+        metric: RegressionMetricName = tuning_parameters.get('metric', 'wape')
+        num_iterations: int = tuning_parameters.get('num_iterations', 100)
         num_points_per_interval: int = tuning_parameters.get(
-            'num_points_per_interval', 5
+            'num_points_per_interval', 16
         )
-        calculate_complexity = tuning_parameters.get('calculate_complexity')
+        complexity_key = tuning_parameters.get('complexity_key')
         validation_rate: float = tuning_parameters.get('validation_rate', 0.2)
         num_masks: int = tuning_parameters.get('num_masks', 5)
 
-        if calculate_complexity is None:
+        if complexity_key is None:
             raise ValueError(
-                'tuning_parameters must include "calculate_complexity" '
-                'function.'
+                'tuning_parameters must include "complexity_key" function.'
             )
 
         def evaluate_mask(
@@ -139,7 +138,6 @@ class ReconstructionExperiment(RegressionExperiment):
                 search_space=search_space,
                 evaluate_hyperparameters=evaluate_hyperparameters,
                 sampling_scales=sampling_scales,
-                metric=metric,
                 num_points_per_interval=num_points_per_interval,
                 logger=self.logger,
             )
@@ -149,7 +147,6 @@ class ReconstructionExperiment(RegressionExperiment):
                 search_space=search_space,
                 evaluate_hyperparameters=evaluate_hyperparameters,
                 sampling_scales=sampling_scales,
-                metric=metric,
                 num_iterations=num_iterations,
                 seed=self.seed,
                 logger=self.logger,
@@ -173,7 +170,7 @@ class ReconstructionExperiment(RegressionExperiment):
         ]
         best_hyperparameters = one_standard_error(
             configuration_scores,
-            calculate_complexity,
+            complexity_key,
             prefer_lower=metric != 'r2',
         )
 
