@@ -15,7 +15,7 @@ from .tables import (
 
 class PlasticWasteDrivers(DatasetFetcher):
     @override
-    def fetch_dataset(self) -> Dataset:
+    def fetch_dataset(self, location: str) -> Dataset:
         table_service = TableService(env.dbUrl)
         tables, table_metadata_map = table_service.prepare_tables(
             [
@@ -29,6 +29,7 @@ class PlasticWasteDrivers(DatasetFetcher):
             table_metadata_map,
             TableQueryParams(
                 column_names=[
+                    DemographyColumn.LOCATION,
                     DemographyColumn.YEAR,
                     DemographyColumn.URBAN_POPULATION,
                     DemographyColumn.GDP,
@@ -45,13 +46,26 @@ class PlasticWasteDrivers(DatasetFetcher):
 
         current_year = date.today().year
         valid_samples = [
-            [year, urbun_population, gdp, plastic_waste_generation]
-            for year, urbun_population, gdp, plastic_waste_generation in result
+            [location, year, urbun_pop, gdp, pwg]
+            for location, year, urbun_pop, gdp, pwg in result
             if year <= current_year
         ]
 
-        X = np.array([sample[:3] for sample in valid_samples], dtype=float)
-        y = np.array([sample[3] for sample in valid_samples], dtype=float)
+        X = np.array([sample[1:4] for sample in valid_samples], dtype=float)
+        y = np.array([sample[4] for sample in valid_samples], dtype=float)
+
+        if location:
+            location_samples = [
+                sample for sample in valid_samples if sample[0] == location
+            ]
+            if not location_samples:
+                raise ValueError(f'No data found for location: {location}')
+            X = np.array(
+                [sample[1:4] for sample in location_samples], dtype=float
+            )
+            y = np.array(
+                [sample[4] for sample in location_samples], dtype=float
+            )
 
         return Dataset(X, y)
 
@@ -65,7 +79,9 @@ class PlasticWasteDrivers(DatasetFetcher):
         )
 
     @override
-    def fetch(self, **kwargs) -> tuple[Dataset, DatasetSchema]:
+    def fetch(self, location: str, **kwargs) -> tuple[Dataset, DatasetSchema]:
         _ = kwargs
-        cache_key = 'PlasticWasteDrivers'
-        return super().fetch(cache_key)
+        cache_key = 'PlasticWasteDrivers' + (
+            f'?location={location}' if location else ''
+        )
+        return super().fetch(cache_key, location)

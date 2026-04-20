@@ -26,9 +26,8 @@ def show(ctx: Context, dataset_name: str) -> None:
         print(f"Dataset '{dataset_name}' not found.")
         return
 
-    dataset, schema = dataset_cls().fetch(
-        **AllowCustomArgs.parse_kwargs(ctx.args)
-    )
+    custom_args = AllowCustomArgs.parse_kwargs(ctx.args)
+    dataset, schema = dataset_cls().fetch(**custom_args)
     print(schema)
     print(f'Number of samples: {len(dataset.X)}')
     print(dataset)
