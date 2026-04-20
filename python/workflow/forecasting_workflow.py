@@ -37,6 +37,9 @@ class ForecastingWorkflow(Workflow):
     ) -> None:
         context['tune_search_type'] = tune_search_type
 
+        svr_gamma_context = context.copy()
+        svr_gamma_context['svr_tune_gamma'] = '1'
+
         task = ForecastingTask(name='Forecasting')
         task.set_context(**context)
         task.add(get_naive_persistence_forecasting(**context))
@@ -45,6 +48,7 @@ class ForecastingWorkflow(Workflow):
         task.add(get_ridge_regression_forecasting(**context))
         task.add(get_gaussian_process_forecasting(**context))
         task.add(get_support_vector_regression_forecasting(**context))
+        task.add(get_support_vector_regression_forecasting(**svr_gamma_context))
         task.add(get_theil_sen_forecasting(**context))
         task.add(get_arima_forecasting(**context))
 

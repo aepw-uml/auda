@@ -93,7 +93,7 @@ class ForecastingExperiment(RegressionExperiment):
         ) -> RegressionMetrics:
             X_train, y_train = self.X_train, self.y_train
             X_test, y_test = self.X_test, self.y_test
-            enable_logging = self.context.get('enable_logging', True)
+            enable_logging = self.context.get('enable_logging', '1') == '1'
 
             self.X_train, self.y_train = X_train_fold, y_train_fold
             self.X_test, self.y_test = X_val_fold, y_val_fold

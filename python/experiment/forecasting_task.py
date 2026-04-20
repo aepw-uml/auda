@@ -156,7 +156,7 @@ def get_support_vector_regression_forecasting(
         regressor_cls=SupportVectorRegression,
     )
 
-    if bool(context.get('svr_tune_gamma', 0)):
+    if context.get('svr_tune_gamma', '0') == '1':
         tuning_parameters = {
             'hyperparameter_names': ['C', 'epsilon', 'gamma'],
             'search_space': [
@@ -231,9 +231,7 @@ class ForecastingTask(Task):
         X, y = dataset.X, dataset.y
 
         if y is None:
-            raise ValueError(
-                'Label data is required for forecasting task.'
-            )
+            raise ValueError('Label data is required for forecasting task.')
 
         if X.shape[0] != y.shape[0]:
             raise ValueError(

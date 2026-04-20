@@ -84,7 +84,7 @@ class Experiment(ABC):
             message: The message to log.
         """
 
-        enable_logging = bool(self.context.get('enable_logging', 1))
+        enable_logging = self.context.get('enable_logging', '1') == '1'
         if self.logger is not None and enable_logging:
             self.logger.info(message)
 

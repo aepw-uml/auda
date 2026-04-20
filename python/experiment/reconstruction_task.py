@@ -166,7 +166,7 @@ def get_support_vector_regression_reconstruction(
         regressor_cls=SupportVectorRegression,
     )
 
-    if str(context.get('svr_tune_gamma', 'False')).lower() == 'true':
+    if context.get('svr_tune_gamma', '0') == '1':
         tuning_parameters = {
             'search_type': 'grid',
             'hyperparameter_names': ['C', 'epsilon', 'gamma'],

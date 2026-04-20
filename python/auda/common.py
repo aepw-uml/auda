@@ -13,7 +13,7 @@ class AllowCustomArgs:
 
             if '=' not in arg:
                 key = arg[2:]
-                context[key] = 'true'
+                context[key] = '1'
             else:
                 key, value = arg[2:].split('=', 1)
                 context[key] = value
