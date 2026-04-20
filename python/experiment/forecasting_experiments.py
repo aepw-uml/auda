@@ -8,7 +8,6 @@ from step.model.drift_baseline import DriftBaseline
 from step.model.exponential_smoothing import ExponentialSmoothing
 from step.model.gaussian_process_regression import GaussianProcessRegression
 from step.model.naive_persistence import NaivePersistence
-from step.model.polynomial_regression import PolynomialRegression
 from step.model.ridge_regression import RidgeRegression
 from step.model.support_vector_regression import SupportVectorRegression
 from step.model.theil_sen_regression import TheilSenRegression
@@ -16,7 +15,6 @@ from step.plot.arima_regression import ARIMARegressionPlotter
 from step.plot.gaussian_process_regression import (
     GaussianProcessRegressionPlotter,
 )
-from step.plot.polynomial_regression import PolynomialRegressionPlotter
 from step.plot.ridge_regression import RidgeRegressionPlotter
 from step.plot.support_vector_regression import SupportVectorRegressionPlotter
 from step.plot.theil_sen_regression import TheilSenRegressionPlotter
@@ -97,29 +95,6 @@ def getTheilSenForecasting(**_) -> ForecastingExperiment:
     return experiment
 
 
-def getPolynomialRegressionForecasting(**_) -> ForecastingExperiment:
-    experiment = ForecastingExperiment(
-        name='Polynomial Regression',
-        description=(
-            'Forecast the original time series with polynomial regression.'
-        ),
-        regressor_cls=PolynomialRegression,
-    )
-
-    experiment.set_context(
-        plotter_factory=PolynomialRegressionPlotter,
-        tuning_parameters={
-            'search_type': 'grid',
-            'hyperparameter_names': ['degree'],
-            'search_space': [[(2.0, 9.0)]],
-            'sampling_scales': ['uniform'],
-            'num_points_per_interval': 8,
-        },
-    )
-
-    return experiment
-
-
 def getRidgeRegressionForecasting(**_) -> ForecastingExperiment:
     experiment = ForecastingExperiment(
         name='Ridge Regression',
@@ -132,11 +107,11 @@ def getRidgeRegressionForecasting(**_) -> ForecastingExperiment:
     experiment.set_context(
         plotter_factory=RidgeRegressionPlotter,
         tuning_parameters={
-            'search_type': 'grid',
             'hyperparameter_names': ['degree', 'alpha'],
             'search_space': [[(2.0, 9.0)], [(1e-6, 1e3)]],
             'sampling_scales': ['uniform', 'log_uniform'],
             'num_points_per_interval': 8,
+            'calculate_complexity': 0,
         },
     )
 
@@ -156,7 +131,6 @@ def getGaussianProcessForecasting(**_) -> ForecastingExperiment:
     experiment.set_context(
         plotter_factory=GaussianProcessRegressionPlotter,
         tuning_parameters={
-            'search_type': 'grid',
             'hyperparameter_names': ['length_scale', 'noise_level'],
             'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
             'sampling_scales': ['log_uniform', 'log_uniform'],
@@ -179,7 +153,6 @@ def getSupportVectorRegressionForecasting(
 
     if bool(context.get('svr_tune_gamma', 0)):
         tuning_parameters = {
-            'search_type': 'grid',
             'hyperparameter_names': ['C', 'epsilon', 'gamma'],
             'search_space': [
                 [(0.1, 100.0)],
@@ -194,7 +167,6 @@ def getSupportVectorRegressionForecasting(
         }
     else:
         tuning_parameters = {
-            'search_type': 'grid',
             'hyperparameter_names': ['C', 'epsilon'],
             'search_space': [
                 [(0.1, 100.0)],

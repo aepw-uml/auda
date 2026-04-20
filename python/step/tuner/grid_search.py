@@ -6,9 +6,9 @@ import numpy as np
 from common.metrics import RegressionMetricName, RegressionMetrics
 from common.metrics.regression_metrics import average_regression_metrics
 from step.tuner.types import (
+    Configuration,
     Domain,
     Hyperparameters,
-    HyperparameterScore,
     SamplingScale,
     SearchSpace,
 )
@@ -24,7 +24,7 @@ def grid_search(
     metric: RegressionMetricName = 'mape',
     num_points_per_interval: int = 5,
     logger: Logger | None = None,
-) -> list[HyperparameterScore]:
+) -> list[Configuration]:
     """Enumerates and evaluates a deterministic hyperparameter grid.
 
     For each hyperparameter, this function generates
@@ -51,8 +51,8 @@ def grid_search(
         logger: An optional logger to log the progress of the grid search.
 
     Returns:
-        A list of ``(score, hyperparameters, metrics_list)`` tuples in the
-        order they were evaluated.
+        A list of ``(hyperparameters, metrics_list)`` tuples in the order they
+        were evaluated.
     """
 
     if len(search_space) != len(hyperparameter_names):
@@ -81,7 +81,7 @@ def grid_search(
     total_iterations = int(
         np.prod([len(grid) for grid in hyperparameter_grids], dtype=int)
     )
-    hyperparameter_scores: list[HyperparameterScore] = []
+    hyperparameter_scores: list[Configuration] = []
     for i, hyperparameters_tuple in enumerate(product(*hyperparameter_grids)):
         hyperparameters = list(hyperparameters_tuple)
         metrics_list: list[RegressionMetrics] = evaluate_hyperparameters(
@@ -89,7 +89,7 @@ def grid_search(
         )
         metrics: RegressionMetrics = average_regression_metrics(metrics_list)
         score: float = metrics.get_value_by_name(metric)
-        hyperparameter_scores.append((score, hyperparameters, metrics_list))
+        hyperparameter_scores.append((hyperparameters, metrics_list))
 
         if logger is not None:
             hyperparameters_str = ', '.join(

@@ -5,9 +5,9 @@ import numpy as np
 from common.metrics import RegressionMetricName, RegressionMetrics
 from common.metrics.regression_metrics import average_regression_metrics
 from step.tuner.types import (
+    Configuration,
     Domain,
     Hyperparameters,
-    HyperparameterScore,
     SamplingScale,
     SearchSpace,
 )
@@ -24,7 +24,7 @@ def random_search(
     num_iterations: int = 100,
     seed: int = 42,
     logger: Logger | None = None,
-) -> list[HyperparameterScore]:
+) -> list[Configuration]:
     """Samples and evaluates random hyperparameter combinations.
 
     For each iteration, this function draws one value for each hyperparameter
@@ -52,8 +52,8 @@ def random_search(
         logger: An optional logger to log the progress of the random search.
 
     Returns:
-        A list of ``(score, hyperparameters, metrics_list)`` tuples in the
-        order they were evaluated.
+        A list of ``(hyperparameters, metrics_list)`` tuples in the order they
+        were evaluated.
     """
 
     rng = np.random.default_rng(seed=seed)
@@ -62,7 +62,7 @@ def random_search(
             'Length of search_space must match length of hyperparameter_names.'
         )
 
-    hyperparameter_scores: list[HyperparameterScore] = []
+    hyperparameter_scores: list[Configuration] = []
     for i in range(num_iterations):
         hyperparameters: Hyperparameters = [
             select_random_hyperparameter(intervals, rng, sampling_scales[i])
@@ -74,7 +74,7 @@ def random_search(
         )
         metrics = average_regression_metrics(metrics_list)
         score: float = metrics.get_value_by_name(metric)
-        hyperparameter_scores.append((score, hyperparameters, metrics_list))
+        hyperparameter_scores.append((hyperparameters, metrics_list))
 
         if logger is not None:
             hyperparameters_str = ', '.join(

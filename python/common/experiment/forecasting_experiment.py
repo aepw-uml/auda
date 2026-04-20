@@ -4,6 +4,7 @@ from common.experiment.regression_experiment import RegressionExperiment
 from common.metrics import RegressionMetrics
 from common.metrics.regression_metrics import RegressionMetricName
 from sklearn.base import np
+from step.evaluator.one_standard_error import one_standard_error
 from step.evaluator.time_series_cross_validation import (
     time_series_cross_validation,
 )
@@ -12,7 +13,8 @@ from step.model.standardize_regressor import StandardizedRegressor
 from step.tuner.grid_search import grid_search
 from step.tuner.random_search import random_search
 from step.tuner.types import (
-    HyperparameterScore,
+    Configuration,
+    Hyperparameters,
     SamplingScale,
     SearchSpace,
 )
@@ -73,6 +75,13 @@ class ForecastingExperiment(RegressionExperiment):
         num_points_per_interval: int = tuning_parameters.get(
             'num_points_per_interval', 5
         )
+        calculate_complexity = tuning_parameters.get('calculate_complexity')
+
+        if calculate_complexity is None:
+            raise ValueError(
+                'tuning_parameters must include "calculate_complexity" '
+                'function.'
+            )
 
         def evaluate_fold(
             X_train_fold: np.ndarray,
@@ -119,7 +128,7 @@ class ForecastingExperiment(RegressionExperiment):
 
         self.timer_start('tuning')
         if search_type == 'grid':
-            hyperparameter_scores: list[HyperparameterScore] = grid_search(
+            configurations: list[Configuration] = grid_search(
                 hyperparameter_names=hyperparameter_names,
                 search_space=search_space,
                 evaluate_hyperparameters=evaluate_hyperparameters,
@@ -129,7 +138,7 @@ class ForecastingExperiment(RegressionExperiment):
                 logger=self.logger,
             )
         elif search_type == 'random':
-            hyperparameter_scores: list[HyperparameterScore] = random_search(
+            configurations: list[Configuration] = random_search(
                 hyperparameter_names=hyperparameter_names,
                 search_space=search_space,
                 evaluate_hyperparameters=evaluate_hyperparameters,
@@ -146,13 +155,23 @@ class ForecastingExperiment(RegressionExperiment):
             )
         self.timer_stop('tuning')
 
-        sorted_hyperparameter_scores = sorted(
-            hyperparameter_scores, key=lambda x: x[0]
-        )
-        index = int(len(hyperparameter_scores) * 0.01)
-        best_hyperparameters = sorted_hyperparameter_scores[index][1]
+        scores_list: list[list[float]] = []
+        for _, metrics_list in configurations:
+            scores_list.append(
+                [metrics.get_value_by_name(metric) for metrics in metrics_list]
+            )
 
-        self.context['hyperparameter_scores'] = hyperparameter_scores
+        configuration_scores: list[tuple[Hyperparameters, list[float]]] = [
+            (configuration[0], scores)
+            for configuration, scores in zip(configurations, scores_list)
+        ]
+        best_hyperparameters = one_standard_error(
+            configuration_scores,
+            calculate_complexity,
+            prefer_lower=metric != 'r2',
+        )
+
+        self.context['configuration'] = configurations
         self.hyperparameters = {
             **self.hyperparameters,
             **{
