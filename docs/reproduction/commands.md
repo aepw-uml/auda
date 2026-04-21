@@ -24,6 +24,18 @@ auda workflow run YearPWG Reconstruction '--location=United States' --seed=471
 auda workflow run YearPPC MultipleReconstruction --location=Japan --seed=471;
 ```
 
+## Correlation Analysis of PlasticWasteDriver Feature Set
+
+```bash
+auda workflow run PlasticWasteDriverFeatureSet Correlation
+```
+
+## Importance Analysis of PlasticWasteDriver Feature Set
+
+```bash
+auda workflow run PlasticWasteGenerationPredictors FeatureImportances
+```
+
 ## Neural Network Forecasting
 
 ```bash
