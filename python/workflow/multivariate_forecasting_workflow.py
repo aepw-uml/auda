@@ -32,5 +32,5 @@ class MultivariateForecastingWorkflow(Workflow):
         workflow_name: str = context.get(
             'workflow_name', 'multivariate_forecasting'
         )
-        task_path = Path('results') / workflow_name
-        build_and_save_metric_table(task, task_path)
+        dir_path = Path('results') / workflow_name
+        build_and_save_metric_table(task, dir_path)

@@ -48,6 +48,10 @@ class PlasticWasteGenerationPredictors(DatasetFetcher):
             X.append(row[:-1])
             y.append(row[-1])
 
+        for i in range(len(X)):
+            X[i].append(X[i][3] / X[i][2])
+            X[i].append(X[i][4] / X[i][2])
+
         return Dataset(X=np.array(X), y=np.array(y))
 
     @override
@@ -59,15 +63,10 @@ class PlasticWasteGenerationPredictors(DatasetFetcher):
                 'Population',
                 'Urban Population',
                 'Rural Population',
+                'Urban Population Ratio',
+                'Rural Population Ratio',
             ],
-            feature_units=[
-                '',
-                'US Dollars',
-                '',
-                '',
-                '',
-                '',
-            ],
+            feature_units=['', 'US Dollars', '', '', '', '', '', ''],
             target_names=['Plastic Waste Generation'],
             target_units=['Metric Tonnes'],
         )

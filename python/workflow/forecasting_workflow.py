@@ -57,8 +57,8 @@ class ForecastingWorkflow(Workflow):
         for experiment in task.experiments:
             experiment.get_metrics()
 
-        task_path = Path('results') / f'forecasting_{tune_search_type}_search'
-        build_and_save_metric_table(task, task_path)
-        save_hyperparameter_table(task, task_path)
-        save_plots(task, task_path)
-        save_time_table(task, task_path)
+        dir_path = Path('results') / f'forecasting_{tune_search_type}_search'
+        build_and_save_metric_table(task, dir_path)
+        save_hyperparameter_table(task, dir_path)
+        save_plots(task, dir_path)
+        save_time_table(task, dir_path)

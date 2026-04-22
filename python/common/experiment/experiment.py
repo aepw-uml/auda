@@ -38,7 +38,7 @@ class Experiment(ABC):
         name: str,
         description: str,
         train_size: float = 0.8,
-        seed: int = 417,
+        seed: int = 471,
     ):
         """Initializes an Experiment instance.
 
@@ -74,6 +74,55 @@ class Experiment(ABC):
 
         self.context = {**self.context, **kwargs}
 
+    @staticmethod
+    def parse_bool(value: object, default: bool = False) -> bool:
+        """Parses a context value into a boolean.
+
+        Args:
+            value: Raw context value to interpret.
+            default: Boolean value to use when ``value`` is ``None``.
+
+        Returns:
+            The parsed boolean value.
+
+        Raises:
+            ValueError: If a string value cannot be interpreted as boolean.
+        """
+
+        if value is None:
+            return default
+
+        if isinstance(value, bool):
+            return value
+
+        if isinstance(value, int):
+            return value != 0
+
+        normalized = str(value).strip().lower()
+        if normalized in ('1', 'true', 'yes', 'y', 'on'):
+            return True
+
+        if normalized in ('0', 'false', 'no', 'n', 'off'):
+            return False
+
+        raise ValueError(
+            f'Invalid boolean value: {value!r}. '
+            'Expected one of 1/0, true/false, yes/no, or on/off.'
+        )
+
+    def get_context_bool(self, key: str, default: bool = False) -> bool:
+        """Returns a boolean value from the experiment context.
+
+        Args:
+            key: Context key to retrieve.
+            default: Boolean value to use when the key is absent.
+
+        Returns:
+            The parsed boolean value for the context key.
+        """
+
+        return self.parse_bool(self.context.get(key), default)
+
     def log(self, message: str) -> None:
         """Logs a message with the experiment's logger.
 
@@ -84,7 +133,7 @@ class Experiment(ABC):
             message: The message to log.
         """
 
-        enable_logging = self.context.get('enable_logging', '1') == '1'
+        enable_logging = self.get_context_bool('enable_logging', True)
         if self.logger is not None and enable_logging:
             self.logger.info(message)
 

@@ -31,12 +31,13 @@ class PlasticWasteDrivers(DatasetFetcher):
                 column_names=[
                     DemographyColumn.LOCATION,
                     DemographyColumn.YEAR,
+                    DemographyColumn.RURAL_POPULATION,
                     DemographyColumn.URBAN_POPULATION,
                     DemographyColumn.GDP,
                     WasteGenerationManagementColumn.PLASTIC_WASTE_GENERATED,
                 ],
                 notnull_column_names=[
-                    DemographyColumn.URBAN_POPULATION,
+                    DemographyColumn.RURAL_POPULATION,
                     DemographyColumn.GDP,
                     WasteGenerationManagementColumn.PLASTIC_WASTE_GENERATED,
                 ],
@@ -46,8 +47,8 @@ class PlasticWasteDrivers(DatasetFetcher):
 
         current_year = date.today().year
         valid_samples = [
-            [location, year, urbun_pop, gdp, pwg]
-            for location, year, urbun_pop, gdp, pwg in result
+            [location, year, rural_pop, urbun_pop, gdp, pwg]
+            for location, year, rural_pop, urbun_pop, gdp, pwg in result
             if year <= current_year
         ]
 
@@ -72,9 +73,14 @@ class PlasticWasteDrivers(DatasetFetcher):
     @override
     def get_dataset_schema(self) -> DatasetSchema:
         return DatasetSchema(
-            feature_names=['Year', 'Urban Population', 'GDP'],
+            feature_names=[
+                'Year',
+                'Rural Population',
+                'Urban Population',
+                'GDP',
+            ],
+            feature_units=['', '', '', 'USD Dollars'],
             target_names=['Plastic Waste Generation'],
-            feature_units=['', '', 'USD Dollars'],
             target_units=['Tonnes'],
         )
 

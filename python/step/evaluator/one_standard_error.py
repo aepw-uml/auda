@@ -35,7 +35,9 @@ def one_standard_error(
     if len(trials) == 0:
         raise ValueError('No trials provided.')
 
-    candidates = one_standard_error_candidates(trials, prefer_lower=prefer_lower)
+    candidates = one_standard_error_candidates(
+        trials, prefer_lower=prefer_lower
+    )
     return min(candidates, key=complexity_key)
 
 
@@ -64,8 +66,7 @@ def one_standard_error_candidates(
         raise ValueError('No trials provided.')
 
     trial_means: list[tuple[Hyperparameters, float]] = [
-        (hyperparameters, mean(scores))
-        for hyperparameters, scores in trials
+        (hyperparameters, mean(scores)) for hyperparameters, scores in trials
     ]
 
     best_trial_mean = trial_means[0][1]
@@ -78,13 +79,15 @@ def one_standard_error_candidates(
 
     threshold = best_trial_mean + 0.1 * standard_error(best_trial_scores)
 
+    def is_within_threshold(mean_score: float) -> bool:
+        return (
+            mean_score <= threshold if prefer_lower else mean_score >= threshold
+        )
+
     return [
         hyperparameters
         for hyperparameters, mean_score in trial_means
-        if prefer_lower
-        and mean_score <= threshold
-        or not prefer_lower
-        and mean_score >= threshold
+        if is_within_threshold(mean_score)
     ]
 
 

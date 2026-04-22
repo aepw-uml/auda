@@ -28,7 +28,7 @@ class ForecastingExperiment(RegressionExperiment):
         description: str,
         regressor_cls: Type[SupervisedLearningModel],
         train_size: float = 0.9,
-        seed: int = 417,
+        seed: int = 471,
     ) -> None:
         super().__init__(name, description, train_size, seed)
         self.regressor_cls = regressor_cls
@@ -42,8 +42,8 @@ class ForecastingExperiment(RegressionExperiment):
             regressor_cls=self.regressor_cls,
             hyperparameters=self.hyperparameters,
             regressor_kwargs=self.context,
-            use_x_scaler=self.context.get('use_scaler', True),
-            use_y_scaler=self.context.get('use_target_scaler', True),
+            use_x_scaler=self.get_context_bool('use_scaler', True),
+            use_y_scaler=self.get_context_bool('use_target_scaler', True),
         )
 
         self.model.fit(self.X_train, self.y_train)
@@ -53,7 +53,7 @@ class ForecastingExperiment(RegressionExperiment):
 
     @override
     def tune(self) -> None:
-        if self.context.get('enable_tuning') == '0':
+        if not self.get_context_bool('enable_tuning', True):
             return self.logger.info('Tuning is disabled. Skipping tuning step.')
 
         tuning_parameters: dict[str, Any] | None = self.context.get(
@@ -93,7 +93,7 @@ class ForecastingExperiment(RegressionExperiment):
         ) -> RegressionMetrics:
             X_train, y_train = self.X_train, self.y_train
             X_test, y_test = self.X_test, self.y_test
-            enable_logging = self.context.get('enable_logging', '1') == '1'
+            enable_logging = self.get_context_bool('enable_logging', True)
 
             self.X_train, self.y_train = X_train_fold, y_train_fold
             self.X_test, self.y_test = X_val_fold, y_val_fold

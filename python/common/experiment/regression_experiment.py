@@ -37,7 +37,7 @@ class RegressionExperiment(Experiment):
         name: str,
         description: str,
         train_size: float = 0.9,
-        seed: int = 417,
+        seed: int = 471,
     ) -> None:
         """Initializes a regression experiment.
 
@@ -61,7 +61,7 @@ class RegressionExperiment(Experiment):
         if self.X is None or self.y is None:
             raise ValueError('Data not set up. Call setup() first.')
 
-        if not bool(self.context.get('use_isolation_forest', 0)):
+        if not self.get_context_bool('use_isolation_forest', False):
             return
 
         if self.X.shape[0] < 10:
@@ -128,10 +128,8 @@ class RegressionExperiment(Experiment):
         if self.X is None or self.y is None:
             raise ValueError('Data not set up. Call setup() first.')
 
-        enable_evaluation = (
-            self.context.get('enable_evaluation', 'False').lower() == 'true'
-        )
-        if enable_evaluation:
+        enable_evaluation = self.get_context_bool('enable_evaluation', True)
+        if not enable_evaluation:
             self.train_size = 1.0
             self.X_train = self.X
             self.y_train = self.y
@@ -147,7 +145,7 @@ class RegressionExperiment(Experiment):
         n_samples = self.X.shape[0]
         indices = np.arange(n_samples)
 
-        if bool(self.context.get('split_shuffle', 0)):
+        if self.get_context_bool('split_shuffle', False):
             np.random.seed(self.seed)
             np.random.shuffle(indices)
 

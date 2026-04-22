@@ -10,14 +10,14 @@ from util.table import Table
 
 
 def save_metric_table(
-    metrics_dict: dict[str, RegressionMetrics], task_path: Path
+    metrics_dict: dict[str, RegressionMetrics], dir_path: Path
 ) -> None:
     """Saves a metric table for the given metrics dictionary to a file.
 
     Args:
         metrics_dict: A dictionary mapping experiment names to their
             corresponding regression metrics.
-        task_path: The path to the task directory where the metric table will be
+        dir_path: The path to the directory where the metric table will be
             saved.
     """
 
@@ -35,7 +35,7 @@ def save_metric_table(
             wape_str,
         )
 
-    metric_table_path: Path = task_path / 'metric_table'
+    metric_table_path: Path = dir_path / 'metric_table'
     save_content_to_file(metric_table_path, metric_table.__repr__())
 
     print(f'Saved metric table to "{metric_table_path}".\n')

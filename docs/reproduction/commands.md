@@ -9,7 +9,7 @@ auda workflow run YearPWG Forecasting --location=Japan --seed=471 --tune_search_
 ## Forecasting of global plastics production
 
 ```bash
-auda workflow run GlobalYearPlasticsProduction Forecasting --seed=471 --workflow_name="global_forecasting"
+auda workflow run GlobalYearPlasticsProduction Forecasting --seed=471 --workflow_name=global_forecasting
 ```
 
 ## Reconstruction of United States plastic waste generation
@@ -33,7 +33,7 @@ auda workflow run PlasticWasteDriverFeatureSet Correlation
 ## Importance Analysis of PlasticWasteDriver Feature Set
 
 ```bash
-auda workflow run PlasticWasteGenerationPredictors FeatureImportances
+auda workflow run PlasticWasteGenerationPredictors FeatureImportances --contamination=0.2 --seed=471
 ```
 
 ## Neural Network Forecasting

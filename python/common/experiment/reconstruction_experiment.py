@@ -26,7 +26,7 @@ class ReconstructionExperiment(RegressionExperiment):
         description: str,
         regressor_cls: Type[SupervisedLearningModel],
         train_size: float = 0.9,
-        seed: int = 417,
+        seed: int = 471,
     ) -> None:
         super().__init__(name, description, train_size, seed)
         self.regressor_cls = regressor_cls
@@ -40,8 +40,8 @@ class ReconstructionExperiment(RegressionExperiment):
             regressor_cls=self.regressor_cls,
             hyperparameters=self.hyperparameters,
             regressor_kwargs=self.context,
-            use_x_scaler=self.context.get('use_scaler', True),
-            use_y_scaler=self.context.get('use_target_scaler', True),
+            use_x_scaler=self.get_context_bool('use_scaler', True),
+            use_y_scaler=self.get_context_bool('use_target_scaler', True),
         )
 
         self.model.fit(self.X_train, self.y_train)
@@ -93,7 +93,7 @@ class ReconstructionExperiment(RegressionExperiment):
         ) -> RegressionMetrics:
             X_train, y_train = self.X_train, self.y_train
             X_test, y_test = self.X_test, self.y_test
-            enable_logging = self.context.get('enable_logging', True)
+            enable_logging = self.get_context_bool('enable_logging', True)
 
             self.X_train, self.y_train = X_train_mask, y_train_mask
             self.X_test, self.y_test = X_val_mask, y_val_mask
@@ -165,8 +165,7 @@ class ReconstructionExperiment(RegressionExperiment):
             )
 
         trial_scores: list[tuple[Hyperparameters, list[float]]] = [
-            (trial[0], scores)
-            for trial, scores in zip(trials, scores_list)
+            (trial[0], scores) for trial, scores in zip(trials, scores_list)
         ]
         best_hyperparameters = one_standard_error(
             trial_scores,

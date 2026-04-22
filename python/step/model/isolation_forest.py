@@ -25,7 +25,7 @@ def isolation_forest(
     X: np.ndarray,
     y: np.ndarray,
     contamination: float = 0.05,
-    seed: int = 417,
+    seed: int = 471,
 ) -> IsolationForestResult:
     """Fits an isolation forest model on the joint feature-target space.
 
