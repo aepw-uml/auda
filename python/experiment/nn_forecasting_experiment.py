@@ -380,6 +380,278 @@ class _ForecastingMLP(nn.Module):
 
 
 class NNForecastingExperiment(RegressionExperiment):
+    def _get_stage_context_value(
+        self,
+        key: str,
+        default: object,
+        stage_name: str | None = None,
+    ) -> object:
+        """Returns a training setting, optionally overridden per stage.
+
+        Args:
+            key: Base context key to read.
+            default: Fallback value when the key is absent.
+            stage_name: Optional training stage prefix such as
+                ``"pretraining"``.
+
+        Returns:
+            The resolved context value.
+        """
+
+        if stage_name is not None:
+            stage_key = f'{stage_name}.{key}'
+            if stage_key in self.context:
+                return self.context[stage_key]
+
+        return self.context.get(key, default)
+
+    def _get_stage_hyperparameter(
+        self,
+        key: str,
+        default: int | float,
+        stage_name: str | None = None,
+    ) -> int | float:
+        """Returns a training hyperparameter, optionally overridden per stage.
+
+        Args:
+            key: Hyperparameter name to read.
+            default: Fallback value when the hyperparameter is absent.
+            stage_name: Optional training stage prefix such as
+                ``"pretraining"``.
+
+        Returns:
+            The resolved hyperparameter value.
+        """
+
+        if stage_name is not None:
+            stage_key = f'{stage_name}.{key}'
+            if stage_key in self.context:
+                value = self.context[stage_key]
+                return cast(int | float, value)
+
+        if key in self.hyperparameters:
+            value = self.hyperparameters[key]
+            return cast(int | float, value)
+
+        value = self.context.get(key, default)
+        return cast(int | float, value)
+
+    def _prepare_model_for_training(
+        self,
+        input_dim: int,
+        target_transform: TargetTransformName,
+        existing_model: '_ForecastingMLP | None' = None,
+    ) -> '_ForecastingMLP':
+        """Builds or reuses a forecasting model for a training stage.
+
+        Args:
+            input_dim: Number of features in the current dataset.
+            target_transform: Target transform to apply in this stage.
+            existing_model: Optional model whose weights should be reused.
+
+        Returns:
+            The model to train for this stage.
+
+        Raises:
+            ValueError: If the existing model is incompatible with the
+                provided input dimension.
+        """
+
+        if existing_model is not None:
+            first_layer = existing_model.network[0]
+            model_input_dim = getattr(first_layer, 'in_features', None)
+            if model_input_dim != input_dim:
+                raise ValueError(
+                    'Cannot fine-tune NNForecastingExperiment with a '
+                    'different number of input features.'
+                )
+            model = existing_model
+        else:
+            model = _ForecastingMLP(input_dim=input_dim)
+
+        # Refit scalers for each stage while preserving the learned weights.
+        model.x_scaler = StandardScaler()
+        model.y_scaler = StandardScaler()
+        model.target_transform = target_transform
+        return model
+
+    def _fit_training_stage(
+        self,
+        model: '_ForecastingMLP | None',
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        stage_name: str,
+    ) -> tuple['_ForecastingMLP', int, float | None]:
+        """Fits one training stage and returns the trained model.
+
+        Args:
+            model: Optional model whose weights should be reused.
+            X_train: Feature matrix for this stage.
+            y_train: Target vector for this stage.
+            stage_name: Human-readable stage name used for logging and
+                stage-specific overrides.
+
+        Returns:
+            The trained model, number of epochs trained, and best validation
+            loss when validation is available.
+        """
+
+        torch.manual_seed(self.seed)
+        np.random.seed(self.seed)
+        target_transform = _resolve_target_transform(
+            self.context.get('target_transform')
+        )
+
+        validation_fraction = float(
+            self._get_stage_context_value(
+                'validation_fraction',
+                0.2,
+                stage_name=stage_name,
+            )
+        )
+        early_stopping_patience = int(
+            self._get_stage_context_value(
+                'early_stopping.patience',
+                25,
+                stage_name=stage_name,
+            )
+        )
+        early_stopping_min_delta = float(
+            self._get_stage_context_value(
+                'early_stopping.min_delta',
+                1e-4,
+                stage_name=stage_name,
+            )
+        )
+        batch_size = int(
+            self._get_stage_hyperparameter(
+                'batch_size',
+                64,
+                stage_name=stage_name,
+            )
+        )
+        learning_rate = float(
+            self._get_stage_hyperparameter(
+                'learning_rate',
+                1e-3,
+                stage_name=stage_name,
+            )
+        )
+        weight_decay = float(
+            self._get_stage_hyperparameter(
+                'weight_decay',
+                1e-4,
+                stage_name=stage_name,
+            )
+        )
+        num_epochs = int(
+            self._get_stage_hyperparameter(
+                'num_epochs',
+                self.context.get('num_epochs', 500),
+                stage_name=stage_name,
+            )
+        )
+
+        model = self._prepare_model_for_training(
+            input_dim=X_train.shape[1],
+            target_transform=target_transform,
+            existing_model=model,
+        )
+        x_scaler = cast(StandardScaler, model.x_scaler)
+        y_scaler = cast(StandardScaler, model.y_scaler)
+
+        self.log(
+            f'{stage_name.capitalize()}: training neural network with '
+            f'batch_size={batch_size}, '
+            f'learning_rate={learning_rate}, '
+            f'weight_decay={weight_decay}, '
+            f'num_epochs={num_epochs}, '
+            f'target_transform={target_transform}.'
+        )
+
+        X_fit = X_train
+        y_fit = y_train.reshape(-1, 1)
+        validation_data: tuple[np.ndarray, np.ndarray] | None = None
+        if early_stopping_patience > 0 and X_train.shape[0] >= 3:
+            (
+                X_subtrain,
+                y_subtrain,
+                X_validation,
+                y_validation,
+            ) = _split_training_validation(
+                X_train,
+                y_train,
+                validation_fraction=validation_fraction,
+                seed=self.seed,
+            )
+            X_fit = X_subtrain
+            y_fit = _transform_targets(
+                y_subtrain,
+                target_transform,
+            ).reshape(-1, 1)
+
+            X_fit_scaled = x_scaler.fit_transform(X_fit)
+            y_fit_scaled = y_scaler.fit_transform(y_fit)
+            y_validation_model = _transform_targets(
+                y_validation,
+                target_transform,
+            )
+            validation_data = (
+                cast(np.ndarray, x_scaler.transform(X_validation)),
+                cast(
+                    np.ndarray,
+                    y_scaler.transform(y_validation_model.reshape(-1, 1)),
+                ),
+            )
+            self.log(
+                f'{stage_name.capitalize()}: using early stopping with '
+                f'{X_subtrain.shape[0]} subtraining samples, '
+                f'{X_validation.shape[0]} validation samples, '
+                f'patience={early_stopping_patience}, '
+                f'min_delta={early_stopping_min_delta:.6f}.'
+            )
+        else:
+            X_fit_scaled = x_scaler.fit_transform(X_fit)
+            y_fit = _transform_targets(
+                y_fit.reshape(-1),
+                target_transform,
+            ).reshape(-1, 1)
+            y_fit_scaled = y_scaler.fit_transform(y_fit)
+            if early_stopping_patience <= 0:
+                self.log(
+                    f'{stage_name.capitalize()}: early stopping disabled '
+                    'because patience <= 0.'
+                )
+            elif X_train.shape[0] < 3:
+                self.log(
+                    f'{stage_name.capitalize()}: early stopping disabled '
+                    'because the training split is too small for a '
+                    'validation set.'
+                )
+
+        dataloader = _create_dataloader(
+            X_fit_scaled,
+            y_fit_scaled,
+            batch_size=batch_size,
+            seed=self.seed,
+            shuffle=True,
+        )
+
+        trained_epochs, best_validation_loss = _fit_model(
+            model,
+            dataloader,
+            learning_rate=learning_rate,
+            weight_decay=weight_decay,
+            num_epochs=num_epochs,
+            validation_data=validation_data,
+            early_stopping_patience=early_stopping_patience,
+            early_stopping_min_delta=early_stopping_min_delta,
+            logger=lambda message: self.log(
+                f'{stage_name.capitalize()}: {message}'
+            ),
+        )
+        return model, trained_epochs, best_validation_loss
+
     @override
     def tune(self) -> None:
         X_train, y_train = self.get_training_set()
@@ -525,124 +797,43 @@ class NNForecastingExperiment(RegressionExperiment):
         X_train, y_train = self.get_training_set()
         super().train()
 
-        torch.manual_seed(self.seed)
-        np.random.seed(self.seed)
-        target_transform = _resolve_target_transform(
-            self.context.get('target_transform')
+        model: _ForecastingMLP | None = None
+        pretraining_dataset = cast(
+            Dataset | None,
+            self.context.get('pretraining_dataset'),
         )
-
-        validation_fraction = float(
-            self.context.get('validation_fraction', 0.2)
-        )
-        early_stopping_patience = int(
-            self.context.get('early_stopping.patience', 25)
-        )
-        early_stopping_min_delta = float(
-            self.context.get('early_stopping.min_delta', 1e-4)
-        )
-
-        # Create the MLP model and attach scalers for later use in prediction.
-        if self.model is not None:
-            model = cast(_ForecastingMLP, self.model)
-        else:
-            model = _ForecastingMLP(input_dim=X_train.shape[1])
-            model.x_scaler = StandardScaler()
-            model.y_scaler = StandardScaler()
-            model.target_transform = target_transform
-
-        batch_size = int(self.hyperparameters.get('batch_size', 64))
-        learning_rate = float(self.hyperparameters.get('learning_rate', 1e-3))
-        weight_decay = float(self.hyperparameters.get('weight_decay', 1e-4))
-        num_epochs = int(
-            self.hyperparameters.get(
-                'num_epochs',
-                self.context.get('num_epochs', 500),
-            )
-        )
-
-        self.log(
-            'Training neural network with '
-            f'batch_size={batch_size}, '
-            f'learning_rate={learning_rate}, '
-            f'weight_decay={weight_decay}, '
-            f'num_epochs={num_epochs}, '
-            f'target_transform={target_transform}.'
-        )
-
-        X_fit = X_train
-        y_fit = y_train.reshape(-1, 1)
-        validation_data: tuple[np.ndarray, np.ndarray] | None = None
-        if early_stopping_patience > 0 and X_train.shape[0] >= 3:
-            (
-                X_subtrain,
-                y_subtrain,
-                X_validation,
-                y_validation,
-            ) = _split_training_validation(
-                X_train,
-                y_train,
-                validation_fraction=validation_fraction,
-                seed=self.seed,
-            )
-            X_fit = X_subtrain
-            y_fit = _transform_targets(
-                y_subtrain,
-                target_transform,
-            ).reshape(-1, 1)
-
-            X_fit_scaled = x_scaler.fit_transform(X_fit)
-            y_fit_scaled = y_scaler.fit_transform(y_fit)
-            y_validation_model = _transform_targets(
-                y_validation,
-                target_transform,
-            )
-            validation_data = (
-                cast(np.ndarray, x_scaler.transform(X_validation)),
-                cast(
-                    np.ndarray,
-                    y_scaler.transform(y_validation_model.reshape(-1, 1)),
-                ),
-            )
-            self.log(
-                'Using early stopping with '
-                f'{X_subtrain.shape[0]} subtraining samples, '
-                f'{X_validation.shape[0]} validation samples, '
-                f'patience={early_stopping_patience}, '
-                f'min_delta={early_stopping_min_delta:.6f}.'
-            )
-        else:
-            X_fit_scaled = x_scaler.fit_transform(X_fit)
-            y_fit = _transform_targets(
-                y_fit.reshape(-1),
-                target_transform,
-            ).reshape(-1, 1)
-            y_fit_scaled = y_scaler.fit_transform(y_fit)
-            if early_stopping_patience <= 0:
-                self.log('Early stopping disabled because patience <= 0.')
-            elif X_train.shape[0] < 3:
-                self.log(
-                    'Early stopping disabled because the training split is '
-                    'too small for a validation set.'
+        if pretraining_dataset is not None:
+            y_pretraining = pretraining_dataset.y
+            if y_pretraining is None:
+                raise ValueError(
+                    'Pretraining dataset must include target values.'
                 )
 
-        dataloader = _create_dataloader(
-            X_fit_scaled,
-            y_fit_scaled,
-            batch_size=batch_size,
-            seed=self.seed,
-            shuffle=True,
-        )
+            model, pretraining_epochs, pretraining_validation_loss = (
+                self._fit_training_stage(
+                    model=None,
+                    X_train=pretraining_dataset.X,
+                    y_train=y_pretraining,
+                    stage_name='pretraining',
+                )
+            )
+            self.parameters['pretraining_trained_num_epochs'] = (
+                pretraining_epochs
+            )
+            if pretraining_validation_loss is not None:
+                self.parameters['pretraining_best_validation_loss'] = (
+                    pretraining_validation_loss
+                )
 
-        trained_epochs, best_validation_loss = _fit_model(
-            model,
-            dataloader,
-            learning_rate=learning_rate,
-            weight_decay=weight_decay,
-            num_epochs=num_epochs,
-            validation_data=validation_data,
-            early_stopping_patience=early_stopping_patience,
-            early_stopping_min_delta=early_stopping_min_delta,
-            logger=self.log,
+        model, trained_epochs, best_validation_loss = self._fit_training_stage(
+            model=model,
+            X_train=X_train,
+            y_train=y_train,
+            stage_name=(
+                'finetuning'
+                if pretraining_dataset is not None
+                else 'training'
+            ),
         )
         self.parameters['trained_num_epochs'] = trained_epochs
         if best_validation_loss is not None:

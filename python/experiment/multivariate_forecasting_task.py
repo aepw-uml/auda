@@ -37,20 +37,32 @@ class MultivariateForecastingTask(ForecastingTask):
             raise ValueError('Labels must be one-dimensional.')
 
 
-def get_nn_forecasting() -> NNForecastingExperiment:
+def get_nn_forecasting(
+    masked_dataset: Dataset, **context
+) -> NNForecastingExperiment:
     """Builds a neural-network forecasting experiment.
+
+    Args:
+        masked_dataset: Dataset containing the feature matrix and target vector
+            for training the neural network. The dataset may have been masked
+            to exclude certain locations or time periods.
+        context: Additional context for configuring the experiment.
 
     Returns:
         The configured neural-network forecasting experiment.
     """
 
-    return NNForecastingExperiment(
+    experiment = NNForecastingExperiment(
         name='NN Forecasting',
         description=(
             'Forecast the target series with a neural network using all '
             'available input features.'
         ),
     )
+
+    experiment.set_context(pretraining_dataset=masked_dataset, **context)
+
+    return experiment
 
 
 __all__ = [
