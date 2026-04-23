@@ -541,14 +541,14 @@ class NNForecastingExperiment(RegressionExperiment):
             self.context.get('early_stopping.min_delta', 1e-4)
         )
 
-        x_scaler = StandardScaler()
-        y_scaler = StandardScaler()
-
         # Create the MLP model and attach scalers for later use in prediction.
-        model = _ForecastingMLP(input_dim=X_train.shape[1])
-        model.x_scaler = x_scaler
-        model.y_scaler = y_scaler
-        model.target_transform = target_transform
+        if self.model is not None:
+            model = cast(_ForecastingMLP, self.model)
+        else:
+            model = _ForecastingMLP(input_dim=X_train.shape[1])
+            model.x_scaler = StandardScaler()
+            model.y_scaler = StandardScaler()
+            model.target_transform = target_transform
 
         batch_size = int(self.hyperparameters.get('batch_size', 64))
         learning_rate = float(self.hyperparameters.get('learning_rate', 1e-3))

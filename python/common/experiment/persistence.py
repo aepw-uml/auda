@@ -22,17 +22,17 @@ def save_metric_table(
     """
 
     metric_table = Table(
-        headers=['Experiment', 'MAE', 'RMSE', 'R²', 'MAPE', 'WAPE']
+        headers=['Experiment', 'MAE', 'RMSE', 'R²', 'WAPE', 'MAPE']
     )
     for name, metrics in metrics_dict.items():
-        [mae_str, rmse_str, r2_str, mape_str, wape_str] = metrics.item_strs()
+        [mae_str, rmse_str, r2_str, wape_str, mape_str] = metrics.item_strs()
         metric_table.append_row(
             name,
             mae_str,
             rmse_str,
             r2_str,
-            mape_str,
             wape_str,
+            mape_str,
         )
 
     metric_table_path: Path = dir_path / 'metric_table'

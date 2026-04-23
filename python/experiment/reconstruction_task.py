@@ -226,7 +226,7 @@ class ReconstructionTask(Task):
         seed = int(self.context.get('seed', 42))
         self.logger.info(f'Using seed {seed}.')
 
-        metric = self.context.get('metric', 'mape')
+        metric = self.context.get('metric', 'wape')
         self.logger.info(f'Using metric "{metric}" for hyperparameter tuning.')
 
         for experiment in self.experiments:

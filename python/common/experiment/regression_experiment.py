@@ -185,7 +185,7 @@ class RegressionExperiment(Experiment):
 
         This implementation predicts on ``X_test`` and stores a
         ``RegressionMetrics`` instance in ``self.metrics`` containing MAE,
-        RMSE, R-squared, MAPE, and WAPE.
+        RMSE, R-squared, WAPE, and MAPE.
 
         Raises:
             ValueError: If the test split or trained model is unavailable.
@@ -207,7 +207,7 @@ class RegressionExperiment(Experiment):
             wape = float(np.abs(y_test - y_pred).sum() / y_scale)
 
         self.context['metrics'] = RegressionMetrics(
-            mae=mae, rmse=rmse, r2=r2, mape=mape, wape=wape
+            mae=mae, rmse=rmse, r2=r2, wape=wape, mape=mape
         )
 
     @override

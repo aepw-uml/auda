@@ -197,6 +197,10 @@ def get_support_vector_regression_forecasting(
 class ForecastingTask(Task):
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema) -> None:
+        """Executes the forecasting task by running all configured forecasting
+        experiments.
+        """
+
         super().run(dataset)
 
         X, y = dataset.X, dataset.y
@@ -205,7 +209,7 @@ class ForecastingTask(Task):
         seed = int(self.context.get('seed', 42))
         self.logger.info(f'Using seed {seed}.')
 
-        metric = self.context.get('metric', 'mape')
+        metric = self.context.get('metric', 'wape')
         self.logger.info(f'Using metric "{metric}" for hyperparameter tuning.')
 
         for experiment in self.experiments:

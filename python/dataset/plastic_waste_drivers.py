@@ -15,7 +15,7 @@ from .tables import (
 
 class PlasticWasteDrivers(DatasetFetcher):
     @override
-    def fetch_dataset(self, location: str) -> Dataset:
+    def fetch_dataset(self, location: str, exclude_location: str) -> Dataset:
         table_service = TableService(env.dbUrl)
         tables, table_metadata_map = table_service.prepare_tables(
             [
@@ -68,6 +68,24 @@ class PlasticWasteDrivers(DatasetFetcher):
                 [sample[4] for sample in location_samples], dtype=float
             )
 
+        if exclude_location:
+            X = np.array(
+                [
+                    sample[1:4]
+                    for sample in valid_samples
+                    if sample[0] != exclude_location
+                ],
+                dtype=float,
+            )
+            y = np.array(
+                [
+                    sample[4]
+                    for sample in valid_samples
+                    if sample[0] != exclude_location
+                ],
+                dtype=float,
+            )
+
         return Dataset(X, y)
 
     @override
@@ -85,9 +103,17 @@ class PlasticWasteDrivers(DatasetFetcher):
         )
 
     @override
-    def fetch(self, location: str, **kwargs) -> tuple[Dataset, DatasetSchema]:
+    def fetch(
+        self, location: str = '', exclude_location: str = '', **kwargs
+    ) -> tuple[Dataset, DatasetSchema]:
         _ = kwargs
-        cache_key = 'PlasticWasteDrivers' + (
-            f'?location={location}' if location else ''
+        cache_key = (
+            'PlasticWasteDrivers'
+            + (f'?location={location}' if location else '')
+            + (
+                f'&exclude_location={exclude_location}'
+                if exclude_location
+                else ''
+            )
         )
-        return super().fetch(cache_key, location)
+        return super().fetch(cache_key, location, exclude_location)
