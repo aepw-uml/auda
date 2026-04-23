@@ -4,6 +4,7 @@
 
 ```bash
 auda workflow run YearPWG Forecasting --location=Japan --seed=471 --tune_search_type=grid
+auda workflow run YearPWG Forecasting --location=Japan --seed=471 --tune_search_type=random
 ```
 
 ## Forecasting of global plastics production

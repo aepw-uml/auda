@@ -14,8 +14,10 @@ if [[ ":$PATH:" != *":$_path:"* ]]; then
 fi
 
 function reproduce() {
-    auda workflow run YearPWG Forecasting \
-        --location=Japan --seed=471 --tune_search_type=grid
+    auda workflow run YearPWG Forecasting --location=Japan --seed=471 \
+        --tune_search_type=grid
+    auda workflow run YearPWG Forecasting --location=Japan --seed=471 \
+        --tune_search_type=random
     auda workflow run GlobalYearPlasticsProduction Forecasting \
         --seed=471 --workflow_name=global_forecasting
     auda workflow run YearPWG Reconstruction '--location=United States' \

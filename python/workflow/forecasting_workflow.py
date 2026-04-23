@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, override
+from typing import override
 
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.persistence import (
@@ -25,18 +25,7 @@ from experiment.forecasting_task import (
 class ForecastingWorkflow(Workflow):
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema, **context) -> None:
-        self._run(dataset, schema, tune_search_type='grid', **context)
-        self._run(dataset, schema, tune_search_type='random', **context)
-
-    def _run(
-        self,
-        dataset: Dataset,
-        schema: DatasetSchema,
-        tune_search_type: Literal['grid', 'random'],
-        **context,
-    ) -> None:
-        context['tune_search_type'] = tune_search_type
-
+        tune_search_type = context.get('tune_search_type', 'random')
         svr_gamma_context = context.copy()
         svr_gamma_context['svr_tune_gamma'] = '1'
 
