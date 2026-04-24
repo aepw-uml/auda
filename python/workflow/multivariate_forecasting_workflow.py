@@ -6,7 +6,7 @@ from common.experiment.persistence import (
     build_and_save_metric_table,
 )
 from common.workflow import Workflow
-from dataset.plastic_waste_drivers import PWDrivers
+from dataset.pw_drivers import PWDrivers
 from experiment.multivariate_forecasting_task import (
     MultivariateForecastingTask,
     get_gaussian_process_forecasting,
