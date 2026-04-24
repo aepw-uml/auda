@@ -12,7 +12,7 @@ from .tables import (
 )
 
 
-class PlasticWasteDriverFeatureSet(DatasetFetcher):
+class PWDriverFeatureSet(DatasetFetcher):
     @override
     def fetch_dataset(self) -> Dataset:
         table_service = TableService(env.dbUrl)
@@ -77,5 +77,5 @@ class PlasticWasteDriverFeatureSet(DatasetFetcher):
     @override
     def fetch(self, **kwargs) -> tuple[Dataset, DatasetSchema]:
         _ = kwargs
-        cache_key = 'PlasticWasteDriverFeatureSet'
+        cache_key = 'PWDriverFeatureSet'
         return super().fetch(cache_key)

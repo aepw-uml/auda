@@ -6,7 +6,7 @@ import numpy as np
 from common.dataset import Dataset, DatasetFetcher, DatasetSchema
 
 
-class GlobalYearPlasticsProduction(DatasetFetcher):
+class GlobalPlasticsProduction(DatasetFetcher):
     """Loads annual global plastics production from a local CSV file."""
 
     MIN_YEAR: int = 1960
@@ -80,5 +80,5 @@ class GlobalYearPlasticsProduction(DatasetFetcher):
         """
 
         _ = kwargs
-        cache_key = f'GlobalYearPlasticsProduction?min_year={self.MIN_YEAR}'
+        cache_key = f'GlobalPlasticsProduction?min_year={self.MIN_YEAR}'
         return super().fetch(cache_key)

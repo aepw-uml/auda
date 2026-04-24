@@ -12,7 +12,7 @@ from .tables import (
 )
 
 
-class PlasticWasteGenerationPredictors(DatasetFetcher):
+class PWGPredictors(DatasetFetcher):
     @override
     def fetch_dataset(self) -> Dataset:
         table_service = TableService(env.dbUrl)
@@ -74,5 +74,5 @@ class PlasticWasteGenerationPredictors(DatasetFetcher):
     @override
     def fetch(self, **kwargs) -> tuple[Dataset, DatasetSchema]:
         _ = kwargs
-        cache_key = 'PlasticWasteGenerationPredictors'
+        cache_key = 'PWGPredictors'
         return super().fetch(cache_key)

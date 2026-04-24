@@ -13,7 +13,7 @@ from .tables import (
 )
 
 
-class PlasticWasteDrivers(DatasetFetcher):
+class PWDrivers(DatasetFetcher):
     @override
     def fetch_dataset(self, location: str, exclude_location: str) -> Dataset:
         table_service = TableService(env.dbUrl)
@@ -108,7 +108,7 @@ class PlasticWasteDrivers(DatasetFetcher):
     ) -> tuple[Dataset, DatasetSchema]:
         _ = kwargs
         cache_key = (
-            'PlasticWasteDrivers'
+            'PWDrivers'
             + (f'?location={location}' if location else '')
             + (
                 f'&exclude_location={exclude_location}'

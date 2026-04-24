@@ -6,7 +6,7 @@ from common.experiment.persistence import (
     build_and_save_metric_table,
 )
 from common.workflow import Workflow
-from dataset.plastic_waste_drivers import PlasticWasteDrivers
+from dataset.plastic_waste_drivers import PWDrivers
 from experiment.multivariate_forecasting_task import (
     MultivariateForecastingTask,
     get_gaussian_process_forecasting,
@@ -27,7 +27,7 @@ class MultivariateForecastingWorkflow(Workflow):
         # Build an auxiliary dataset for NN pretraining by excluding the target
         # location and removing outliers.
         location = context.get('location', '')
-        masked_dataset, _ = PlasticWasteDrivers().fetch('', location)
+        masked_dataset, _ = PWDrivers().fetch('', location)
         X, y = masked_dataset.X, masked_dataset.y
         assert y is not None, 'Target variable y is None'
         result = isolation_forest(X, y, contamination=0.2, seed=seed)
