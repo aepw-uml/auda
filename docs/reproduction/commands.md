@@ -19,10 +19,10 @@ auda workflow run GlobalPlasticsProduction Forecasting --seed=471 --workflow_nam
 auda workflow run YearPWG Reconstruction '--location=United States' --seed=471
 ```
 
-## Multiple Reconstruction of Japan polymer PET consumption
+## Multiple Reconstruction of the United States total resin consumption
 
 ```bash
-auda workflow run YearPPC MultipleReconstruction --location=Japan --seed=471;
+auda workflow run YearTRC MultipleReconstruction --location=United\ States --seed=471;
 ```
 
 ## Correlation Analysis of PWDriverFeatureSet

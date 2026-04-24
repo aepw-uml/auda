@@ -1,1 +1,9 @@
 \subsection{Evaluation}
+
+In this study, the evaluation metrics for the forecasting and reconstruction tasks include mean absolute error (MAE), root mean square error (RMSE), the coefficient of determination (\(R^2\)), weighted absolute percentage error (WAPE), and mean absolute percentage error (MAPE). Because the targets in these tasks are physical quantities, such as plastic waste generation measured in tonnes, WAPE is treated as the primary metric. It quantifies the model's total absolute error relative to the total amount being predicted:
+
+\begin{equation}
+	\text{WAPE} = \frac{\sum_{i=1}^{n} |y_i - \hat{y}_i|}{\sum_{i=1}^{n} |y_i|}.
+\end{equation}
+
+Therefore, WAPE is used as the performance metric for hyperparameter tuning across all forecasting and reconstruction tasks.

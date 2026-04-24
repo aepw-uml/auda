@@ -1,5 +1,41 @@
 \subsection{Models}
 
-Experiments in this paper are mainly forecasting, reconstruction, correlation analysis, and importance analysis. For the first two types of experiment, we introduce some commonly used baseline models and machine learning models.
+The experiments in this study focus on correlation analysis, importance analysis, reconstruction, and forecasting. For the forecasting and reconstruction tasks, AUDA preserves the chronological order of the data points. In each experiment, the first 90\% of observations are used for training and validation, while the final 10\% of the series, with a minimum of two observations, are reserved for hold-out evaluation. Baseline, statistical, and machine learning models are applied to these two types of tasks.
 
-For the forecasting tasks, AUDA preserves chronological order. Each experiment uses the first 90\% of observations for training and reserves the final 10\% of the series, with a minimum of two observations, for hold-out evaluation. The forecasting suite compares naive persistence, drift baseline, Holt-style exponential smoothing, polynomial ridge regression \cite{hoerl1970ridge}, Gaussian process regression with an RBF plus white-noise kernel, RBF-kernel support vector regression, local Theil-Sen regression over the most recent seven years.
+The baseline models used in the forecasting suite are naive persistence, drift, and Holt-style exponential smoothing \cite{holt2004forecasting}. For the reconstruction suite, the baseline models are linear interpolation and moving average interpolation.
+
+The statistical models used in the forecasting suite are local Theil--Sen regression over the most recent seven years \cite{sen1968estimates} and a fixed ARIMA(2, 0, 1) model \cite{box2015time}. The statistical model used in the reconstruction suite is cubic spline interpolation \cite{de1978practical}.
+
+The machine learning models used in both the forecasting and reconstruction suites are polynomial ridge regression \cite{hoerl1970ridge}, Gaussian process regression with an RBF plus white-noise kernel \cite{seeger2004gaussian}, and RBF-kernel support vector regression \cite{smola2004tutorial}. In the multivariate forecasting experiment, we also introduce multilayer perceptron (MLP) \cite{goodfellow2016deep}. The MLP architecture consists of two hidden layers with widths 32 and 16, respectively. Each hidden layer is followed by layer normalization and ReLU activation. The output layer is linear, producing a single scalar prediction for the target variable. The model is trained using mean squared error loss and optimized with the Adam optimizer \cite{kingma2014adam}.
+
+Models used in correlation analysis and importance analysis are covered in detail in \ref{sec:experiment_1_and_2}.
+
+\subsubsection{Representative Model Formulations}
+
+Because this study is comparative rather than methodological, only two models are summarized here. For Gaussian process regression, the trend is modeled as
+
+\begin{equation}
+	f(x) = \mathcal{GP}(0, k(x, x')),
+\end{equation}
+
+with an RBF-plus-noise kernel
+
+\begin{equation}
+	k(x, x') = \exp \left( -\frac{(x - x')^2}{2 \ell^2} \right) + \sigma^2 \delta_{x, x'},
+\end{equation}
+
+where $\ell$ controls the temporal smoothness and $\sigma^2_n$ absorbs observation noise. This is useful when the underlying trajectory is believed to be smooth but not strictly linear.
+
+For support vector regression, AUDA minimizes model complexity together with the \(\epsilon\)-insensitive loss function
+
+\begin{equation}
+	\min_{w, b} \frac{1}{2} \| w \|^2 + C \sum_{i=1}^n \max(0, |y_i - (w^T \phi(x_i) + b)| - \epsilon),
+\end{equation}
+
+with the RBF kernel
+
+\begin{equation}
+	K(x_i, x_j) = \exp \left( -\gamma \| x_i - x_j \|^2 \right),
+\end{equation}
+
+where \(C\) controls the penalty for large residuals and \(\epsilon\) defines the insensitive tube around the fitted function.

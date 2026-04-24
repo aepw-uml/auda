@@ -1,0 +1,6 @@
+\subsection{Experiment 1 and 2: Correlation Analysis and Importance Analysis}
+\label{sec:experiment_1_and_2}
+
+In the experiment 1, the correlation analysis workflow computes the Pearson correlation matrix over the features in the \texttt{PWDriverFeatureSet} dataset and saves the resulting heat map.
+
+In the experiment 2, the reconstruction first removed outliers using an isolation forest \cite{tony2008isolation} fitted to the joint predictor-target space, and then trained a random forest regressor on the filtered data \cite{breiman2001random}. Feature importance was quantified using the model’s built-in importance scores, which measure each predictor’s relative contribution to reducing prediction error across the ensemble. The isolation forest used a contamination rate of 0.2, while the random forest used 300 trees.

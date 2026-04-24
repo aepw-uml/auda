@@ -70,8 +70,6 @@ class PWDriverFeatureSet(DatasetFetcher):
                 'Metric Tons',
                 '',
             ],
-            target_names=['Plastic Waste Generation'],
-            target_units=['Metric Tonnes'],
         )
 
     @override
