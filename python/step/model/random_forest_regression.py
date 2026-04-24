@@ -17,7 +17,7 @@ class RandomForestRegression(SupervisedLearningModel):
             max_depth=None,
             min_samples_split=2,
             min_samples_leaf=1,
-            random_state=42,
+            random_state=471,
             n_jobs=-1,
         )
         random_forest_regressor.fit(X, y)

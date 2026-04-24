@@ -507,21 +507,21 @@ class NNForecastingExperiment(RegressionExperiment):
                 'validation_fraction',
                 0.2,
                 stage_name=stage_name,
-            )
+            )  # type: ignore[assignment]
         )
         early_stopping_patience = int(
             self._get_stage_context_value(
                 'early_stopping.patience',
                 25,
                 stage_name=stage_name,
-            )
+            )  # type: ignore[assignment]
         )
         early_stopping_min_delta = float(
             self._get_stage_context_value(
                 'early_stopping.min_delta',
                 1e-4,
                 stage_name=stage_name,
-            )
+            )  # type: ignore[assignment]
         )
         batch_size = int(
             self._get_stage_hyperparameter(
@@ -830,9 +830,7 @@ class NNForecastingExperiment(RegressionExperiment):
             X_train=X_train,
             y_train=y_train,
             stage_name=(
-                'finetuning'
-                if pretraining_dataset is not None
-                else 'training'
+                'finetuning' if pretraining_dataset is not None else 'training'
             ),
         )
         self.parameters['trained_num_epochs'] = trained_epochs
