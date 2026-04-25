@@ -33,6 +33,63 @@ class ReconstructionExperiment(RegressionExperiment):
         self.context['split_shuffle'] = True
 
     @override
+    def split(self) -> None:
+        """Splits reconstruction data while keeping boundary samples in train.
+
+        Reconstruction models need observed samples on both ends of the
+        sequence, so the first and last original samples are always assigned to
+        the training split. Test samples are selected only from interior
+        positions.
+
+        Raises:
+            ValueError: If the dataset has not been provided via ``setup()`` or
+                if evaluation is enabled with fewer than three samples.
+        """
+
+        if self.X is None or self.y is None:
+            raise ValueError('Data not set up. Call setup() first.')
+
+        enable_evaluation = self.get_context_bool('enable_evaluation', True)
+        if not enable_evaluation:
+            return super().split()
+
+        super().split()
+        n_samples = self.X.shape[0]
+        if n_samples < 3:
+            raise ValueError(
+                'Reconstruction experiments require at least 3 samples when '
+                'evaluation is enabled.'
+            )
+
+        boundary_indices = np.array([0, n_samples - 1], dtype=int)
+        interior_indices = np.arange(1, n_samples - 1)
+
+        if self.get_context_bool('split_shuffle', False):
+            np.random.seed(self.seed)
+            np.random.shuffle(interior_indices)
+
+        test_size = 1 - self.train_size
+        num_test_samples = max(2, int(n_samples * test_size))
+        num_test_samples = min(num_test_samples, interior_indices.shape[0])
+        test_indices = interior_indices[:num_test_samples]
+        train_indices = np.concatenate(
+            (boundary_indices, interior_indices[num_test_samples:])
+        )
+
+        self.X_train = self.X[train_indices]
+        self.y_train = self.y[train_indices]
+        self.X_test = self.X[test_indices]
+        self.y_test = self.y[test_indices]
+
+        m_train = self.X_train.shape[0]
+        m_test = self.X_test.shape[0]
+        self.log(
+            f'Split data into {m_train} training samples '
+            f'and {m_test} test samples, reserving boundary samples for '
+            'training.'
+        )
+
+    @override
     def train(self) -> None:
         super().train()
 

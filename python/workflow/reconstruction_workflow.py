@@ -12,6 +12,7 @@ from common.workflow import Workflow
 from experiment.reconstruction_task import (
     get_reconstruction_task,
 )
+from util.names import to_kebab
 
 
 class ReconstructionWorkflow(Workflow):
@@ -33,7 +34,12 @@ class ReconstructionWorkflow(Workflow):
         for experiment in task.experiments:
             experiment.get_metrics()
 
-        dir_path = Path('results') / 'reconstruction'
+        location = to_kebab(context.get('location', ''))
+        dir_path = Path('results') / (
+            'multiple_reconstruction'
+            if not location
+            else f'multiple_reconstruction_{location}'
+        )
         build_and_save_metric_table(task, dir_path)
         save_hyperparameter_table(task, dir_path)
         save_plots(task, dir_path)

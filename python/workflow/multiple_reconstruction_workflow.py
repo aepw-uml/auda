@@ -7,6 +7,7 @@ from common.workflow import Workflow
 from experiment.reconstruction_task import (
     run_reconstruction_tasks,
 )
+from util.names import to_kebab
 
 
 class MultipleReconstructionWorkflow(Workflow):
@@ -20,5 +21,10 @@ class MultipleReconstructionWorkflow(Workflow):
             num_experiments, dataset, schema, context, seed=seed
         )
 
-        dir_path = Path('results') / 'multiple_reconstruction'
+        location = to_kebab(context.get('location', ''))
+        dir_path = Path('results') / (
+            'multiple_reconstruction'
+            if not location
+            else f'multiple_reconstruction_{location}'
+        )
         save_metric_table(average_metrics, dir_path)

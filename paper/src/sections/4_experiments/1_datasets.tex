@@ -1,6 +1,6 @@
 \subsection{Datasets}
 
-\begin{table}[h]
+\begin{table}[ht]
 	\caption{
 		\centering
 		All datasets used in this study.
@@ -16,12 +16,14 @@
 		PWDriverFeatureSet       & -                          & -              & 79               \\
 		PWGPredictors            & Plastic Waste Generation   & -              & 695              \\
 		PWDrivers                & Plastic Waste Generation   & 2010-2019      & 695              \\
+		PWDrivers (Japan)        & Plastic Waste Generation   & 2010-2019      & 10               \\
+		PWDrivers (Slovenia)     & Plastic Waste Generation   & 2010-2018      & 6                \\
 		GlobalPlasticsProduction & Global Plastics Production & 1960-2019      & 59               \\
 		\bottomrule
 	\end{tabular}
 	\label{tab:datasets}
 \end{table}
 
-This study primarily utilizes datasets migrated from the PRISM database, as summarized in Table~\ref{tab:datasets}. The \texttt{YearPWG} dataset captures the annual trend in plastic waste generation; the \texttt{YearTRC} dataset represents the annual trend in total resin consumption; and the \texttt{YearPPC} dataset reflects the annual trend in polymer PET consumption. The \texttt{PWDriverFeatureSet} dataset is an unlabeled dataset comprising population, GDP, urban population, plastic waste generation, mismanaged plastic waste, and the proportion of plastic waste that is properly managed. The \texttt{PWGPredictors} dataset includes the features: year, GDP, population, urban population, rural population, and the rural population ratio. The \texttt{PWDrivers} dataset contains year, GDP, population, urban population, rural population, urban population ratio, and rural population ratio.
+This study primarily utilizes datasets migrated from the PRISM database, as summarized in Table~\ref{tab:datasets}. The \texttt{YearPWG} dataset captures the annual trend in plastic waste generation; the \texttt{YearTRC} dataset represents the annual trend in total resin consumption; and the \texttt{YearPPC} dataset reflects the annual trend in polymer PET consumption. The \texttt{PWDriverFeatureSet} dataset is an unlabeled dataset comprising population, GDP, urban population, plastic waste generation, mismanaged plastic waste, and the proportion of plastic waste that is properly managed. The \texttt{PWGPredictors} dataset includes the features: year, GDP, population, urban population, rural population, and the rural population ratio. The \texttt{PWDrivers} dataset contains year, GDP, population, urban population, rural population, urban population ratio, and rural population ratio. The \texttt{PWDrivers (Japan)} and \texttt{PWDrivers (Slovenia)} datasets are subsets of the \texttt{PWDrivers} dataset, containing data specific to Japan and Slovenia, respectively.
 
 An additional dataset is obtained from \textit{Our World in Data}, which provides the annual trend in global plastics production~\cite{owid_global_plastics_production}.

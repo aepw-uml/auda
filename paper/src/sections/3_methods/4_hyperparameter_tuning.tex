@@ -98,3 +98,29 @@ Next, we compute the standard error of the performance metrics for the configura
 where \(\sigma\) is the standard deviation of the fold-wise performance metrics for that configuration. We then identify all configurations whose mean performance is within \(\mu^\star + \alpha E\), where \(\mu^\star\) is the best mean performance and \(\alpha\) is an adjustment coefficient. Finally, we select the simplest configuration among these candidates.
 
 The purpose of the 1-SE rule is to reduce accidental overfitting caused by randomness in hyperparameter search. The constant \(\alpha\) controls the trade-off between performance and simplicity. In this study, the number of random-search iterations is set to \(T = 128\), and the number of grid points for each hyperparameter is set to \(M = 8\). Under these settings, we find that setting \(\alpha = 0.1\) is appropriate.
+
+Table~\ref{tab:complexity-key-hyperparameters} shows the complexity ordering for the hyperparameters of all tunable models. Lower complexity-key values are treated as simpler by the 1-SE rule. For example, in Ridge Regression, a lower degree and a higher alpha contribute to a simpler model.
+
+\begin{table}[t]
+	\centering
+	\caption{Complexity ordering for hyperparameters of all tunable models.}
+	\label{tab:complexity-key-hyperparameters}
+	\begin{tabular}{lll}
+		\toprule
+		Model & Hyperparameter   & Complexity-key contribution \\
+		\midrule
+		\multirow{2}{*}{Ridge Regression}
+		      & degree           & $+\text{degree}$            \\
+		      & alpha            & $-\alpha$                   \\
+		\midrule
+		\multirow{2}{*}{Gaussian Process Regression}
+		      & length\_scale    & $-\text{length\_scale}$     \\
+		      & noise\_level     & $-\text{noise\_level}$      \\
+		\midrule
+		\multirow{3}{*}{Support Vector Regression}
+		      & C                & $+C$                        \\
+		      & epsilon          & $-\epsilon$                 \\
+		      & gamma (if tuned) & $+\gamma$                   \\
+		\bottomrule
+	\end{tabular}
+\end{table}

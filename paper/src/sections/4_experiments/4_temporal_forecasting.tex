@@ -1,1 +1,11 @@
-\subsection{Temporal Forecasting}
+\subsection{Experiments 4--7: Temporal Forecasting}
+
+Producing business-as-usual projections from historical data is a fundamental task in environmental data analysis. In this study, we design four experiments to evaluate the performance of various forecasting methods across datasets with different characteristics.
+
+In Experiment 4, we apply forecasting models to the \texttt{GlobalPlasticsProduction} dataset. This dataset contains 59 samples, making it relatively large for time series analysis; thus, machine learning models are expected to perform well. This experiment serves as a benchmark for assessing model performance on larger datasets.
+
+In Experiment 5, we evaluate forecasting models on the \texttt{YearPWG (Japan)} dataset, which consists of 26 samples. While the size is moderate, this dataset exhibits a non-monotonic pattern: it initially increases, followed by a sharp decline, and then a recovery. This experiment investigates how forecasting models handle such irregular temporal dynamics.
+
+In Experiment 6, we apply a multilayer perceptron (MLP) model to the \texttt{PWDrivers} dataset. We observe that environmental data in this study is influenced by policy factors, although the dataset does not explicitly include policy-related variables. Therefore, we employ a neural network to capture the implicit relationships between the input features and the target variable, namely plastic waste generation. This experiment evaluates whether the MLP can effectively learn these latent relationships and produce accurate forecasts.
+
+In Experiment 7, we conduct multivariate forecasting using Gaussian Process Regression (GPR), Support Vector Regression (SVR), and MLP models on the \texttt{PWDrivers (Japan)} and \texttt{PWDrivers (Slovenia)} datasets. The MLP model is first pre-trained on the full \texttt{PWDrivers} dataset excluding the target country, and subsequently fine-tuned on the target country's training data. This experiment compares the performance of traditional machine learning methods with that of the MLP in a multivariate forecasting setting. For the \texttt{PWDrivers (Slovenia)} dataset, which contains only \(6\) samples, hyperparameter tuning is not performed due to the limited data availability.

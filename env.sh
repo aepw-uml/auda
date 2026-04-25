@@ -20,8 +20,9 @@ function reproduce() {
         --tune_search_type=random
     auda workflow run GlobalPlasticsProduction Forecasting \
         --seed=471 --workflow_name=global_forecasting
-    auda workflow run YearPWG Reconstruction '--location=United States' \
+    auda workflow run YearTRC MultipleReconstruction --location=United\ States \
         --seed=471
+    auda workflow run YearPPC MultipleReconstruction --location=Japan --seed=471
     auda workflow run YearPPC MultipleReconstruction --location=Japan \
         --seed=471
     auda workflow run PWDriverFeatureSet Correlation
