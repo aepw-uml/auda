@@ -46,7 +46,10 @@ class ForecastingWorkflow(Workflow):
         for experiment in task.experiments:
             experiment.get_metrics()
 
-        dir_path = Path('results') / f'forecasting_{tune_search_type}_search'
+        workflow_name = context.get('workflow_name', 'forecasting')
+        dir_path = (
+            Path('results') / f'{workflow_name}_{tune_search_type}_search'
+        )
         build_and_save_metric_table(task, dir_path)
         save_hyperparameter_table(task, dir_path)
         save_plots(task, dir_path)

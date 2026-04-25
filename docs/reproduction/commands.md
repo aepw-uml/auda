@@ -27,14 +27,14 @@ auda workflow run YearPPC Reconstruction --location=Japan --seed=471
 ## Forecasting of global plastics production
 
 ```bash
-auda workflow run GlobalPlasticsProduction Forecasting --seed=471 --workflow_name=global_forecasting
+auda workflow run GlobalPlasticsProduction Forecasting --seed=471 --workflow_name=global_forecasting --tune_search_type=grid
+auda workflow run GlobalPlasticsProduction Forecasting --seed=471 --workflow_name=global_forecasting --tune_search_type=random
 ```
 
 ## Forecasting of Japan plastic waste generation
 
 ```bash
-auda workflow run YearPWG Forecasting --location=Japan --seed=471 --tune_search_type=grid
-auda workflow run YearPWG Forecasting --location=Japan --seed=471 --tune_search_type=random
+auda workflow run YearPWG Forecasting --location=Japan --seed=471
 ```
 
 ## Neural Network Forecasting

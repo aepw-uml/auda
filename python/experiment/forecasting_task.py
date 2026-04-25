@@ -148,15 +148,17 @@ def get_gaussian_process_forecasting(**_) -> ForecastingExperiment:
 def get_support_vector_regression_forecasting(
     **context: str,
 ) -> ForecastingExperiment:
+    tune_gamma = context.get('svr_tune_gamma', '0') == '1'
     experiment = ForecastingExperiment(
-        name='Support Vector Regression',
+        name='Support Vector Regression'
+        + (' (with gamma tuning)' if tune_gamma else ''),
         description=(
             'Forecast the original time series with support vector regression.'
         ),
         regressor_cls=SupportVectorRegression,
     )
 
-    if context.get('svr_tune_gamma', '0') == '1':
+    if tune_gamma:
         tuning_parameters = {
             'hyperparameter_names': ['C', 'epsilon', 'gamma'],
             'search_space': [
