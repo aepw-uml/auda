@@ -43,13 +43,21 @@ function move-figures() {
     DIR="results/global_forecasting_random_search/plots"
     cp "$DIR/ridge-regression.png" \
         paper/src/figures/global_forecasting_ridge_regression.png
-
     cp "$DIR/gaussian-process-regression.png" \
         paper/src/figures/global_forecasting_gpr.png
-
     cp "$DIR/support-vector-regression.png" \
         paper/src/figures/global_forecasting_svr.png
-
     cp "$DIR/theil-sen-regression.png" \
         paper/src/figures/global_forecasting_theil_sen_regression.png
+
+    # Japan PWG forecasting
+    DIR="results/forecasting_random_search/plots"
+    cp "$DIR/ridge-regression.png" \
+        paper/src/figures/japan_pwg_forecasting_ridge_regression.png
+    cp "$DIR/gaussian-process-regression.png" \
+        paper/src/figures/japan_pwg_forecasting_gpr.png
+    cp "$DIR/support-vector-regression.png" \
+        paper/src/figures/japan_pwg_forecasting_svr.png
+    cp "$DIR/arima-regression.png" \
+        paper/src/figures/japan_pwg_forecasting_arima_regression.png
 }
