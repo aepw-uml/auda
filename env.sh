@@ -37,27 +37,62 @@ function reproduce() {
 }
 
 function move-figures() {
-    mkdir -p paper/src/figures
+    DEST="paper/src/figures"
+    mkdir -p "$DEST"
+
+    # Prism data extraction
+    cp images/prism_data_extraction.png \
+        "$DEST/prism_data_extraction.png"
+
+    # Correlation matrix
+    cp "results/correlation/correlation_matrix.png" \
+        "$DEST/correlation_matrix.png"
+
+    # Importance analysis histogram
+    cp "results/feature_importances/feature_importances.png" \
+        "$DEST/feature_importances.png"
+
+    # Reconstruction (Japan)
+    DIR="results/multiple_reconstruction_japan/plots"
+    cp "$DIR/theil-sen-regression.png" \
+        "$DEST/japan_trc_reconstruction_theil_sen_regression.png"
+    cp "$DIR/ridge-regression.png" \
+        "$DEST/japan_trc_reconstruction_ridge_regression.png"
+    cp "$DIR/gaussian-process-regression.png" \
+        "$DEST/japan_trc_reconstruction_gpr.png"
+    cp "$DIR/support-vector-regression.png" \
+        "$DEST/japan_trc_reconstruction_svr.png"
+
+    # Reconstruction (United States)
+    DIR="results/multiple_reconstruction_united-states/plots"
+    cp "$DIR/theil-sen-regression.png" \
+        "$DEST/united_states_ppc_reconstruction_theil_sen_regression.png"
+    cp "$DIR/ridge-regression.png" \
+        "$DEST/united_states_ppc_reconstruction_ridge_regression.png"
+    cp "$DIR/gaussian-process-regression.png" \
+        "$DEST/united_states_ppc_reconstruction_gpr.png"
+    cp "$DIR/support-vector-regression.png" \
+        "$DEST/united_states_ppc_reconstruction_svr.png"
 
     # Global forecasting random search
     DIR="results/global_forecasting_random_search/plots"
-    cp "$DIR/ridge-regression.png" \
-        paper/src/figures/global_forecasting_ridge_regression.png
-    cp "$DIR/gaussian-process-regression.png" \
-        paper/src/figures/global_forecasting_gpr.png
-    cp "$DIR/support-vector-regression.png" \
-        paper/src/figures/global_forecasting_svr.png
     cp "$DIR/theil-sen-regression.png" \
-        paper/src/figures/global_forecasting_theil_sen_regression.png
+        "$DEST/global_forecasting_theil_sen_regression.png"
+    cp "$DIR/ridge-regression.png" \
+        "$DEST/global_forecasting_ridge_regression.png"
+    cp "$DIR/gaussian-process-regression.png" \
+        "$DEST/global_forecasting_gpr.png"
+    cp "$DIR/support-vector-regression.png" \
+        "$DEST/global_forecasting_svr.png"
 
     # Japan PWG forecasting
     DIR="results/forecasting_random_search/plots"
-    cp "$DIR/ridge-regression.png" \
-        paper/src/figures/japan_pwg_forecasting_ridge_regression.png
-    cp "$DIR/gaussian-process-regression.png" \
-        paper/src/figures/japan_pwg_forecasting_gpr.png
-    cp "$DIR/support-vector-regression.png" \
-        paper/src/figures/japan_pwg_forecasting_svr.png
     cp "$DIR/arima-regression.png" \
-        paper/src/figures/japan_pwg_forecasting_arima_regression.png
+        "$DEST/japan_pwg_forecasting_arima_regression.png"
+    cp "$DIR/ridge-regression.png" \
+        "$DEST/japan_pwg_forecasting_ridge_regression.png"
+    cp "$DIR/gaussian-process-regression.png" \
+        "$DEST/japan_pwg_forecasting_gpr.png"
+    cp "$DIR/support-vector-regression.png" \
+        "$DEST/japan_pwg_forecasting_svr.png"
 }
