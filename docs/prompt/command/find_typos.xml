@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE xml>
+<command name="FindTypos">
+    <description>
+        Find issues and vulnerabilities in the research paper.
+    </description>
+    <steps>
+        <step id="ScanFiles">
+            Scan all .tex files in the `paper` directory in the project root directory.
+        </step>
+        <step id="IdentifyTypos">
+            For each scanned file, find possible typos. This also includes verbs with incorrect
+            tense usage, nouns with incorrect pluralization, and other common spelling mistakes.
+        </step>
+    </steps>
+    <rules>
+        <rule>Do not edit any files.</rule>
+    </rules>
+    <output>
+        <item id="Findings">Findings of all possible typos.</item>
+    </output>
+</command>

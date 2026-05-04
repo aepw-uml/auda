@@ -30,10 +30,12 @@ function reproduce() {
         --workflow_name=global_forecasting --tune_search_type=random
     auda workflow run YearPWG Forecasting --location=Japan --seed=471
     auda workflow run PWDrivers NNForecasting --seed=471
+
     auda workflow run PWDrivers MultivariateForecasting --seed=471 \
-        --location=Japan
+        --location=Japan --workflow_name=multivariate_forecasting_japan
     auda workflow run PWDrivers MultivariateForecasting --seed=471 \
-        --location=Slovenia --enable_tuning=0
+        --location=Slovenia --enable_tuning=0 \
+        --workflow_name=multivariate_forecasting_slovenia
 }
 
 function move-figures() {
@@ -54,21 +56,13 @@ function move-figures() {
 
     # Reconstruction (Japan)
     DIR="results/multiple_reconstruction_japan/plots"
-    cp "$DIR/theil-sen-regression.png" \
-        "$DEST/japan_trc_reconstruction_theil_sen_regression.png"
-    cp "$DIR/ridge-regression.png" \
+    cp "$DIR/ridge_regression.png" \
         "$DEST/japan_trc_reconstruction_ridge_regression.png"
-    cp "$DIR/gaussian-process-regression.png" \
-        "$DEST/japan_trc_reconstruction_gpr.png"
     cp "$DIR/support-vector-regression.png" \
         "$DEST/japan_trc_reconstruction_svr.png"
 
     # Reconstruction (United States)
     DIR="results/multiple_reconstruction_united-states/plots"
-    cp "$DIR/theil-sen-regression.png" \
-        "$DEST/united_states_ppc_reconstruction_theil_sen_regression.png"
-    cp "$DIR/ridge-regression.png" \
-        "$DEST/united_states_ppc_reconstruction_ridge_regression.png"
     cp "$DIR/gaussian-process-regression.png" \
         "$DEST/united_states_ppc_reconstruction_gpr.png"
     cp "$DIR/support-vector-regression.png" \

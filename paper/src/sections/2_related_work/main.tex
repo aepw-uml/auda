@@ -1,0 +1,18 @@
+\section{Literature Review}
+
+% Claude version
+\subsection{Plastic Waste Quantification}
+
+Quantitative estimates of global and national plastic waste generation have evolved rapidly over the past decade. Geyer, Jambeck, and Law produced the first comprehensive material-flow analysis of all plastics ever made, establishing a global baseline. Jambeck and colleagues estimated land-to-ocean plastic inputs at the country level, and Lebreton and Andrady projected future scenarios for plastic generation and disposal. The OECD Global Plastics Outlook provides a more recent international assessment under multiple policy scenarios. These studies share a common methodological constraint: country-level inputs are sparse, often imputed, and rarely reported on a consistent annual cadence.
+
+\subsection{Time-Series Forecasting}
+
+Classical exponential smoothing methods, originating with Holt, remain competitive baselines for short, low-frequency time series. Box-Jenkins ARIMA models extend the toolkit to autoregressive structure, although order selection becomes unreliable when the sample is small. Robust regression techniques such as Theil-Sen estimation provide trend slopes that are insensitive to outliers, which is valuable when annual observations are dominated by a few policy-driven shocks. The textbook treatments of Hyndman and Athanasopoulos, and of Chatfield, provide practical guidance for selecting among these methods under data constraints.
+
+\subsection{Machine Learning for Environmental Forecasting}
+
+Machine-learning methods have been applied widely to environmental time series, including kernel ridge regression, Gaussian process regression with radial-basis-function kernels, and support vector regression. Multilayer perceptrons offer a flexible alternative when sufficient training data are available. A recurring concern in this literature is that flexible models can underperform simple baselines when the available data are too sparse to constrain their hyperparameters; this concern has been formalized in the bias-variance literature and reiterated empirically in recent forecasting competitions.
+
+\subsection{Hyperparameter Selection in Small-Sample Settings}
+
+Grid search and random search remain standard tools for hyperparameter selection, with random search shown by Bergstra and Bengio to be more efficient than grid search in moderate to high-dimensional configuration spaces. The one-standard-error rule, articulated in The Elements of Statistical Learning, advocates selecting the simplest model whose cross-validated error is within one standard error of the best, and is particularly appropriate when the variance of the cross-validation estimator itself is large, as in the small-sample regime considered here.

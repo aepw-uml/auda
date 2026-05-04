@@ -46,6 +46,6 @@ auda workflow run PWDrivers NNForecasting --seed=471
 ## Multivariate Forecasting
 
 ```bash
-auda workflow run PWDrivers MultivariateForecasting --seed=471 --location=Japan
-auda workflow run PWDrivers MultivariateForecasting --seed=471 --location=Slovenia --enable_tuning=0
+auda workflow run PWDrivers MultivariateForecasting --seed=471 --location=Japan --workflow_name=multivariate_forecasting_japan
+auda workflow run PWDrivers MultivariateForecasting --seed=471 --location=Slovenia --enable_tuning=0 --workflow_name=multivariate_forecasting_slovenia
 ```

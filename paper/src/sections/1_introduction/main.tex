@@ -1,1 +1,23 @@
 \section{Introduction}
+
+% Claude version
+Plastic waste is among the most visible and policy-relevant environmental indicators of the twenty-first century. Global plastic production has grown faster than the capacity of waste-management systems to handle it, with leakage into terrestrial and marine environments now widely documented. Country-level analytics are essential because production, consumption, and end-of-life pathways are governed by domestic regulation, infrastructure, and consumer behavior, all of which vary substantially across nations.
+Despite this need, the data on which country-level analyses depend are notoriously fragmented. Public sources publish indicators in mixed formats (PDF reports, scanned tables, semi-structured spreadsheets), with inconsistent units, irregular reporting cadences, and incomplete coverage across years and geographies. Two challenges follow: first, transforming heterogeneous source documents into a clean, schema-enforced analytical dataset; and second, modeling that dataset under severe sample-size constraints, where some countries have fewer than ten observations available across two decades.
+This paper addresses both challenges. Our contributions are as follows:
+\begin{itemize}
+	\item {
+	      PRISM, a large-language-model-assisted extract-transform-load pipeline that ingests heterogeneous public documents and produces normalized, schema-enforced records suitable for downstream analytics.
+	      }
+	\item {
+	      AUDA, an analytical database derived from PRISM via a quality-preserving migration step that enforces null exclusion, referential integrity on geographic keys, and unit and type consistency.
+	      }
+	\item {
+	      A comparative forecasting and reconstruction benchmark spanning seven experiments, covering naive, statistical, and machine-learning methods over country-level plastic waste indicators.
+	      }
+	\item {
+	      A practical observation: in the small-sample regime that characterizes most country-level plastic waste indicators, method complexity must be matched to data signal. Classical and statistical baselines remain competitive with, and frequently outperform, kernel- and neural-network-based machine learning models, while pre-trained multilayer perceptrons yield gains in the multivariate setting when cross-country information is shared.
+	      }
+\end{itemize}
+
+The remainder of the paper is organized as follows. Section 2 reviews related work on plastic waste quantification, time-series forecasting, and small-sample regression. Section 3 describes the PRISM-AUDA pipeline, the model suite, the hyperparameter tuning protocol, and the evaluation metrics. Section 4 details the datasets and the seven experiments. Section 5 reports and discusses the results. Section 6 concludes and outlines limitations and future work.
+

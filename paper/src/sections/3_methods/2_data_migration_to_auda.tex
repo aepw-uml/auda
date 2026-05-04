@@ -1,5 +1,5 @@
-\subsection{Data Migration to AUDA}
+\subsection{Data Migration to AUDA Anlaytical Database}
 
-AUDA utilizes a script to migrate up-to-date approved data points from PRISM into its analytical database through an Extract-Transform-Load (ETL) process. This migration stage reorganizes validated PRISM records into an analytical schema where all tables are keyed by year and location. During the migration, AUDA applies multiple quality-preserving constraints to ensure data integrity and analytical reliability. This includes excluding null-valued records, enforcing referential integrity on geographic attributes, and maintaining consistency in units and data types.
+AUDA utilizes a script to migrate up-to-date, approved data points from PRISM into its analytical database through an Extract-Transform-Load (ETL) process. This migration stage reorganizes validated PRISM records into an analytical schema in which all tables are keyed by location and year. During the migration, the script filters out records with null values and ensures that units are consistent across all data points. For records with the same key, the script retains only the most recent entry based on the last updated timestamp.
 
 All analyses and experiments in this study will exclusively use data from the AUDA analytical database.

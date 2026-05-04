@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE xml>
+<command name="FindIssues">
+    <description>
+        Find issues and vulnerabilities in specified files without making any edits.
+    </description>
+    <steps>
+        <step id="ScanFiles">
+            Scan all the Python files (`.py` files) in the `python` directory in the project root
+            directory.
+        </step>
+        <step id="IdentifyIssues">
+            For each scanned file, identify any issues or vulnerabilities present.
+        </step>
+        <step id="CompareWithDocuments">
+            For each identified issue, compare it against the relevant documents (if exist) to
+            determine if it is intentional or unintentional.
+        </step>
+    </steps>
+    <rules>
+        <rule>Do not edit any files.</rule>
+    </rules>
+    <output>
+        <item id="Findings">Findings of issues and vulnerabilities.</item>
+    </output>
+</command>
