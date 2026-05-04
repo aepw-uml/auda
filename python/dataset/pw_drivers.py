@@ -52,8 +52,8 @@ class PWDrivers(DatasetFetcher):
             if year <= current_year
         ]
 
-        X = np.array([sample[1:4] for sample in valid_samples], dtype=float)
-        y = np.array([sample[4] for sample in valid_samples], dtype=float)
+        X = np.array([sample[1:-1] for sample in valid_samples], dtype=float)
+        y = np.array([sample[-1] for sample in valid_samples], dtype=float)
 
         if location:
             location_samples = [
@@ -62,16 +62,16 @@ class PWDrivers(DatasetFetcher):
             if not location_samples:
                 raise ValueError(f'No data found for location: {location}')
             X = np.array(
-                [sample[1:4] for sample in location_samples], dtype=float
+                [sample[1:-1] for sample in location_samples], dtype=float
             )
             y = np.array(
-                [sample[4] for sample in location_samples], dtype=float
+                [sample[-1] for sample in location_samples], dtype=float
             )
 
         if exclude_location:
             X = np.array(
                 [
-                    sample[1:4]
+                    sample[1:-1]
                     for sample in valid_samples
                     if sample[0] != exclude_location
                 ],
@@ -79,7 +79,7 @@ class PWDrivers(DatasetFetcher):
             )
             y = np.array(
                 [
-                    sample[4]
+                    sample[-1]
                     for sample in valid_samples
                     if sample[0] != exclude_location
                 ],

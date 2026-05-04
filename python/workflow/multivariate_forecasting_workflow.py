@@ -37,9 +37,8 @@ class MultivariateForecastingWorkflow(Workflow):
         # The NN forecasting experiment first pretrains on the auxiliary
         # out-of-location dataset, then fine-tunes on the requested location.
         task.add(get_nn_forecasting(masked_dataset))
-
-        task.add(get_support_vector_regression_forecasting())
         task.add(get_gaussian_process_forecasting())
+        task.add(get_support_vector_regression_forecasting())
 
         task.run(dataset, schema)
 
