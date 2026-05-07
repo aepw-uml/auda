@@ -1,0 +1,7 @@
+\subsection{Models}
+
+The experiments in this study focus on correlation analysis, importance analysis, reconstruction, and forecasting. For the reconstruction and forecasting tasks, common baseline models, statistical models, and machine learning models are applied to the data.
+
+For the correlation analysis, we compute pairwise Pearson correlation coefficients between the features. The Pearson correlation coefficient is a statistical measure that describes the strength and direction of a linear relationship between two variables.
+
+% For the importance analysis, we first fit an isolation forest to identify outliers in the data. We then train a random forest regressor~\cite{breiman2001random} on the filtered data. Feature importance is quantified using the model’s built-in importance scores, which measure each predictor’s relative contribution to reducing prediction error across the ensemble. The isolation forest uses a contamination rate of 0.2, while the random forest uses 300 trees.

@@ -1,77 +1,15 @@
-\subsection{Experiment 3: Reconstruction}
+\section{Experiment 3: Reconstruction}
 
 The AUDA analysis table is highly sparse due to substantial missing data across countries, regions, and years. For example, the United States Environmental Protection Agency (EPA) reports plastic waste generation data only at five-year intervals between 2000 and 2015. Therefore, in Experiment 3, we reconstruct the missing values in the \texttt{YearPPC (Japan)} and \texttt{YearTRC (US)} datasets.
 
 We randomly select 10\% of the observed data points in the dataset (with at least two points) as the test set and fit the models using the remaining 90\% of the data points. The test samples are guaranteed not to include the first or last data point in the time series, ensuring that the models are evaluated on their interpolation capabilities rather than extrapolation. Since the evaluation metrics are sensitive to the specific test samples selected by the random number generator, we repeat the experiment 16 times and report the average results.
 
-\begin{table}[!ht]
-	\centering
-	\caption{\centering Reconstruction performance for polymer PET consumption in Japan using the \texttt{YearPPC (Japan)} dataset, averaged over 16 runs.}
-	\begin{tabular}{@{}lccccc@{}}
-		\toprule
-		\textbf{Experiment}         & \textbf{MAE}                   & \textbf{RMSE}         & $\mathbf{R^2}$ & \textbf{WAPE} & \textbf{MAPE} \\
-		\midrule
-		Linear Interpolation        & \(1.444 \times 10^4\)          & \(1.517 \times 10^4\) & 0.822          & 2.67\%        & 2.73\%        \\
-		\textbf{Moving Average Interpolation}
-		                            & \(\mathbf{1.268 \times 10^4}\)
-		                            & \(\mathbf{1.503 \times 10^4}\)
-		                            & \(\mathbf{0.610}\)
-		                            & \(\mathbf{2.38}\)\%
-		                            & \(\mathbf{2.50}\)\%                                                                                     \\
-		Cubic Spline Interpolation  & \(1.397 \times 10^4\)          & \(1.454 \times 10^4\) & 0.817          & 2.56\%        & 2.59\%        \\
-		Ridge Regression            & \(1.808 \times 10^4\)          & \(1.995 \times 10^4\) & 0.095          & 3.32\%        & 3.46\%        \\
-		Gaussian Process Regression & \(3.287 \times 10^4\)          & \(3.471 \times 10^4\) & -3.108         & 6.57\%        & 6.95\%        \\
-		Support Vector Regression   & \(1.792 \times 10^4\)          & \(2.010 \times 10^4\) & 0.715          & 3.39\%        & 3.57\%        \\
-		Theil-Sen Regression        & \(3.149 \times 10^4\)          & \(3.320 \times 10^4\) & 0.051          & 5.93\%        & 6.03\%        \\
-		\hline
-	\end{tabular}
-	\label{tab:reconstruction_japan}
-\end{table}
-
-\begin{table}[!ht]
-	\centering
-	\caption{\centering Reconstruction performance for total resin consumption in the United States using the \texttt{YearTRC (US)} dataset, averaged over 16 runs.}
-	\begin{tabular}{@{}lccccc@{}}
-		\toprule
-		\textbf{Experiment}                & \textbf{MAE}                   & \textbf{RMSE}                  & $\mathbf{R^2}$       & \textbf{WAPE}       & \textbf{MAPE}       \\
-		\midrule
-		Linear Interpolation               & \(1.749 \times 10^5\)          & \(1.962 \times 10^5\)          & -43.373              & 1.19\%              & 1.19\%              \\
-		Moving Average Interpolation       & \(3.054 \times 10^5\)          & \(3.229 \times 10^5\)          & -65.726              & 2.06\%              & 2.06\%              \\
-		Cubic Spline Interpolation         & \(2.335 \times 10^5\)          & \(2.623 \times 10^5\)          & -82.874              & 1.59\%              & 1.60\%              \\
-		Ridge Regression                   & \(1.962 \times 10^5\)          & \(2.172 \times 10^5\)          & -50.411              & 1.33\%              & 1.33\%              \\
-		Gaussian Process Regression        & \(3.370 \times 10^5\)          & \(3.990 \times 10^5\)          & -80.118              & 2.29\%              & 2.30\%              \\
-		\textbf{Support Vector Regression} & \(\mathbf{1.625 \times 10^5}\) & \(\mathbf{1.827 \times 10^5}\) & \(\mathbf{-46.310}\) & \(\mathbf{1.10}\)\% & \(\mathbf{1.11}\)\% \\
-		Theil-Sen Regression               & \(1.722 \times 10^5\)          & \(1.890 \times 10^5\)          & -56.271              & 1.17\%              & 1.18\%              \\
-		\hline
-	\end{tabular}
-	\label{tab:reconstruction_united_states}
-\end{table}
+\input{sections/4_experiments/tables/reconstruction_japan.tex}
+\input{sections/4_experiments/tables/reconstruction_united_states.tex}
 
 Table~\ref{tab:reconstruction_japan} shows that all machine learning methods did not perform better than moving average interpolation for \texttt{YearPPC (Japan)}. Among all machine learning models, ridge regression has the lowest WAPE and SVR has the highest \(R^2\) among all machine learning models. Table~\ref{tab:reconstruction_united_states} shows that SVR performed the best among all methods for \texttt{YearPPC (United States)}, with the lowest MAE, RMSE, and WAPE.
 
-\begin{figure}[H]
-	\centering
+\input{sections/4_experiments/plots/japan_trc_reconstruction.tex}
 
-	\subfloat[\texttt{YearTRC (Japan)} with ridge regression.]{
-		\includegraphics[width=0.45\textwidth]{figures/japan_trc_reconstruction_ridge_regression.png}
-	}
-	\subfloat[\texttt{YearTRC (Japan)} with support vector regression.]{
-		\includegraphics[width=0.45\textwidth]{figures/japan_trc_reconstruction_svr.png}
-	}
-
-	\vspace{0.5cm}
-
-	\subfloat[\texttt{YearPPC (United States)} with ridge regression.]{
-		\includegraphics[width=0.45\textwidth]{figures/united_states_ppc_reconstruction_ridge_regression.png}
-	}
-	\hfill
-	\subfloat[\texttt{YearPPC (United States)} with support vector regression.]{
-		\includegraphics[width=0.45\textwidth]{figures/united_states_ppc_reconstruction_svr.png}
-	}
-
-	\caption{Reconstruction plots for ridge regression and support vector regression on the \texttt{YearTRC (Japan)} and \texttt{YearPPC (United States)} datasets.}
-
-	\label{fig:japan_trc_reconstruction_plots}
-\end{figure}
-
-Figure~\ref{fig:japan_trc_reconstruction_plots}.
+% TODO: add explanation
+Figure~\ref{fig:japan_trc_reconstruction} shows that.

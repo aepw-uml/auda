@@ -1,0 +1,20 @@
+\begin{table}[!ht]
+	\centering
+	\caption{\centering Temporal forecasting performance for plastic waste generation in Japan using the \texttt{YearPWG (Japan)} dataset.}
+	\begin{tabular}{@{}lccccc@{}}
+		\toprule
+		\textbf{Experiment}                          & \textbf{MAE}          & \textbf{RMSE}         & $\mathbf{R^2}$     & \textbf{WAPE}       & \textbf{MAPE}       \\
+		\midrule
+		Naive Persistence                            & \(1.800 \times 10^5\) & \(2.110 \times 10^5\) & -0.373             & 4.57\%              & 4.71\%              \\
+		Drift Baseline                               & \(1.717 \times 10^5\) & \(1.917 \times 10^5\) & -0.134             & 4.36\%              & 4.47\%              \\
+		Exponential Smoothing                        & \(1.379 \times 10^5\) & \(1.424 \times 10^5\) & \(\mathbf{0.374}\) & \(\mathbf{3.50}\)\% & \(\mathbf{3.55}\)\% \\
+		Ridge Regression                             & \(5.573 \times 10^5\) & \(5.740 \times 10^5\) & -9.170             & 14.15\%             & 14.33\%             \\
+		Gaussian Process Regression                  & \(2.282 \times 10^5\) & \(2.982 \times 10^5\) & -1.745             & 5.79\%              & 6.03\%              \\
+		Support Vector Regression                    & \(1.516 \times 10^5\) & \(1.576 \times 10^5\) & 0.234              & 3.85\%              & 3.91\%              \\
+		Support Vector Regression\textsuperscript{*} & \(1.452 \times 10^5\) & \(1.839 \times 10^5\) & -0.044             & 3.69\%              & 3.82\%              \\
+		Theil-Sen Regression                         & \(1.491 \times 10^5\) & \(2.002 \times 10^5\) & -0.236             & 3.78\%              & 3.95\%              \\
+		ARIMA Regression                             & \(2.063 \times 10^5\) & \(2.382 \times 10^5\) & -0.752             & 5.24\%              & 5.39\%              \\
+		\hline
+	\end{tabular}
+	\label{tab:japan_pwg_forecasting_metrics}
+\end{table}

@@ -1,0 +1,39 @@
+\subsection{Preliminaries}
+
+\subsubsection{Baseline Models}
+
+Baseline models are simple models used as a reference to compare the performance of more complex models. In this study, we use linear interpolation and moving average as baseline models for time series reconstruction. Linear interpolation estimates missing values by connecting the nearest known data points with a straight line. Moving average interpolation estimates missing values by averaging the known data points within a specified window around the missing value.
+
+For time series forecasting tasks, we use naive persistence, drift, and Holt-style exponential smoothing~\cite{holt2004forecasting}. Naive persistence assumes that the future value of a variable will be equal to its most recent observed value. Drift extrapolates the trend observed in the historical data into the future. Holt-style exponential smoothing captures both level and trend components in the data, allowing for more flexible forecasting.
+
+\subsubsection{Statistics Models}
+
+Statistical models use statistical methods to analyze and predict data. In this study, we use cubic spline interpolation~\cite{de1978practical} in reconstruction tasks, which fits a piecewise cubic function to the data while ensuring smoothness at the known data points. For forecasting tasks, we use local Theil--Sen regression~\cite{sen1968estimates}, a non-parametric method that estimates the slope of a trend by taking the median of all pairwise slopes in the data, and a fixed \texttt{ARIMA(2, 0, 1)} model~\cite{box2015time}, a time series forecasting method that combines autoregressive and moving average components. The ARIMA model is used as a reference in this study.
+
+\subsubsection{Machine Learning Models}
+
+Machine learning models used in this study include polynomial ridge regression~\cite{hoerl1970ridge}, Gaussian process regression (GPR)~\cite{seeger2004gaussian}, support vector regression (SVR)~\cite{smola2004tutorial}, and multilayer perceptron (MLP)~\cite{goodfellow2016deep}. Polynomial ridge regression is a linear model that incorporates polynomial features and applies L2 regularization to prevent overfitting.
+
+GPR is a Bayesian approach that models the underlying function as a Gaussian process. The trend is modeled as
+\begin{equation}
+	f(x) = \mathcal{GP}(0, k(x, x')),
+\end{equation}
+with an RBF-plus-noise kernel
+\begin{equation}
+	k(x, x') = \exp \left( -\frac{(x - x')^2}{2 \ell^2} \right) + \sigma^2 \delta_{x, x'},
+\end{equation}
+where $\ell$ controls temporal smoothness and $\sigma^2$ absorbs observation noise. This formulation is useful when the underlying trajectory is believed to be smooth but not strictly linear.
+
+SVR is a regression method that finds a hyperplane in a high-dimensional space that best fits the data while allowing for some margin of error. The optimization problem for SVR can be formulated as
+\begin{equation}
+	\min_{w, b} \frac{1}{2} \| w \|^2 + C \sum_{i=1}^n \max(0, |y_i - (w^T \phi(x_i) + b)| - \epsilon),
+\end{equation}
+with the RBF kernel
+\begin{equation}
+	K(x_i, x_j) = \exp \left( -\gamma \| x_i - x_j \|^2 \right),
+\end{equation}
+where \(C\) controls the penalty for large residuals and \(\epsilon\) defines the width of the insensitive tube around the fitted function.
+
+MLP is a feedforward neural network consisting of multiple layers of neurons, allowing it to capture complex nonlinear relationships in the data. We use a simple architecture with one hidden layer and ReLU activation functions, along with the Adam optimizer~\cite{kingma2014adam}, which is sufficient for the forecasting tasks in this study. We also use early stopping based on validation performance to prevent overfitting.
+
+Additionally, we use isolation forest~\cite{tony2008isolation} as an unsupervised anomaly detection method to identify outliers in the data. An Isolation Forest constructs an ensemble of isolation trees, where each tree recursively selects a feature and a split value at random to partition the data.

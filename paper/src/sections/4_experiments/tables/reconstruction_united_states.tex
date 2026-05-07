@@ -1,0 +1,18 @@
+\begin{table}[!ht]
+	\centering
+	\caption{\centering Reconstruction performance for total resin consumption in the United States using the \texttt{YearTRC (US)} dataset, averaged over 16 runs.}
+	\begin{tabular}{@{}lccccc@{}}
+		\toprule
+		\textbf{Experiment}                & \textbf{MAE}                   & \textbf{RMSE}                  & $\mathbf{R^2}$       & \textbf{WAPE}       & \textbf{MAPE}       \\
+		\midrule
+		Linear Interpolation               & \(1.749 \times 10^5\)          & \(1.962 \times 10^5\)          & -43.373              & 1.19\%              & 1.19\%              \\
+		Moving Average Interpolation       & \(3.054 \times 10^5\)          & \(3.229 \times 10^5\)          & -65.726              & 2.06\%              & 2.06\%              \\
+		Cubic Spline Interpolation         & \(2.335 \times 10^5\)          & \(2.623 \times 10^5\)          & -82.874              & 1.59\%              & 1.60\%              \\
+		Ridge Regression                   & \(1.962 \times 10^5\)          & \(2.172 \times 10^5\)          & -50.411              & 1.33\%              & 1.33\%              \\
+		Gaussian Process Regression        & \(3.370 \times 10^5\)          & \(3.990 \times 10^5\)          & -80.118              & 2.29\%              & 2.30\%              \\
+		\textbf{Support Vector Regression} & \(\mathbf{1.625 \times 10^5}\) & \(\mathbf{1.827 \times 10^5}\) & \(\mathbf{-46.310}\) & \(\mathbf{1.10}\)\% & \(\mathbf{1.11}\)\% \\
+		Theil-Sen Regression               & \(1.722 \times 10^5\)          & \(1.890 \times 10^5\)          & -56.271              & 1.17\%              & 1.18\%              \\
+		\hline
+	\end{tabular}
+	\label{tab:reconstruction_united_states}
+\end{table}
