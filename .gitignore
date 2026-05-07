@@ -22,6 +22,6 @@ __pycache__/
 # Logs
 indent.log
 
-# Paper draft
-/paper_draft/
-/paper-old/
+# Paper draft and paper zip files
+/paper-*
+paper.zip

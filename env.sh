@@ -14,25 +14,47 @@ if [[ ":$PATH:" != *":$_path:"* ]]; then
 fi
 
 function reproduce() {
+    # Experiment 1 - Correlation analysis
     auda workflow run PWDriverFeatureSet Correlation
+
+    # Experiment 2 - Importance analysis
     auda workflow run PWGPredictors FeatureImportances --contamination=0.2 \
         --seed=471
+
+    # Experiment 3 - Reconstruction (TRC for the United States & TRC for Japan)
     auda workflow run YearTRC MultipleReconstruction \
         --location=United\ States --seed=471
-    auda workflow run YearPPC MultipleReconstruction --location=Japan \
+    auda workflow run YearTRC MultipleReconstruction --location=Japan \
         --seed=471
+
     auda workflow run YearTRC Reconstruction --location=United\ States \
-        --seed=471
-    auda workflow run YearPPC Reconstruction --location=Japan --seed=471
+        --seed=475
+    auda workflow run YearTRC Reconstruction --location=Japan --seed=480
+
+    # Experiment 4 - SE tolerance coefficient sweep and complexity ordering
+    # robustness (TRC reconstruction for the United States)
+    auda workflow run YearTRC SEToleranceCoefficientSweep \
+        --location=United\ States --seed=471
+    auda workflow run YearTRC ComplexityOrderingRobustness \
+        --location=United\ States --seed=471 --se_tolerance_coefficient=0.1
+
+    # Experiment 5 - Global plastic production forecasting
     auda workflow run GlobalPlasticsProduction Forecasting --seed=471 \
         --workflow_name=global_forecasting --tune_search_type=grid
     auda workflow run GlobalPlasticsProduction Forecasting --seed=471 \
         --workflow_name=global_forecasting --tune_search_type=random
+
+    # Experiment 6 - PWG forecasting (Japan)
     auda workflow run YearPWG Forecasting --location=Japan --seed=471
+
+    # Experiment 7 - PWG forecasting
     auda workflow run PWDrivers NNForecasting --seed=471
 
+    # Experiment 8 - PWG multivariate forecasting
     auda workflow run PWDrivers MultivariateForecasting --seed=471 \
         --location=Japan --workflow_name=multivariate_forecasting_japan
+
+    # Experiment 9 - PWG multivariate forecasting (Slovenia)
     auda workflow run PWDrivers MultivariateForecasting --seed=471 \
         --location=Slovenia --enable_tuning=0 \
         --workflow_name=multivariate_forecasting_slovenia
@@ -46,29 +68,36 @@ function move-figures() {
     cp images/prism_data_extraction.png \
         "$DEST/prism_data_extraction.png"
 
-    # Correlation matrix
+    # Experiment 1 - Correlation analysis
     cp "results/correlation/correlation_matrix.png" \
         "$DEST/correlation_matrix.png"
 
-    # Importance analysis histogram
+    # Experiment 2 - Importance analysis
     cp "results/feature_importances/feature_importances.png" \
         "$DEST/feature_importances.png"
 
-    # Reconstruction (Japan)
-    DIR="results/multiple_reconstruction_japan/plots"
+    # Experiment 3 - Reconstruction (TRC for the United States & TRC for Japan)
+    DIR="results/reconstruction_japan/plots"
     cp "$DIR/ridge_regression.png" \
         "$DEST/japan_trc_reconstruction_ridge_regression.png"
-    cp "$DIR/support-vector-regression.png" \
+    cp "$DIR/support_vector_regression.png" \
         "$DEST/japan_trc_reconstruction_svr.png"
+    DIR="results/reconstruction_united_states/plots"
+    cp "$DIR/gaussian_process_regression.png" \
+        "$DEST/united_states_trc_reconstruction_gpr.png"
+    cp "$DIR/support_vector_regression.png" \
+        "$DEST/united_states_trc_reconstruction_svr.png"
 
-    # Reconstruction (United States)
-    DIR="results/multiple_reconstruction_united-states/plots"
-    cp "$DIR/gaussian-process-regression.png" \
-        "$DEST/united_states_ppc_reconstruction_gpr.png"
-    cp "$DIR/support-vector-regression.png" \
-        "$DEST/united_states_ppc_reconstruction_svr.png"
+    # Experiment 4 - SE tolerance coefficient sweep and complexity ordering
+    # robustness (TRC reconstruction for the United States)
+    DIR="results/se_tolerance_coefficient_sweep_united_states"
+    cp "$DIR/selection_sensitivity_to_se_tolerance.png" \
+        "$DEST/selection_sensitivity_to_se_tolerance.png"
+    DIR="results/complexity_ordering_robustness_united_states"
+    cp "$DIR/complexity_ordering_robustness.png" \
+        "$DEST/complexity_ordering_robustness.png"
 
-    # Global forecasting random search
+    # Experiment 5 - Global plastic production forecasting (random search)
     DIR="results/global_forecasting_random_search/plots"
     cp "$DIR/theil-sen-regression.png" \
         "$DEST/global_forecasting_theil_sen_regression.png"
@@ -79,8 +108,8 @@ function move-figures() {
     cp "$DIR/support-vector-regression.png" \
         "$DEST/global_forecasting_svr.png"
 
-    # Japan PWG forecasting
-    DIR="results/forecasting_random_search/plots"
+    # Experiment 6 - PWG forecasting
+    DIR="results/global_forecasting_random_search/plots"
     cp "$DIR/arima-regression.png" \
         "$DEST/japan_pwg_forecasting_arima_regression.png"
     cp "$DIR/ridge-regression.png" \
