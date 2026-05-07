@@ -393,7 +393,8 @@ def save_figure(
     selection_records: list[SelectionRecord],
     dir_path: Path,
 ) -> None:
-    """Saves Figure 4 for the coefficient sweep."""
+    """Saves the selection sensitivity to SE tolerance plot for the coefficient
+    sweep."""
 
     records_by_group: dict[tuple[str, float], list[SelectionRecord]] = {}
     coefficients = sorted(

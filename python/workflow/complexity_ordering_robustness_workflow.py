@@ -252,7 +252,7 @@ def save_figure(
     records: list[ComplexityOrderingRecord],
     dir_path: Path,
 ) -> None:
-    """Saves Figure 5 for complexity-ordering robustness."""
+    """Saves the complexity-ordering robustness figure."""
 
     records_by_experiment: dict[str, list[ComplexityOrderingRecord]] = {}
     for record in records:
@@ -292,7 +292,6 @@ def save_figure(
     ax.set_xticks(x_positions)
     ax.set_xticklabels(experiment_names, rotation=20, ha='right')
     ax.set_ylabel('Mean WAPE Degradation from Flipped Ordering (pp)')
-    ax.set_title('Figure 5. Complexity Ordering Robustness')
     ax.grid(axis='y', linestyle='--', linewidth=0.7, alpha=0.35)
 
     for bar, changed_rate in zip(bars, changed_rates):
@@ -310,8 +309,8 @@ def save_figure(
 
     fig.tight_layout()
 
-    figure_path = dir_path / 'figure_5.png'
+    figure_path = dir_path / 'complexity_ordering_robustness.png'
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(figure_path, dpi=600, bbox_inches='tight', pad_inches=0.1)
     plt.close(fig)
-    print(f'Saved Figure 5 to "{figure_path}".')
+    print(f'Saved complexity-ordering robustness figure to "{figure_path}".')

@@ -36,9 +36,7 @@ class ReconstructionWorkflow(Workflow):
 
         location = to_snake(context.get('location', ''))
         dir_path = Path('results') / (
-            'multiple_reconstruction'
-            if not location
-            else f'multiple_reconstruction_{location}'
+            'reconstruction' if not location else f'reconstruction_{location}'
         )
         build_and_save_metric_table(task, dir_path)
         save_hyperparameter_table(task, dir_path)
