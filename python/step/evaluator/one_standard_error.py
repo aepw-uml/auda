@@ -8,7 +8,8 @@ def one_standard_error(
     trials: list[tuple[Hyperparameters, list[float]]],
     complexity_key: Callable[[Hyperparameters], tuple[float, ...]],
     *,
-    prefer_lower=True,
+    prefer_lower: bool = True,
+    se_tolerance_coefficient: float = 0.1,
 ) -> Hyperparameters:
     """
     Selects the hyperparameter setting that is within one standard error of the
@@ -23,6 +24,8 @@ def one_standard_error(
             True, trials with mean scores less than or equal to the threshold
             will be selected. If False, trials with mean
             scores greater than or equal to the threshold will be selected.
+        se_tolerance_coefficient: Multiplier applied to the standard error of
+            the best-mean trial.
 
     Returns:
         The hyperparameter setting that is within one standard error of the
@@ -36,7 +39,9 @@ def one_standard_error(
         raise ValueError('No trials provided.')
 
     candidates = one_standard_error_candidates(
-        trials, prefer_lower=prefer_lower
+        trials,
+        prefer_lower=prefer_lower,
+        se_tolerance_coefficient=se_tolerance_coefficient,
     )
     return min(candidates, key=complexity_key)
 
@@ -44,7 +49,8 @@ def one_standard_error(
 def one_standard_error_candidates(
     trials: list[tuple[Hyperparameters, list[float]]],
     *,
-    prefer_lower=True,
+    prefer_lower: bool = True,
+    se_tolerance_coefficient: float = 0.1,
 ) -> list[Hyperparameters]:
     """Selects trial candidates that are within one standard error of the best
     trial.
@@ -56,6 +62,8 @@ def one_standard_error_candidates(
             True, trials with mean scores less than or equal to the threshold
             will be selected. If False, trials with mean
             scores greater than or equal to the threshold will be selected.
+        se_tolerance_coefficient: Multiplier applied to the standard error of
+            the best-mean trial.
 
     Returns:
         Hyperparameter settings belonging to trials within one standard error
@@ -77,7 +85,10 @@ def one_standard_error_candidates(
             best_trial_mean = trial_mean
             best_trial_scores = trials[i][1]
 
-    threshold = best_trial_mean + 0.1 * standard_error(best_trial_scores)
+    threshold = (
+        best_trial_mean
+        + se_tolerance_coefficient * standard_error(best_trial_scores)
+    )
 
     def is_within_threshold(mean_score: float) -> bool:
         return (

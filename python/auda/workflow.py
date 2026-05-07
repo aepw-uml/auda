@@ -35,6 +35,22 @@ def run_workflow(ctx: Context, dataset_name: str, workflow: str) -> None:
             )
 
             MultipleReconstructionWorkflow().run(dataset, schema, **context)
+        case 'SEToleranceCoefficientSweep':
+            from workflow.se_tolerance_coefficient_sweep_workflow import (
+                SEToleranceCoefficientSweepWorkflow,
+            )
+
+            SEToleranceCoefficientSweepWorkflow().run(
+                dataset, schema, **context
+            )
+        case 'ComplexityOrderingRobustness':
+            from workflow.complexity_ordering_robustness_workflow import (
+                ComplexityOrderingRobustnessWorkflow,
+            )
+
+            ComplexityOrderingRobustnessWorkflow().run(
+                dataset, schema, **context
+            )
         case 'Forecasting':
             from workflow.forecasting_workflow import ForecastingWorkflow
 
