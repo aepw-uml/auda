@@ -5,7 +5,7 @@ from common.files import save_content_to_file
 from common.metrics.regression_metrics import RegressionMetrics
 from common.task import Task
 from step.plot.plotter import Plotter
-from util.names import to_kebab
+from util.names import to_snake
 from util.table import Table
 
 
@@ -121,7 +121,7 @@ def save_plots(task: Task, task_path: Path) -> None:
         if plotter is None:
             continue
 
-        plot_path: Path = plots_dir / to_kebab(experiment.name)
+        plot_path: Path = plots_dir / to_snake(experiment.name)
         file_path: str = plotter.save(plot_path)
         print(f'Saved plot for "{experiment.name}" to "{file_path}".')
 

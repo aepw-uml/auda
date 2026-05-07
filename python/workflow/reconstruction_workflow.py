@@ -12,7 +12,7 @@ from common.workflow import Workflow
 from experiment.reconstruction_task import (
     get_reconstruction_task,
 )
-from util.names import to_kebab
+from util.names import to_snake
 
 
 class ReconstructionWorkflow(Workflow):
@@ -34,7 +34,7 @@ class ReconstructionWorkflow(Workflow):
         for experiment in task.experiments:
             experiment.get_metrics()
 
-        location = to_kebab(context.get('location', ''))
+        location = to_snake(context.get('location', ''))
         dir_path = Path('results') / (
             'multiple_reconstruction'
             if not location

@@ -9,7 +9,7 @@ from common.files import save_content_to_file
 from common.workflow import Workflow
 from experiment.reconstruction_task import run_reconstruction_tasks
 from step.tuner.types import Hyperparameters
-from util.names import to_kebab
+from util.names import to_snake
 from util.table import Table
 
 from workflow.se_tolerance_coefficient_sweep_workflow import (
@@ -119,7 +119,7 @@ class ComplexityOrderingRobustnessWorkflow(Workflow):
                     )
                 )
 
-        location = to_kebab(context.get('location', ''))
+        location = to_snake(context.get('location', ''))
         dir_path = Path('results') / (
             'complexity_ordering_robustness'
             if not location

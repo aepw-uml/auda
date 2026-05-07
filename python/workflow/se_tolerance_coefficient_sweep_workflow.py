@@ -20,7 +20,7 @@ from common.workflow import Workflow
 from experiment.reconstruction_task import run_reconstruction_tasks
 from step.evaluator.one_standard_error import standard_error
 from step.tuner.types import Hyperparameters, Trial
-from util.names import to_kebab
+from util.names import to_snake
 from util.table import Table
 
 DEFAULT_SE_TOLERANCE_COEFFICIENTS = [0.0, 0.1, 0.2, 0.5, 1.0]
@@ -125,7 +125,7 @@ class SEToleranceCoefficientSweepWorkflow(Workflow):
                         )
                     )
 
-        location = to_kebab(context.get('location', ''))
+        location = to_snake(context.get('location', ''))
         dir_path = Path('results') / (
             'se_tolerance_coefficient_sweep'
             if not location
@@ -443,16 +443,15 @@ def save_figure(
     ax.set_ylim(0.0, 100.0)
     ax.set_xlabel('Standard-Error Tolerance Coefficient')
     ax.set_ylabel('Selections Changed from Best-Mean (%)')
-    ax.set_title('Figure 4. Selection Sensitivity to c_SE')
     ax.grid(axis='y', linestyle='--', linewidth=0.7, alpha=0.35)
     ax.legend()
     fig.tight_layout()
 
-    figure_path = dir_path / 'figure_4.png'
+    figure_path = dir_path / 'selection_sensitivity_to_se_tolerance.png'
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(figure_path, dpi=600, bbox_inches='tight', pad_inches=0.1)
     plt.close(fig)
-    print(f'Saved Figure 4 to "{figure_path}".')
+    print(f'Saved SE tolerance coefficient to "{figure_path}".')
 
 
 def save_csv(file_path: Path, rows: list[dict[str, str]]) -> None:

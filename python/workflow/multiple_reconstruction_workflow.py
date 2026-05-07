@@ -7,7 +7,7 @@ from common.workflow import Workflow
 from experiment.reconstruction_task import (
     run_reconstruction_tasks,
 )
-from util.names import to_kebab
+from util.names import to_snake
 
 
 class MultipleReconstructionWorkflow(Workflow):
@@ -21,7 +21,7 @@ class MultipleReconstructionWorkflow(Workflow):
             num_experiments, dataset, schema, context, seed=seed
         )
 
-        location = to_kebab(context.get('location', ''))
+        location = to_snake(context.get('location', ''))
         dir_path = Path('results') / (
             'multiple_reconstruction'
             if not location
