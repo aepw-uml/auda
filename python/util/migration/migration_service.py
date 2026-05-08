@@ -170,6 +170,9 @@ class MigrationService:
                 >= self.options.minimal_data_source_score
             )
 
+        # Filter out records where `unit = 'NA'`
+        query = query.where(PrismDataExtraction.unit != 'NA')
+
         return query
 
     def get_num_datapoints(self) -> int:
