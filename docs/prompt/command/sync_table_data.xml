@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE xml>
+<command name="SyncTableData">
+    <description>
+        Synchronize table data in specified .tex files with the latest data from the results. All
+        file paths in this command are relative to the project root directory. This process should
+        be accurate. Take your time.
+    </description>
+    <context>
+        <pairs>
+            <!-- Experiment 3 -->
+            <pair>
+                <tex>
+                    paper/src/sections/4_experiments/tables/reconstruction_japan_trc.tex
+                </tex>
+                <result>results/multiple_reconstruction_japan_trc</result>
+            </pair>
+            <pair>
+                <tex>
+                    paper/src/sections/4_experiments/tables/reconstruction_united_states_trc.tex
+                </tex>
+                <result>results/multiple_reconstruction_united_states/metric_table</result>
+            </pair>
+
+            <!-- Experiment 4 -->
+            <pair>
+                <tex>
+                    paper/src/4_experiments/tables/selection_sensitivity.tex
+                </tex>
+                <result>results/se_tolerance_coefficient_sweep_united_states/summary_table</result>
+            </pair>
+            <pair>
+                <tex>
+                    paper/src/4_experiments/tables/complexity_ordering_robustness.tex
+                </tex>
+                <result>results/complexity_ordering_robustness_united_states/summary_table</result>
+            </pair>
+
+            <!-- Experiment 5 -->
+            <pair>
+                <tex>
+                    paper/src/4_experiments/tables/selection_sensitivity.tex
+                </tex>
+                <result>results/se_tolerance_coefficient_sweep_united_states/summary_table</result>
+            </pair>
+            <pair>
+                <tex>
+                    paper/src/4_experiments/tables/complexity_ordering_robustness.tex
+                </tex>
+                <result>results/complexity_ordering_robustness_united_states/summary_table</result>
+            </pair>
+
+            <!-- Experiment 6 -->
+            <pair>
+                <tex>
+                    paper/src/4_experiments/tables/forecasting_japan_pwg_metrics.tex
+                </tex>
+                <result>results/forecasting_random_search/metric_table</result>
+            </pair>
+
+            <!-- Experiment 7 -->
+            <pair>
+                <tex>
+                    paper/src/4_experiments/tables/nn_forecasting_metrics.tex
+                </tex>
+                <result>results/nn_forecasting/metric_table</result>
+            </pair>
+
+            <!-- Experiment 8 -->
+            <pair>
+                <tex>
+                    paper/src/4_experiments/tables/multivariate_forecasting_japan_metrics.tex
+                </tex>
+                <result>results/multivariate_forecasting_japan/metric_table</result>
+            </pair>
+            <pair>
+                <tex>
+                    paper/src/4_experiments/tables/multivariate_forecasting_slovenia_metrics.tex
+                </tex>
+                <result>results/multivariate_forecasting_slovenia/metric_table</result>
+            </pair>
+        </pairs>
+    </context>
+    <steps>
+        <step id="SyncData">
+            For every pair in the context, read the file associated with the "result" key, extract
+            the relevant data, and update the corresponding cells in the table in the .tex file
+            associated with the "tex" key. Ensure that the formatting of the .tex file is preserved
+            and that only the specified .tex files are edited.
+        </step>
+    </steps>
+    <rules>
+        <rule>Only edit specified .tex files.</rule>
+        <rule></rule>
+    </rules>
+    <output>
+        <item id="GitDiff">Git diff of the revision.</item>
+    </output>
+</command>
