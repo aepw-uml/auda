@@ -91,7 +91,7 @@
     </steps>
     <rules>
         <rule>Only edit specified .tex files.</rule>
-        <rule></rule>
+        <rule>Spawn some subagents and let each subagent complete one pair.</rule>
     </rules>
     <output>
         <item id="GitDiff">Git diff of the revision.</item>

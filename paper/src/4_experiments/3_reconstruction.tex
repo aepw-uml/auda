@@ -1,15 +1,15 @@
-\section{Experiment 3: Reconstruction}
+\subsection{Experiment 3: Reconstruction}
 
 The AUDA analysis table is highly sparse due to substantial missing data across countries, regions, and years. For example, the United States Environmental Protection Agency (EPA) reports plastic waste generation data only at five-year intervals between 2000 and 2015. Therefore, in Experiment 3, we reconstruct the missing values in the \texttt{YearPPC (Japan)} and \texttt{YearTRC (US)} datasets.
 
 We randomly select 10\% of the observed data points in the dataset (with at least two points) as the test set and fit the models using the remaining 90\% of the data points. The test samples are guaranteed not to include the first or last data point in the time series, ensuring that the models are evaluated on their interpolation capabilities rather than extrapolation. Since the evaluation metrics are sensitive to the specific test samples selected by the random number generator, we repeat the experiment 16 times and report the average results.
 
-\input{sections/4_experiments/tables/reconstruction_japan.tex}
-\input{sections/4_experiments/tables/reconstruction_united_states.tex}
+\input{4_experiments/tables/reconstruction_japan_trc.tex}
+\input{4_experiments/tables/reconstruction_united_states_trc.tex}
 
-Table~\ref{tab:reconstruction_japan} shows that all machine learning methods did not perform better than moving average interpolation for \texttt{YearPPC (Japan)}. Among all machine learning models, ridge regression has the lowest WAPE and SVR has the highest \(R^2\) among all machine learning models. Table~\ref{tab:reconstruction_united_states} shows that SVR performed the best among all methods for \texttt{YearPPC (United States)}, with the lowest MAE, RMSE, and WAPE.
+Table~\ref{tab:reconstruction_japan_trc} shows that all machine learning methods did not perform better than moving average interpolation for \texttt{YearPPC (Japan)}. Among all machine learning models, ridge regression has the lowest WAPE and SVR has the highest \(R^2\) among all machine learning models. Table~\ref{tab:reconstruction_united_states_trc} shows that SVR performed the best among all methods for \texttt{YearPPC (United States)}, with the lowest MAE, RMSE, and WAPE.
 
-\input{sections/4_experiments/plots/japan_trc_reconstruction.tex}
+\input{4_experiments/plots/reconstruction_trc_japan.tex}
 
 % TODO: add explanation
-Figure~\ref{fig:japan_trc_reconstruction} shows that.
+Figure~\ref{fig:reconstruction_japan_trc} shows that.

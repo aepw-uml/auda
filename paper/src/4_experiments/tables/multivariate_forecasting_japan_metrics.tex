@@ -1,0 +1,14 @@
+\begin{table}[!ht]
+	\centering
+	\caption{\centering Multivariate forecasting performance for plastic waste generation in Japan using the \texttt{PWDrivers (Japan)} dataset.}
+	\begin{tabular}{@{}lccccc@{}}
+		\toprule
+		\textbf{Experiment}         & \textbf{MAE}                   & \textbf{RMSE}                  & $\mathbf{R^2}$      & \textbf{WAPE}       & \textbf{MAPE}       \\
+		\midrule
+		NN Forecasting              & \(3.472 \times 10^5\)          & \(4.203 \times 10^5\)          & -2.983              & 7.43\%              & 7.22\%              \\
+		Support Vector Regression   & \(3.283 \times 10^5\)          & \(\mathbf{3.969 \times 10^5}\) & \(\mathbf{-2.552}\) & 7.03\%              & 6.83\%              \\
+		Gaussian Process Regression & \(\mathbf{3.191 \times 10^5}\) & \(4.243 \times 10^5\)          & -3.061              & \(\mathbf{6.83}\)\% & \(\mathbf{6.58}\)\% \\
+		\hline
+	\end{tabular}
+	\label{tab:multivariate_forecasting_japan_metrics}
+\end{table}

@@ -1,0 +1,14 @@
+\begin{table}[!ht]
+	\centering
+	\caption{\centering Multivariate forecasting performance for plastic waste generation in Slovenia using the \texttt{PWDrivers (Slovenia)} dataset.}
+	\begin{tabular}{@{}lccccc@{}}
+		\toprule
+		\textbf{Experiment}                & \textbf{MAE}                   & \textbf{RMSE}                  & $\mathbf{R^2}$      & \textbf{WAPE}       & \textbf{MAPE}       \\
+		\midrule
+		NN Forecasting                     & \(1.126 \times 10^4\)          & \(1.300 \times 10^4\)          & -5.513              & 17.50\%             & 18.41\%             \\
+		\textbf{Support Vector Regression} & \(\mathbf{5.580 \times 10^3}\) & \(\mathbf{7.157 \times 10^3}\) & \(\mathbf{-0.974}\) & \(\mathbf{8.67}\)\% & \(\mathbf{8.17}\)\% \\
+		Gaussian Process Regression        & \(1.090 \times 10^4\)          & \(1.121 \times 10^4\)          & -3.842              & 16.94\%             & 17.37\%             \\
+		\hline
+	\end{tabular}
+	\label{tab:multivariate_forecasting_slovenia_metrics}
+\end{table}

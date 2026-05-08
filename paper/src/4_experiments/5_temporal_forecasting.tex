@@ -1,4 +1,4 @@
-\section{Experiment 5-8: Temporal Forecasting}
+\subsection{Experiment 5-8: Temporal Forecasting}
 
 % ---- Experiment 5 - GlobalPlasticsProduction
 
@@ -6,9 +6,9 @@ Producing business-as-usual projections from historical data is a fundamental ta
 
 In Experiment 5, we apply forecasting models to the \texttt{GlobalPlasticsProduction} dataset. This dataset contains 59 samples, making it relatively large for time series analysis; therefore, machine learning models are expected to perform well. This experiment serves as a benchmark for evaluating model performance on larger datasets. Additionally, we tune hyperparameters using both grid search and random search methods, and compare their runtime and performance.
 
-\input{sections/4_experiments/plots/global_forecasting.tex}
-\input{sections/4_experiments/tables/global_forecasting_grid_search_metrics.tex}
-\input{sections/4_experiments/tables/global_forecasting_random_search_metrics.tex}
+\input{4_experiments/plots/global_forecasting.tex}
+\input{4_experiments/tables/global_forecasting_grid_search_metrics.tex}
+\input{4_experiments/tables/global_forecasting_random_search_metrics.tex}
 
 % Table~\ref{tab:forecasting_results_grid_search} and Table~\ref{tab:forecasting_results_random_search} show that SVR achieved the best overall performance among all evaluated methods. In the random search tuning setting, SVR obtained the lowest MAE, RMSE, WAPE, and MAPE, and the highest \(R^2\) value. In the grid search tuning setting, SVR is also the best performing method, although it was slightly weaker than in the former setting. These results indicate that SVR was the most effective model for capturing the temporal trend in global plastic production. Figure~\ref{fig:global_forecasting_plots} visually confirms the superior performance of SVR, as its forecasted test values closely follow the actual test values, while the other methods show larger deviations.
 
@@ -16,7 +16,7 @@ Table~\ref{tab:global_forecasting_grid_search_metrics} and Table~\ref{tab:global
 
 These results suggest that SVR is the most effective model for capturing the temporal trend in global plastic production. Figure~\ref{fig:global_forecasting} further supports this conclusion, as the SVR forecasts closely follow the actual test values, whereas the other methods exhibit larger deviations.
 
-\input{sections/4_experiments/tables/global_forecasting_tuning_time.tex}
+\input{4_experiments/tables/global_forecasting_tuning_time.tex}
 
 % Table~\ref{tab:forecasting_results_grid_search} and Table~\ref{tab:forecasting_results_random_search} also show that for all the tunable models, random search always has equal to better performance than grid search. Moreover, Table~\ref{tab:forecasting_tuning_time} suggests that random search is more efficient than grid search in terms of hyperparameter tuning time in this experiment settings. Therefore, in the following experiments, we will only report the results of random search tuning for the tunable models.
 
@@ -26,13 +26,13 @@ Table~\ref{tab:global_forecasting_grid_search_metrics} and Table~\ref{tab:global
 
 In Experiment 6, we evaluate the same forecasting models on the \texttt{YearPWG (Japan)} dataset. This series contains only 26 annual observations, so the hold-out set is small, and the model rankings should be interpreted cautiously.
 
-\input{sections/4_experiments/plots/japan_pwg_forecasting.tex}
-\input{sections/4_experiments/tables/japan_pwg_forecasting_metrics.tex}
+\input{4_experiments/plots/forecasting_japan_pwg.tex}
+\input{4_experiments/tables/forecasting_japan_pwg_metrics.tex}
 
-Unlike the global plastics production series, the Japan plastic waste generation series is not monotonic. Figure~\ref{fig:japan_pwg_forecasting} shows that the trend increases in the earlier years, declines sharply, and then partially recovers. This makes the task a useful check of whether flexible regression models can handle short and irregular environmental time series.
+Unlike the global plastics production series, the Japan plastic waste generation series is not monotonic. Figure~\ref{fig:forecasting_japan_pwg} shows that the trend increases in the earlier years, declines sharply, and then partially recovers. This makes the task a useful check of whether flexible regression models can handle short and irregular environmental time series.
 
 
-Table~\ref{tab:japan_pwg_forecasting_metrics} shows that exponential smoothing performs best across all reported metrics, with an MAE of \(1.379 \times 10^5\), an RMSE of \(1.424 \times 10^5\), an \(R^2\) of 0.374, a WAPE of 3.50\%, and a MAPE of 3.55\%. The SVR variants and Theil--Sen regression produce competitive percentage errors, but they do not outperform exponential smoothing on the main metrics. Ridge regression performs especially poorly, suggesting that a polynomial trend fitted to this short series is too rigid or unstable for the observed trajectory.
+Table~\ref{tab:forecasting_japan_pwg_metrics} shows that exponential smoothing performs best across all reported metrics, with an MAE of \(1.379 \times 10^5\), an RMSE of \(1.424 \times 10^5\), an \(R^2\) of 0.374, a WAPE of 3.50\%, and a MAPE of 3.55\%. The SVR variants and Theil--Sen regression produce competitive percentage errors, but they do not outperform exponential smoothing on the main metrics. Ridge regression performs especially poorly, suggesting that a polynomial trend fitted to this short series is too rigid or unstable for the observed trajectory.
 
 The differences in model performance between the global plastics production and Japan plastic waste generation series suggests that model choice depends strongly on both sample size and trend shape. Flexible machine learning models can perform well when the temporal signal is smooth and enough observations are available, while simple time-series baselines may be more robust for short, non-monotonic country-level series. Combining the data from Experiments 4 and 5, we found that SVR performed generally the best in both experiments.
 
@@ -63,5 +63,5 @@ These results show both the potential and the limitation of pooled neural-networ
 
 In Experiment 8, we conduct multivariate forecasting using Gaussian Process Regression (GPR), Support Vector Regression (SVR), and MLP models on the \texttt{PWDrivers (Japan)} and \texttt{PWDrivers (Slovenia)} datasets. The MLP model is first pre-trained on the full \texttt{PWDrivers} dataset excluding the target country, and subsequently fine-tuned on the target country's training data. This experiment compares the performance of traditional machine learning methods with that of the MLP in a multivariate forecasting setting. For the \texttt{PWDrivers (Slovenia)} dataset, which contains only \(6\) samples, hyperparameter tuning is not performed due to the limited data availability.
 
-\input{sections/4_experiments/tables/multivariate_forecasting_japan_metrics.tex}
-\input{sections/4_experiments/tables/multivariate_forecasting_slovenia_metrics.tex}
+\input{4_experiments/tables/multivariate_forecasting_japan_metrics.tex}
+\input{4_experiments/tables/multivariate_forecasting_slovenia_metrics.tex}

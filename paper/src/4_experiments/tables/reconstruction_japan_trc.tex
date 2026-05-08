@@ -1,0 +1,18 @@
+\begin{table}[!ht]
+	\centering
+	\caption{\centering Reconstruction performance for polymer PET consumption in Japan using the \texttt{YearPPC (Japan)} dataset, averaged over 16 runs.}
+	\begin{tabular}{@{}lccccc@{}}
+		\toprule
+		\textbf{Experiment}         & \textbf{MAE}                   & \textbf{RMSE}         & $\mathbf{R^2}$ & \textbf{WAPE} & \textbf{MAPE} \\
+		\midrule
+		Linear Interpolation        & \(9.814 \times 10^4\)          & \(1.153 \times 10^5\)          & -130.623              & 2.65\%              & 2.64\%              \\
+		Moving Average Interpolation & \(9.776 \times 10^4\)          & \(1.007 \times 10^5\)          & -99.532               & 2.64\%              & 2.64\%              \\
+		Cubic Spline Interpolation  & \(6.101 \times 10^4\)          & \(7.454 \times 10^4\)          & -54.037               & 1.65\%              & 1.64\%              \\
+		Ridge Regression            & \(9.569 \times 10^4\)          & \(9.708 \times 10^4\)          & -92.357               & 2.58\%              & 2.58\%              \\
+		Gaussian Process Regression & \(1.059 \times 10^5\)          & \(1.180 \times 10^5\)          & -136.926              & 2.86\%              & 2.85\%              \\
+		\textbf{Support Vector Regression} & \(\mathbf{2.938 \times 10^4}\) & \(\mathbf{4.094 \times 10^4}\) & \(\mathbf{-15.605}\) & \(\mathbf{0.79}\)\% & \(\mathbf{0.80}\)\% \\
+		Theil-Sen Regression        & \(1.013 \times 10^5\)          & \(1.215 \times 10^5\)          & -145.342              & 2.73\%              & 2.73\%              \\
+		\hline
+	\end{tabular}
+	\label{tab:reconstruction_japan_trc}
+\end{table}
