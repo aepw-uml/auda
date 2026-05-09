@@ -31,7 +31,6 @@ In Experiment 6, we evaluate the same forecasting models on the \texttt{YearPWG 
 
 Unlike the global plastics production series, the Japan plastic waste generation series is not monotonic. Figure~\ref{fig:forecasting_japan_pwg} shows that the trend increases in the earlier years, declines sharply, and then partially recovers. This makes the task a useful check of whether flexible regression models can handle short and irregular environmental time series.
 
-
 Table~\ref{tab:forecasting_japan_pwg_metrics} shows that exponential smoothing performs best across all reported metrics, with an MAE of \(1.379 \times 10^5\), an RMSE of \(1.424 \times 10^5\), an \(R^2\) of 0.374, a WAPE of 3.50\%, and a MAPE of 3.55\%. The SVR variants and Theil--Sen regression produce competitive percentage errors, but they do not outperform exponential smoothing on the main metrics. Ridge regression performs especially poorly, suggesting that a polynomial trend fitted to this short series is too rigid or unstable for the observed trajectory.
 
 The differences in model performance between the global plastics production and Japan plastic waste generation series suggests that model choice depends strongly on both sample size and trend shape. Flexible machine learning models can perform well when the temporal signal is smooth and enough observations are available, while simple time-series baselines may be more robust for short, non-monotonic country-level series. Combining the data from Experiments 4 and 5, we found that SVR performed generally the best in both experiments.
@@ -65,3 +64,15 @@ In Experiment 8, we conduct multivariate forecasting using Gaussian Process Regr
 
 \input{4_experiments/tables/multivariate_forecasting_japan_metrics.tex}
 \input{4_experiments/tables/multivariate_forecasting_slovenia_metrics.tex}
+
+% Codex
+% TODO: rewrite this
+Table~\ref{tab:multivariate_forecasting_japan_metrics} shows that GPR performs best on the \texttt{PWDrivers (Japan)} dataset, with the lowest MAE, RMSE, WAPE, and MAPE among the three models. The MLP is the second-best method and remains close to GPR in percentage error, while SVR performs slightly worse. These results suggest that the Japan driver series has a smooth local structure that is well-matched by the Gaussian process model. The negative \(R^2\) values should be interpreted cautiously because the country-specific dataset contains only 10 samples, leaving very few held-out observations for evaluation.
+
+% Codex
+% TODO: rewrite this
+Table~\ref{tab:multivariate_forecasting_slovenia_metrics} shows a different pattern for the \texttt{PWDrivers (Slovenia)} dataset. SVR achieves the best overall performance, with a WAPE of 8.67\% and a MAPE of 8.17\%. The MLP is less accurate than SVR but still outperforms GPR, while GPR performs poorly on this very small dataset. Since the Slovenia dataset contains only 6 samples, the fitted models are highly sensitive to the train-test split, and the results should be treated as an exploratory comparison rather than a stable model ranking.
+
+% Codex
+% TODO: rewrite this
+Overall, Experiment 8 shows that adding driver variables does not eliminate the challenges caused by sparse country-level data. The best model differs between Japan and Slovenia, indicating that model choice remains dataset-dependent even when the same feature set and forecasting task are used. The MLP pre-training strategy provides a way to transfer information from the pooled \texttt{PWDrivers} dataset to country-specific forecasting, but in these experiments it does not consistently outperform the simpler kernel-based models.

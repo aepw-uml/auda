@@ -1,6 +1,6 @@
 \subsection{Experiment 1 and 2: Correlation and Importance Analysis}
 
-In Experiment 1, the correlation analysis workflow computed the Pearson correlation matrix over the features in the \texttt{PWDriverFeatureSet} dataset. In the experiment 2, it first removed outliers using an isolation forest fitted to the joint predictor-target space, and then trained a random forest regressor on the filtered data.
+In Experiment 1, the correlation analysis workflow computed the Pearson correlation matrix over the features in the \texttt{PWDriverFeatureSet} dataset. In Experiment 2, we removed outliers from the \texttt{PWGPredictors} dataset using an isolation forest fit on the joint predictor–target space, then trained a random forest regressor on the filtered data.
 
 \input{4_experiments/plots/correlation_matrix.tex}
 
