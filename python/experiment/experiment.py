@@ -45,7 +45,7 @@ class Experiment(ABC):
         name: str,
         description: str,
         seed: int = 42,
-        train_rate: float = 0.9,
+        train_size: float = 0.8,
     ) -> None:
         """Initializes an experiment.
 
@@ -59,8 +59,9 @@ class Experiment(ABC):
         self.name: str = name
         self.description: str = description
         self.seed: int = seed
-        self.train_rate: float = train_rate
-        self.test_rate: float = 1.0 - train_rate
+        self.train_rate: float = train_size
+
+        self.test_rate: float = 1.0 - train_size
         self.context: dict[str, Any] = {}
         self.logger = get_logger(name)
 
