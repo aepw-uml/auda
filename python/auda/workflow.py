@@ -75,5 +75,13 @@ def run_workflow(ctx: Context, dataset_name: str, workflow: str) -> None:
             )
 
             MultivariateForecastingWorkflow().run(dataset, schema, **context)
+        case 'MultipleMultivariateForecasting':
+            from workflow.multiple_multivariate_forecasting_workflow import (
+                MultipleMultivariateForecastingWorkflow,
+            )
+
+            MultipleMultivariateForecastingWorkflow().run(
+                dataset, schema, **context
+            )
         case _:
             raise ValueError(f'Unknown workflow: {workflow}')

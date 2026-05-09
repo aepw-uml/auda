@@ -71,13 +71,13 @@
                 <tex>
                     paper/src/4_experiments/tables/multivariate_forecasting_japan_metrics.tex
                 </tex>
-                <result>results/multivariate_forecasting_japan/metric_table</result>
+                <result>results/multiple_multivariate_forecasting_japan/metric_table</result>
             </pair>
             <pair>
                 <tex>
                     paper/src/4_experiments/tables/multivariate_forecasting_slovenia_metrics.tex
                 </tex>
-                <result>results/multivariate_forecasting_slovenia/metric_table</result>
+                <result>results/multiple_multivariate_forecasting_slovenia/metric_table</result>
             </pair>
         </pairs>
     </context>

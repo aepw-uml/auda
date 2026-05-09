@@ -1,0 +1,43 @@
+from pathlib import Path
+from typing import override
+
+from common.dataset import Dataset, DatasetSchema
+from common.experiment.persistence import save_metric_table
+from common.workflow import Workflow
+from experiment.multivariate_forecasting_task import (
+    run_multivariate_forecasting_tasks,
+)
+from util.names import to_snake
+
+
+class MultipleMultivariateForecastingWorkflow(Workflow):
+    """Runs repeated multivariate forecasting experiments."""
+
+    @override
+    def run(self, dataset: Dataset, schema: DatasetSchema, **context) -> None:
+        """Runs repeated multivariate forecasting and saves average metrics.
+
+        Args:
+            dataset: Dataset containing the feature matrix and target vector.
+            schema: Schema describing the dataset columns and units.
+            **context: Shared task and experiment configuration.
+        """
+
+        num_experiments = int(context.get('num_experiments', '16'))
+        seed = int(context.get('seed', '471'))
+        _, average_metrics = run_multivariate_forecasting_tasks(
+            num_experiments, dataset, schema, context, seed=seed
+        )
+
+        location = to_snake(context.get('location', ''))
+        workflow_name = context.get('workflow_name')
+        dir_path = Path('results') / (
+            workflow_name
+            if workflow_name
+            else (
+                'multiple_multivariate_forecasting'
+                if not location
+                else f'multiple_multivariate_forecasting_{location}'
+            )
+        )
+        save_metric_table(average_metrics, dir_path)

@@ -29,7 +29,7 @@ function reproduce() {
 
     auda workflow run YearTRC Reconstruction --location=United\ States \
         --seed=475
-    auda workflow run YearTRC Reconstruction --location=Japan --seed=480
+    auda workflow run YearTRC Reconstruction --location=Japan --seed=472
 
     # Experiment 4 - SE tolerance coefficient sweep and complexity ordering
     # robustness (TRC reconstruction for the United States)
@@ -50,14 +50,12 @@ function reproduce() {
     # Experiment 7 - PWG forecasting
     auda workflow run PWDrivers NNForecasting --seed=471
 
-    # Experiment 8 - PWG multivariate forecasting
-    auda workflow run PWDrivers MultivariateForecasting --seed=471 \
-        --location=Japan --workflow_name=multivariate_forecasting_japan
-
-    # Experiment 9 - PWG multivariate forecasting (Slovenia)
-    auda workflow run PWDrivers MultivariateForecasting --seed=471 \
+    # Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)
+    auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
+        --location=Japan --workflow_name=multiple_multivariate_forecasting_japan
+    auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
         --location=Slovenia --enable_tuning=0 \
-        --workflow_name=multivariate_forecasting_slovenia
+        --workflow_name=multiple_multivariate_forecasting_slovenia
 }
 
 function move-figures() {
