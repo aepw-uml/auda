@@ -46,8 +46,9 @@ function reproduce() {
 
     # Experiment 6 - PWG forecasting (Japan)
     auda workflow run YearPWG Forecasting --location=Japan --seed=471
+    auda workflow run YearPWG Forecasting --location=United\ States --seed=471
 
-    # Experiment 7 - PWG forecasting
+    # Experiment 7 - NN PWG forecasting
     auda workflow run PWDrivers NNForecasting --seed=471
 
     # Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)
@@ -116,4 +117,36 @@ function move-figures() {
         "$DEST/japan_pwg_forecasting_gpr.png"
     cp "$DIR/support-vector-regression.png" \
         "$DEST/japan_pwg_forecasting_svr.png"
+}
+
+function datasets() {
+    # Experiment 1 - Correlation analysis
+    auda dataset show PWDriverFeatureSet --no-samples
+    printf '%*s\n' 80 '' | tr ' ' '-'
+
+    # Experiment 2 - Importance analysis
+    auda dataset show PWGPredictors --no-samples
+    printf '%*s\n' 80 '' | tr ' ' '-'
+
+    # Experiment 3 - Reconstruction (TRC for the United States & TRC for Japan)
+    auda dataset show YearTRC --location=Japan --no-samples
+    auda dataset show YearTRC --location=United\ States --no-samples
+    printf '%*s\n' 80 '' | tr ' ' '-'
+
+    # Experiment 5 - Global plastic production forecasting
+    auda dataset show GlobalPlasticsProduction --no-samples
+    printf '%*s\n' 80 '' | tr ' ' '-'
+
+    # Experiment 6 - PWG forecasting (Japan & United States)
+    auda dataset show YearPWG --location=Japan --no-samples
+    auda dataset show YearPWG --location=United\ States --no-samples
+    printf '%*s\n' 80 '' | tr ' ' '-'
+
+    # Experiment 7 - NN PWG forecasting
+    auda dataset show PWDrivers --no-samples
+    printf '%*s\n' 80 '' | tr ' ' '-'
+
+    # Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)
+    auda dataset show PWDrivers --location=Japan --no-samples
+    auda dataset show PWDrivers --location=Slovenia --no-samples
 }

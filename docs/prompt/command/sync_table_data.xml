@@ -92,6 +92,11 @@
     <rules>
         <rule>Only edit specified .tex files.</rule>
         <rule>Spawn some subagents and let each subagent complete one pair.</rule>
+        <rule>Do not add extra columns for the original tables in the tex files.</rule>
+        <rule>
+            Keep the order of the models in the order of baseline models, statistical models, and
+            machine learning models.
+        </rule>
     </rules>
     <output>
         <item id="GitDiff">Git diff of the revision.</item>
