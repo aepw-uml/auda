@@ -1,7 +1,13 @@
 \subsection{Experiment 4: Hyperparameter-selection Sensitivity and Robustness}
 
+In experiment 4, we evaluate the sensitivity and robustness of the hyperparameter selection procedure to the standard-error tolerance coefficient \(c_{\mathrm{SE}}\) and the complexity ordering. We perform a sweep over \(c_{\mathrm{SE}} \in \{0, 0.1, 0.2, 0.5, 1\}\) and compare the selected models to the best-performing models in terms of WAPE on the test set. We also evaluate the robustness of the complexity ordering by comparing the selected models to the best-performing models in terms of WAPE on the test set.
+
 \input{4_experiments/plots/selection_sensitivity_to_se_tolerance.tex}
 \input{4_experiments/tables/selection_sensitivity.tex}
 
-\input{4_experiments/plots/complexity_ordering_robustness.tex}
+The sweep results in Figure~\ref{fig:selection_sensitivity_to_se_tolerance} and Table~\ref{tab:selection_sensitivity} shows.
+
+% \input{4_experiments/plots/complexity_ordering_robustness.tex}
 \input{4_experiments/tables/complexity_ordering_robustness.tex}
+
+The results in Table~\ref{tab:complexity_ordering_robustness} show that the hyperparameter selection procedure is robust to changes in the complexity ordering, with minimal degradation in WAPE when the ordering is flipped.

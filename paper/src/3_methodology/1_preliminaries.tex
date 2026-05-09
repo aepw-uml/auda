@@ -8,11 +8,15 @@ For time series forecasting tasks, we use naive persistence, drift, and Holt-sty
 
 \subsubsection{Statistics Models}
 
-Statistical models use statistical methods to analyze and predict data. In this study, we use cubic spline interpolation~\cite{de1978practical} in reconstruction tasks, which fits a piecewise cubic function to the data while ensuring smoothness at the known data points. For forecasting tasks, we use local Theil--Sen regression~\cite{sen1968estimates}, a non-parametric method that estimates the slope of a trend by taking the median of all pairwise slopes in the data, and a fixed \texttt{ARIMA(2, 0, 1)} model~\cite{box2015time}, a time series forecasting method that combines autoregressive and moving average components. The ARIMA model is used as a reference in this study.
+Statistical models use statistical methods to analyze and predict data. In this study, we use cubic spline interpolation~\cite{de1978practical} in reconstruction tasks, which fits a piecewise cubic function to the data while ensuring smoothness at the known data points. For forecasting tasks, we use local Theil--Sen regression~\cite{sen1968estimates}, a non-parametric method that estimates the slope of a trend by taking the median of all pairwise slopes in the data, and a fixed \texttt{ARIMA(2, 0, 1)} model~\cite{box2015time}, a time series forecasting method that combines autoregressive and moving average components. Since ARIMA models usually perform poorly on tiny datasets, they are mostly used as a baseline in many experiments involving small datasets.
+
+The ARIMA model is used as a reference in this study.
 
 \subsubsection{Machine Learning Models}
 
-Machine learning models used in this study include polynomial ridge regression~\cite{hoerl1970ridge}, Gaussian process regression (GPR)~\cite{seeger2004gaussian}, support vector regression (SVR)~\cite{smola2004tutorial}, and multilayer perceptron (MLP)~\cite{goodfellow2016deep}. Polynomial ridge regression is a linear model that incorporates polynomial features and applies L2 regularization to prevent overfitting.
+Machine learning models used in this study include polynomial ridge regression~\cite{hoerl1970ridge}, Gaussian process regression (GPR)~\cite{seeger2004gaussian}, support vector regression (SVR)~\cite{smola2004tutorial}, and multilayer perceptron (MLP)~\cite{goodfellow2016deep}. We also use random forest~\cite{breiman2001random} for feature-importance analysis.
+
+Polynomial ridge regression is a linear model that incorporates polynomial features and applies L2 regularization to prevent overfitting.
 
 GPR is a Bayesian approach that models the underlying function as a Gaussian process. The trend is modeled as
 \begin{equation}
@@ -37,3 +41,6 @@ where \(C\) controls the penalty for large residuals and \(\epsilon\) defines th
 MLP is a feedforward neural network consisting of multiple layers of neurons, allowing it to capture complex nonlinear relationships in the data. We use a simple architecture with one hidden layer and ReLU activation functions, along with the Adam optimizer~\cite{kingma2014adam}, which is sufficient for the forecasting tasks in this study. We also use early stopping based on validation performance to prevent overfitting.
 
 Additionally, we use isolation forest~\cite{liu2008isolation} as an unsupervised anomaly detection method to identify outliers in the data. An Isolation Forest constructs an ensemble of isolation trees, where each tree recursively selects a feature and a split value at random to partition the data.
+
+% Codex
+Random forest~\cite{breiman2001random} is an ensemble learning method that trains many decision trees on bootstrap samples of the data and combines their predictions. At each split, the model considers only a random subset of features, which reduces correlation among trees and improves generalization compared with a single decision tree. In this study, random forest is used for feature-importance analysis rather than as a primary forecasting model. The resulting importance scores provide a target-aware ranking of predictors, but they should be interpreted as empirical associations rather than causal effects.
