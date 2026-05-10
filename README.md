@@ -8,9 +8,11 @@ _This project is open source and welcomes contributions from developers, researc
 
 > [!IMPORTANT]
 >
-> Installation requires access to the AEPW database and the analysis tables used by this project. If you are an AEPW developer, follow the steps below. If you are a researcher trying to reproduce the experiments, use the [Experiment Reproduction Guide](#experiment-reproduction-guide) instead.
+> Installation requires access to the AEPW database and the analysis tables used by this project. If you are an AEPW developer, follow the steps below. If you are a researcher trying to reproduce the experiments, use the [Reproduction Guide][1] instead.
 
-AUDA currently supports Linux and macOS only.
+> [!NOTE]
+>
+> AUDA currently supports Linux and macOS only.
 
 Before you start, make sure the following tools are installed:
 
@@ -32,8 +34,6 @@ Next, create your local environment file:
 cp .env.example .env
 ```
 
-Update `DB_URL` in `.env` so it points to the correct PostgreSQL instance.
+Update `DB_URL` in `.env` to point to the correct PostgreSQL instance. Also update `PRISM_DB_URL` to point to the PRISM production PostgreSQL instance.
 
-## Run modules
-
-## Experiment Reproduction Guide
+[1]: ./docs/reproduction_guide.md
