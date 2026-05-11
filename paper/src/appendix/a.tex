@@ -1,2 +1,44 @@
-\section{Appendix A}
+\section[\appendixname~\thesection]{Hyperparameter Search Space}
 \label{sec:appendix_a}
+
+Suppose there are \(d\) hyperparameters \(\{ \lambda_1, \lambda_2, \dots, \lambda_d \}\). For each hyperparameter \(\lambda_j\), let its domain be \(\mathcal{D}_j = [a_j, b_j]\). The full search space is the Cartesian product
+\[
+	\mathcal{D} = \mathcal{D}_1 \times \mathcal{D}_2 \times \cdots \times \mathcal{D}_d .
+\]
+
+In random search, for each iteration \(t = 1, 2, \dots, T\), a hyperparameter vector
+\[
+	\bm{\lambda}^{(t)} = \left(\lambda_1^{(t)}, \dots, \lambda_d^{(t)}\right) \in \mathcal{D}
+\]
+is sampled. Each hyperparameter is sampled either uniformly or log-uniformly. For each dimension \(j = 1, 2, \dots, d\),
+\begin{itemize}
+	\item if \(\lambda_j\) is sampled uniformly, then
+	      \[
+		      \lambda_j^{(t)} \sim \mathrm{Uniform}(a_j, b_j);
+	      \]
+
+	\item if \(\lambda_j\) is sampled log-uniformly, then
+	      \[
+		      \log\left(\lambda_j^{(t)}\right) \sim \mathrm{Uniform}(\log a_j, \log b_j),
+	      \]
+	      where \(a_j > 0\) and \(b_j > 0\).
+
+\end{itemize}
+The resulting configuration set is
+\[
+	\mathcal{G} = \left\{ \bm{\lambda}^{(t)} \mid t = 1, 2, \dots, T \right\}.
+\]
+
+In grid search, let \(M \in \mathbb{N}\) (\(M \ge 2\)) be the number of grid points for each hyperparameter. For each dimension \(j = 1, 2, \dots, d\), a set of grid points \(\mathcal{G}_j\) is constructed as follows:
+\begin{itemize}
+	\item for a uniform grid,
+	      \[
+		      \mathcal{G}_j = \left\{ a_j + \frac{m}{M - 1}(b_j - a_j) \middle| m = 0, 1, \dots, M - 1 \right\};
+	      \]
+	\item for a log-uniform grid,
+	      \[
+		      \mathcal{G}_j = \left\{ \exp \left( \log a_j + \frac{m}{M - 1}(\log b_j - \log a_j) \right) \middle| m = 0, 1, \dots, M - 1 \right\},
+	      \]
+	      where \(a_j > 0\) and \(b_j > 0\).
+\end{itemize}
+The resulting configuration set is \(\mathcal{G} = \mathcal{G}_1 \times \mathcal{G}_2 \times \cdots \times \mathcal{G}_d\), where each configuration \(\bm{\lambda} \in \mathcal{G}\).

@@ -10,15 +10,11 @@ In Experiment 5, we apply forecasting models to the \texttt{GlobalPlasticsProduc
 \input{4_experiments/tables/global_forecasting_grid_search_metrics.tex}
 \input{4_experiments/tables/global_forecasting_random_search_metrics.tex}
 
-% Table~\ref{tab:forecasting_results_grid_search} and Table~\ref{tab:forecasting_results_random_search} show that SVR achieved the best overall performance among all evaluated methods. In the random search tuning setting, SVR obtained the lowest MAE, RMSE, WAPE, and MAPE, and the highest \(R^2\) value. In the grid search tuning setting, SVR is also the best performing method, although it was slightly weaker than in the former setting. These results indicate that SVR was the most effective model for capturing the temporal trend in global plastic production. Figure~\ref{fig:global_forecasting_plots} visually confirms the superior performance of SVR, as its forecasted test values closely follow the actual test values, while the other methods show larger deviations.
-
 Table~\ref{tab:global_forecasting_grid_search_metrics} and Table~\ref{tab:global_forecasting_random_search_metrics} indicate that SVR achieved the best overall performance among all evaluated methods. Under the random search tuning setting, SVR attained the lowest MAE, RMSE, WAPE, and MAPE, as well as the highest \(R^2\) value. Under the grid search setting, SVR also remained the top-performing method, although its performance was slightly inferior to that of the random search setting.
 
 These results suggest that SVR is the most effective model for capturing the temporal trend in global plastic production. Figure~\ref{fig:global_forecasting} further supports this conclusion, as the SVR forecasts closely follow the actual test values, whereas the other methods exhibit larger deviations.
 
 \input{4_experiments/tables/global_forecasting_tuning_time.tex}
-
-% Table~\ref{tab:forecasting_results_grid_search} and Table~\ref{tab:forecasting_results_random_search} also show that for all the tunable models, random search always has equal to better performance than grid search. Moreover, Table~\ref{tab:forecasting_tuning_time} suggests that random search is more efficient than grid search in terms of hyperparameter tuning time in this experiment settings. Therefore, in the following experiments, we will only report the results of random search tuning for the tunable models.
 
 Table~\ref{tab:global_forecasting_grid_search_metrics} and Table~\ref{tab:global_forecasting_random_search_metrics} also show that, for all tunable models, random search consistently achieves performance that is equal to or better than that of grid search. Furthermore, Table~\ref{tab:global_forecasting_tuning_time} indicates that random search is more efficient in terms of hyperparameter tuning time under the experimental settings considered. Therefore, in the subsequent experiments, we report only the results obtained using random search for the tunable models.
 
