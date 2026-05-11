@@ -1,8 +1,18 @@
 from pathlib import Path
 from typing import Any
 
+import matplotlib.pyplot as plt
+import numpy as np
 from common.files import save_content_to_file
-from common.metrics.regression_metrics import RegressionMetrics
+from common.metrics.regression_metrics import (
+    REGRESSION_METRIC_NAMES,
+    RegressionMetricName,
+    RegressionMetrics,
+    average_regression_metrics,
+    format_regression_metric_summary,
+    get_regression_metric_label,
+    std_regression_metrics,
+)
 from common.task import Task
 from step.plot.plotter import Plotter
 from util.names import to_snake
@@ -63,6 +73,146 @@ def build_and_save_metric_table(
     }
 
     save_metric_table(metrics_dict, task_path)
+
+
+def collect_metrics_by_name(
+    tasks: list[Task],
+) -> dict[str, list[RegressionMetrics]]:
+    """Collects regression metrics across repeated tasks by experiment name.
+
+    Args:
+        tasks: Repeated task runs that contain compatible experiments.
+
+    Returns:
+        A dictionary mapping each experiment name to the metrics observed across
+        repeated task runs.
+    """
+
+    metrics_by_name: dict[str, list[RegressionMetrics]] = {}
+    for task in tasks:
+        for experiment in task.experiments:
+            metrics_by_name.setdefault(experiment.name, []).append(
+                experiment.get_metrics()
+            )
+
+    return metrics_by_name
+
+
+def summarize_metrics_by_name(
+    metrics_by_name: dict[str, list[RegressionMetrics]],
+) -> tuple[dict[str, RegressionMetrics], dict[str, RegressionMetrics]]:
+    """Summarizes repeated metrics by experiment name.
+
+    Args:
+        metrics_by_name: Metrics collected by experiment name.
+
+    Returns:
+        A tuple containing dictionaries of mean metrics and sample standard
+        deviations by experiment name.
+    """
+
+    mean_metrics: dict[str, RegressionMetrics] = {}
+    std_metrics: dict[str, RegressionMetrics] = {}
+    for name, metrics_list in metrics_by_name.items():
+        mean_metrics[name] = average_regression_metrics(metrics_list)
+        std_metrics[name] = std_regression_metrics(metrics_list)
+
+    return mean_metrics, std_metrics
+
+
+def save_metric_summary_plot(
+    metrics_by_name: dict[str, list[RegressionMetrics]],
+    dir_path: Path,
+    metric: RegressionMetricName = 'wape',
+) -> None:
+    """Saves an error-bar plot of mean metric values by model.
+
+    The plot shows the mean and sample standard deviation for one metric across
+    repeated runs, keeping the metric table compact while preserving uncertainty
+    information in a figure.
+
+    Args:
+        metrics_by_name: Metrics collected by experiment name.
+        dir_path: Directory where the plot should be saved.
+        metric: Metric to summarize in the plot.
+    """
+
+    if not metrics_by_name:
+        return
+
+    if metric not in REGRESSION_METRIC_NAMES:
+        raise ValueError(f'Unknown metric for summary plot: {metric}.')
+
+    names = list(metrics_by_name.keys())
+    mean_metrics, std_metrics = summarize_metrics_by_name(metrics_by_name)
+    means = np.array(
+        [mean_metrics[name].get_value_by_name(metric) for name in names],
+        dtype=float,
+    )
+    stds = np.array(
+        [std_metrics[name].get_value_by_name(metric) for name in names],
+        dtype=float,
+    )
+
+    plot_means = means.copy()
+    plot_stds = stds.copy()
+    x_label = get_regression_metric_label(metric)
+    if metric in ('wape', 'mape'):
+        plot_means *= 100
+        plot_stds *= 100
+        x_label = f'{x_label} (%)'
+
+    y_positions = np.arange(len(names))
+    fig_height = max(3.5, 0.45 * len(names) + 1.4)
+    fig, ax = plt.subplots(figsize=(8.0, fig_height), dpi=200)
+    ax.barh(
+        y_positions,
+        plot_means,
+        xerr=plot_stds,
+        color='steelblue',
+        alpha=0.85,
+        capsize=4,
+    )
+
+    span = float(np.max(np.abs(plot_means) + plot_stds))
+    offset = max(span * 0.02, 0.05)
+    for y_position, name, plot_mean, plot_std in zip(
+        y_positions, names, plot_means, plot_stds
+    ):
+        summary = format_regression_metric_summary(
+            metric,
+            mean_metrics[name].get_value_by_name(metric),
+            std_metrics[name].get_value_by_name(metric),
+        )
+        text_x = plot_mean + plot_std + offset
+        horizontal_alignment = 'left'
+        if plot_mean < 0:
+            text_x = plot_mean - plot_std - offset
+            horizontal_alignment = 'right'
+
+        ax.text(
+            text_x,
+            y_position,  # type: ignore
+            summary,
+            va='center',
+            ha=horizontal_alignment,
+            fontsize=8,
+        )
+
+    ax.set_yticks(y_positions)
+    ax.set_yticklabels(names)
+    ax.invert_yaxis()
+    ax.set_xlabel(x_label)
+    ax.set_title(f'{get_regression_metric_label(metric)} Mean $\\pm$ SD')
+    ax.grid(axis='x', alpha=0.25)
+
+    dir_path.mkdir(parents=True, exist_ok=True)
+    figure_path = dir_path / f'metric_summary_{metric}.png'
+    fig.tight_layout()
+    fig.savefig(figure_path, dpi=600, bbox_inches='tight', pad_inches=0.1)
+    plt.close(fig)
+
+    print(f'Saved metric summary plot to "{figure_path}".')
 
 
 def get_hyperparameters_str(hyperparameters: dict[str, Any]) -> str:

@@ -48,6 +48,12 @@ class ForecastingExperiment(RegressionExperiment):
 
         self.model.fit(self.X_train, self.y_train)
         self.parameters = self.model.regressor_.parameters
+        selected_order = self.parameters.get('selected_order')
+        if selected_order is not None:
+            self.hyperparameters = {
+                **self.hyperparameters,
+                'selected_order': selected_order,
+            }
 
         self.logger.info('Model trained.')
 

@@ -55,6 +55,12 @@ def run_workflow(ctx: Context, dataset_name: str, workflow: str) -> None:
             from workflow.forecasting_workflow import ForecastingWorkflow
 
             ForecastingWorkflow().run(dataset, schema, **context)
+        case 'MultipleForecasting':
+            from workflow.multiple_forecasting_workflow import (
+                MultipleForecastingWorkflow,
+            )
+
+            MultipleForecastingWorkflow().run(dataset, schema, **context)
         case 'Correlation':
             from workflow.correlation_workflow import CorrelationWorkflow
 

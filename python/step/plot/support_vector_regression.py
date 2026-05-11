@@ -21,16 +21,7 @@ class SupportVectorRegressionPlotter(RegressionPlotter):
     def plot_epsilon_tube(self) -> None:
         """Plots the epsilon tube around the regression curve."""
 
-        epsilon_optional = cast(
-            float | None, self.hyperparameters.get('epsilon')
-        )
-        if epsilon_optional is None:
-            raise ValueError(
-                'Epsilon hyperparameter is required for support vector '
-                'regression.'
-            )
-
-        epsilon: float = epsilon_optional
+        epsilon = cast(float, self.hyperparameters.get('epsilon', 0.1))
         y_std: float = self.y_train.std()
         epsilon = epsilon * y_std
 

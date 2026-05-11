@@ -1,7 +1,9 @@
 from typing import cast, override
 
+import numpy as np
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.forecasting_experiment import ForecastingExperiment
+from common.metrics import RegressionMetrics, average_regression_metrics
 from common.task import Task
 from step.evaluator.complexity_key import (
     gaussian_process_regression_complexity_key,
@@ -58,7 +60,9 @@ def get_exponential_smoothing_forecasting(**_) -> ForecastingExperiment:
 def get_arima_forecasting(**context) -> ForecastingExperiment:
     experiment = ForecastingExperiment(
         name='ARIMA Regression',
-        description=('Forecast the original time series with ARIMA.'),
+        description=(
+            'Forecast the original time series with an auto-ARIMA model.'
+        ),
         regressor_cls=ARIMARegression,
     )
 
@@ -70,9 +74,12 @@ def get_arima_forecasting(**context) -> ForecastingExperiment:
     )
     experiment.hyperparameters = {
         'replace': True,
-        'p': 2,
-        'd': 0,
-        'q': 1,
+        'auto': True,
+        'max_p': 2,
+        'max_d': 1,
+        'max_q': 2,
+        'max_order': 5,
+        'information_criterion': 'aic',
         'trend': 'n',
     }
 
@@ -249,3 +256,99 @@ class ForecastingTask(Task):
                 'Features must have exactly one column and labels must be '
                 'one-dimensional.'
             )
+
+
+def get_forecasting_task(context: dict[str, str]) -> ForecastingTask:
+    """Builds a forecasting task with all standard forecasting experiments.
+
+    Args:
+        context: Shared context to inject into every forecasting experiment.
+
+    Returns:
+        The configured forecasting task.
+    """
+
+    svr_gamma_context = context.copy()
+    svr_gamma_context['svr_tune_gamma'] = '1'
+
+    task = ForecastingTask(name='Forecasting')
+    task.set_context(**context)
+    task.add(get_naive_persistence_forecasting(**context))
+    task.add(get_drift_baseline_forecasting(**context))
+    task.add(get_exponential_smoothing_forecasting(**context))
+    task.add(get_ridge_regression_forecasting(**context))
+    task.add(get_gaussian_process_forecasting(**context))
+    task.add(get_support_vector_regression_forecasting(**context))
+    task.add(get_support_vector_regression_forecasting(**svr_gamma_context))
+    task.add(get_theil_sen_forecasting(**context))
+    task.add(get_arima_forecasting(**context))
+    return task
+
+
+def run_forecasting_task(
+    dataset: Dataset,
+    schema: DatasetSchema,
+    context: dict[str, str] | None = None,
+) -> ForecastingTask:
+    """Runs the standard forecasting task.
+
+    Args:
+        dataset: Dataset containing the feature matrix and target vector.
+        schema: Schema describing the dataset columns and units.
+        context: Optional shared context for the task.
+
+    Returns:
+        The forecasting task after all experiments finish.
+    """
+
+    if context is None:
+        context = {}
+
+    task = get_forecasting_task(context)
+    task.run(dataset, schema)
+    return task
+
+
+def run_forecasting_tasks(
+    num_experiments: int,
+    dataset: Dataset,
+    schema: DatasetSchema,
+    context: dict[str, str] | None = None,
+    seed: int = 42,
+) -> tuple[list[ForecastingTask], dict[str, RegressionMetrics]]:
+    """Runs multiple forecasting tasks with different seeds.
+
+    Args:
+        num_experiments: Number of tasks to run.
+        dataset: Dataset containing the feature matrix and target vector.
+        schema: Schema describing the dataset columns and units.
+        context: Optional shared context for every task.
+        seed: Seed used to sample the per-run task seeds.
+
+    Returns:
+        A tuple containing the tasks and their averaged metrics by experiment
+        name.
+    """
+
+    rng = np.random.default_rng(seed)
+    experiment_seeds = rng.integers(0, 2 << 31, size=num_experiments)
+
+    tasks: list[ForecastingTask] = []
+    for experiment_seed in experiment_seeds:
+        run_context = {} if context is None else dict(context)
+        run_context['seed'] = str(int(experiment_seed))
+        task = run_forecasting_task(dataset, schema, run_context)
+        tasks.append(task)
+
+    metrics_lists_by_name: dict[str, list[RegressionMetrics]] = {}
+    for task in tasks:
+        for experiment in task.experiments:
+            metrics_lists_by_name.setdefault(experiment.name, []).append(
+                experiment.get_metrics()
+            )
+
+    metrics_by_name: dict[str, RegressionMetrics] = {}
+    for name, metrics_list in metrics_lists_by_name.items():
+        metrics_by_name[name] = average_regression_metrics(metrics_list)
+
+    return tasks, metrics_by_name

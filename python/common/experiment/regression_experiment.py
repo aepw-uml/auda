@@ -2,7 +2,12 @@ from typing import Type, cast, override
 
 import numpy as np
 from common.dataset import DatasetSchema
-from common.metrics import RegressionMetrics
+from common.metrics import (
+    REGRESSION_METRIC_NAMES,
+    RegressionMetricName,
+    RegressionMetrics,
+    format_regression_metric_summary,
+)
 from sklearn.metrics import (
     mean_absolute_error,
     mean_absolute_percentage_error,
@@ -280,6 +285,24 @@ class RegressionExperiment(Experiment):
             X_pred_nums = self.context['x-pred'].split(',')
             X_pred = np.array(X_pred_nums, dtype=float).reshape(-1, 1)
 
+        metric_mean = self.context.get('metric_summary_mean')
+        metric_std = self.context.get('metric_summary_std')
+        metric_annotation: str | None = None
+        if isinstance(metric_mean, RegressionMetrics) and isinstance(
+            metric_std, RegressionMetrics
+        ):
+            plot_metric: RegressionMetricName = self.context.get(
+                'plot_metric', 'wape'
+            )
+            if plot_metric not in REGRESSION_METRIC_NAMES:
+                raise ValueError(f'Unknown plot metric: {plot_metric}.')
+
+            mean = metric_mean.get_value_by_name(plot_metric)
+            std = metric_std.get_value_by_name(plot_metric)
+            metric_annotation = format_regression_metric_summary(
+                plot_metric, mean, std
+            )
+
         plotter: Plotter = plotter_factory(
             schema=schema,
             title=plot_title,
@@ -291,6 +314,7 @@ class RegressionExperiment(Experiment):
             X_pred=X_pred,
             parameters=self.parameters,
             hyperparameters=self.hyperparameters,
+            metric_annotation=metric_annotation,
         )
 
         plotter.plot()

@@ -12,6 +12,7 @@ from .complexity_ordering_robustness_workflow import (
     ComplexityOrderingRobustnessWorkflow,
 )
 from .forecasting_workflow import ForecastingWorkflow
+from .multiple_forecasting_workflow import MultipleForecastingWorkflow
 from .multiple_multivariate_forecasting_workflow import (
     MultipleMultivariateForecastingWorkflow,
 )
@@ -26,6 +27,7 @@ from .se_tolerance_coefficient_sweep_workflow import (
 __all__ = [
     'ComplexityOrderingRobustnessWorkflow',
     'ForecastingWorkflow',
+    'MultipleForecastingWorkflow',
     'MultipleMultivariateForecastingWorkflow',
     'MultipleReconstructionWorkflow',
     'MultivariateForecastingWorkflow',

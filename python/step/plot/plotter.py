@@ -81,6 +81,7 @@ class RegressionPlotter(Plotter, ABC):
         curve_description: str = 'Model Prediction',
         parameters: dict[str, str] = {},
         hyperparameters: dict[str, str] = {},
+        metric_annotation: str | None = None,
     ) -> None:
         """Initializes the regression plotter with model inputs and outputs.
 
@@ -92,6 +93,7 @@ class RegressionPlotter(Plotter, ABC):
             X_test: Test feature values.
             y_test: Test target values.
             curve_description: Optional label for the model prediction curve.
+            metric_annotation: Optional metric summary to display on the plot.
         """
 
         super().__init__(schema, title)
@@ -105,6 +107,8 @@ class RegressionPlotter(Plotter, ABC):
         self.curve_description: str = curve_description
         self.parameters: dict[str, str] = parameters
         self.hyperparameters: dict[str, str] = hyperparameters
+        self.metric_annotation: str | None = metric_annotation
+        self.metric_annotation_artist = None
 
         self.y_pred: np.ndarray | None = None
         if self.X_pred is not None:
@@ -217,3 +221,29 @@ class RegressionPlotter(Plotter, ABC):
         self.ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         self.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
         self.ax.legend()
+        self.draw_metric_annotation()
+
+    def draw_metric_annotation(self) -> None:
+        """Draws the configured metric annotation inside the axes."""
+
+        if not self.metric_annotation:
+            return
+
+        if self.metric_annotation_artist is not None:
+            self.metric_annotation_artist.remove()
+
+        self.metric_annotation_artist = self.ax.text(
+            0.03,
+            0.97,
+            self.metric_annotation,
+            transform=self.ax.transAxes,
+            va='top',
+            ha='left',
+            fontsize=9,
+            bbox={
+                'boxstyle': 'round,pad=0.3',
+                'facecolor': 'white',
+                'edgecolor': '0.75',
+                'alpha': 0.9,
+            },
+        )

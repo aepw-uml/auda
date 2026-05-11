@@ -4,24 +4,25 @@ from typing import override
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.persistence import (
     collect_metrics_by_name,
+    save_hyperparameter_table,
     save_metric_summary_plot,
     save_metric_table,
+    save_plots,
+    save_time_table,
     summarize_metrics_by_name,
 )
 from common.metrics import RegressionMetricName
 from common.workflow import Workflow
-from experiment.multivariate_forecasting_task import (
-    run_multivariate_forecasting_tasks,
-)
+from experiment.forecasting_task import run_forecasting_tasks
 from util.names import to_snake
 
 
-class MultipleMultivariateForecastingWorkflow(Workflow):
-    """Runs repeated multivariate forecasting experiments."""
+class MultipleForecastingWorkflow(Workflow):
+    """Runs repeated univariate forecasting experiments."""
 
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema, **context) -> None:
-        """Runs repeated multivariate forecasting and saves average metrics.
+        """Runs repeated forecasting and saves aggregate artifacts.
 
         Args:
             dataset: Dataset containing the feature matrix and target vector.
@@ -30,12 +31,14 @@ class MultipleMultivariateForecastingWorkflow(Workflow):
         """
 
         num_experiments = int(context.get('num_experiments', '16'))
-        seed = int(context.get('seed', '471'))
-        tasks, _ = run_multivariate_forecasting_tasks(
+        seed = int(context.get('seed', '42'))
+        tasks, _ = run_forecasting_tasks(
             num_experiments, dataset, schema, context, seed=seed
         )
         metrics_by_name = collect_metrics_by_name(tasks)
-        average_metrics, _ = summarize_metrics_by_name(metrics_by_name)
+        average_metrics, std_metrics = summarize_metrics_by_name(
+            metrics_by_name
+        )
 
         location = to_snake(context.get('location', ''))
         workflow_name = context.get('workflow_name')
@@ -43,9 +46,9 @@ class MultipleMultivariateForecastingWorkflow(Workflow):
             workflow_name
             if workflow_name
             else (
-                'multiple_multivariate_forecasting'
+                'multiple_forecasting'
                 if not location
-                else f'multiple_multivariate_forecasting_{location}'
+                else f'multiple_forecasting_{location}'
             )
         )
         save_metric_table(average_metrics, dir_path)
@@ -53,5 +56,19 @@ class MultipleMultivariateForecastingWorkflow(Workflow):
         plot_metric: RegressionMetricName = context.get(
             'plot_metric', 'wape'
         )
+
+        representative_task = tasks[0]
         if num_experiments > 1:
             save_metric_summary_plot(metrics_by_name, dir_path, plot_metric)
+            for experiment in representative_task.experiments:
+                experiment.context['metric_summary_mean'] = average_metrics[
+                    experiment.name
+                ]
+                experiment.context['metric_summary_std'] = std_metrics[
+                    experiment.name
+                ]
+                experiment.context['plot_metric'] = plot_metric
+
+        save_hyperparameter_table(representative_task, dir_path)
+        save_plots(representative_task, dir_path)
+        save_time_table(representative_task, dir_path)
