@@ -39,15 +39,15 @@
             <!-- Experiment 5 -->
             <pair>
                 <tex>
-                    paper/src/4_experiments/tables/selection_sensitivity.tex
+                    paper/src/4_experiments/tables/global_forecasting_grid_search.tex
                 </tex>
-                <result>results/se_tolerance_coefficient_sweep_united_states/summary_table</result>
+                <result>results/multiple_global_forecasting_grid_search/metric_table</result>
             </pair>
             <pair>
                 <tex>
-                    paper/src/4_experiments/tables/complexity_ordering_robustness.tex
+                    paper/src/4_experiments/tables/global_forecasting_random_search_metrics.tex
                 </tex>
-                <result>results/complexity_ordering_robustness_united_states/summary_table</result>
+                <result>results/multiple_global_forecasting_random_search/metric_table</result>
             </pair>
 
             <!-- Experiment 6 -->

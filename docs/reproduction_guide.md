@@ -1,5 +1,9 @@
 # Reproduction Guide
 
+> [!NOTE]
+>
+> AUDA currently supports **Linux** (including WSL) and **macOS** only.
+
 To reproduce the results in this project, make sure your environment has the following prerequisites:
 
 - `Python` 3.12.11 or later.
