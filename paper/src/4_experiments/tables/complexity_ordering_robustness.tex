@@ -3,16 +3,16 @@
 	\caption{\centering WAPE degradation under flipped selections.}
 	\begin{tabular}{lccccc}
 		\toprule
-		Experiment       &
+		Experiment                  &
 		\shortstack{Changed                                              \\Rate} &
 		\shortstack{Mean                                                 \\Original\\WAPE} &
 		\shortstack{Mean                                                 \\Flipped\\WAPE} &
 		\shortstack{Mean                                                 \\WAPE\\Degradation} &
 		\shortstack{Max                                                  \\WAPE\\Degradation} \\
 		\midrule
-		Ridge Regression & 100.00\% & 1.26\% & 1.26\% & -0.01\% & 0.03\% \\
-		GPR              & 87.50\%  & 2.44\% & 2.44\% & 0.00\%  & 0.10\% \\
-		SVR              & 100.00\% & 3.33\% & 3.32\% & -0.01\% & 0.16\% \\
+		Ridge Regression            & 100.00\% & 1.26\% & 1.26\% & -0.01\% & 0.03\% \\
+		Gaussian Process Regression & 87.50\%  & 2.44\% & 2.44\% & 0.00\%  & 0.10\% \\
+		Support Vector Regression   & 100.00\% & 3.33\% & 3.32\% & -0.01\% & 0.16\% \\
 		\bottomrule
 	\end{tabular}
 	\label{tab:complexity_ordering_robustness}
