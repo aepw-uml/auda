@@ -6,7 +6,7 @@ The analytical dataset used in this study originates from the Plastic Recovery I
 	\centering
 	\includegraphics[width=1.0\linewidth]{figures/prism_data_extraction.png}
 	\caption{
-		PRISM data extraction workflow. The system first identifies the input document type (either PDF or tabular file). For PDF documents, PRISM uses \texttt{PyMuPDF} to parse text regions and extract layout elements, and process images to recover text, tables, and figures using large language models (LLMs). Parsed content is then chunked, indexed, and processed through evidence-grounded extraction using LLMs with retrieval-augmented generation (RAG) and Chain-of-Thought (CoT) reasoning. Subsequently, the extracted data undergoes schema enforcement and human validation before being used by downstream analysis.
+		PRISM data extraction workflow. The system first identifies the input document type (either PDF or tabular file). For PDF documents, PRISM uses \texttt{PyMuPDF} to parse text regions and extract layout elements, and processes images to recover text, tables, and figures using large language models (LLMs). Parsed content is then chunked, indexed, and processed through evidence-grounded extraction using LLMs with retrieval-augmented generation (RAG) and Chain-of-Thought (CoT) reasoning. Subsequently, the extracted data undergo schema enforcement and human validation before being used by downstream analysis.
 	}
 	\label{fig:prism_data_extraction}
 \end{figure}

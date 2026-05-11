@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE xml>
-<command name="FindTypos">
+<command name="FixTypos">
     <description>
-        Find issues and vulnerabilities in the research paper.
+        Fix typos for the paper.
     </description>
     <steps>
         <step id="ScanFiles">
-            Scan all .tex files in the `paper` directory in the project root directory.
+            Scan all `.tex` files in the `paper` directory in the project root directory.
         </step>
         <step id="IdentifyTypos">
             For each scanned file, find possible typos. This also includes verbs with incorrect
             tense usage, nouns with incorrect pluralization, and other common spelling mistakes.
         </step>
+        <step id="FixTypos">
+            For each identified typo, fix it by replacing it with the correct word or phrase.
+        </step>
     </steps>
-    <rules>
-        <rule>Do not edit any files.</rule>
-    </rules>
     <output>
         <item id="Findings">Findings of all possible typos.</item>
     </output>

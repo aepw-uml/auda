@@ -1,6 +1,6 @@
 \subsection{Hyperparameter Tuning}
 
-For tunable models, AUDA provides two widely used methods for hyperparameter tuning: grid search \cite{hastie2009elements} and random search \cite{bergstra2012random}. The procedure for constructing the configuration set \(\mathcal{G}\) is described in Appendix~\ref{sec:appendix_a}. Grid search evaluates all configurations \(\mathcal{G}\) in a predefined grid, while random search samples configurations randomly from the search space. For both methods, each configuration \(\lambda \in \mathcal{G}\) is used to train the model and evaluate its performance on a validation set. Forecasting tasks use time-series cross-validation~\cite{hyndman2018forecasting}, whereas construction tasks use repeated random holdout validation~\cite{kohavi1995study}.
+For tunable models, AUDA provides two widely used methods for hyperparameter tuning: grid search \cite{hastie2009elements} and random search \cite{bergstra2012random}. The procedure for constructing the configuration set \(\mathcal{G}\) is described in Appendix~\ref{sec:appendix_a}. Grid search evaluates all configurations \(\mathcal{G}\) in a predefined grid, while random search samples configurations randomly from the search space. For both methods, each configuration \(\lambda \in \mathcal{G}\) is used to train the model and evaluate its performance on a validation set. Forecasting tasks use time-series cross-validation~\cite{hyndman2018forecasting}, whereas reconstruction tasks use repeated random holdout validation~\cite{kohavi1995study}.
 
 The fold-wise performance metrics are combined with each configuration to form pairs \((\lambda, (\mathcal{L}^{(1)}(\lambda), \mathcal{L}^{(2)}(\lambda), \dots, \mathcal{L}^{(K)}(\lambda))\), where \(K\) is the number of folds.
 
@@ -10,7 +10,7 @@ We then find the mean performance \(\mu(\lambda)\) for each configuration. Next,
 \]
 where \(\sigma\) is the standard deviation of the fold-wise performance metrics for that configuration. We then identify all configurations whose mean performance is within \(\mu^\star + c_{\mathrm{SE}} E\), where \(\mu^\star\) is the best mean performance and \(c_{\mathrm{SE}}\) is a coefficient. Finally, we select the simplest configuration among these candidates. This process follows the one-standard-error rule, which favors the simplest model whose cross-validation error is statistically close to the minimum-error model~\cite{breiman2017classification}.
 
-The purpose of the 1-SE rule is to reduce accidental overfitting caused by randomness in hyperparameter search. The selection-efficiency coefficient \(c_{\mathrm{SE}}\) controls how much loss in validation performance is allowed when selecting a simpler model. The smaller \(c_{\mathrm{SE}}\) is, the narrower the range of candidate configurations becomes, and the more simple configurations are excluded.
+The purpose of the 1-SE rule is to reduce accidental overfitting caused by randomness in hyperparameter search. The selection-efficiency coefficient \(c_{\mathrm{SE}}\) controls how much loss in validation performance is allowed when selecting a simpler model. The smaller \(c_{\mathrm{SE}}\) is, the narrower the range of candidate configurations becomes, and more candidate configurations are excluded.
 
 In this study, the number of random-search iterations is set to \(T = 128\), and the number of grid points for each hyperparameter is set to \(M = 12\). The ridge regression and Gaussian models each have two tunable hyperparameters, resulting in \(M^2 = 144\) configurations for grid search. The support vector regression with gamma tuning has three tunable hyperparameters, resulting in \(M^3 = 1728\) grid-search configurations.
 
@@ -41,4 +41,4 @@ In this study, the number of random-search iterations is set to \(T = 128\), and
 	\label{tab:complexity-ordering}
 \end{table}
 
-Table~\ref{tab:complexity-ordering} defines how model complexity is ordered when applying the 1-SE rule. For each tunable model, the table lists which hyperparameters direction is treated as simpler. For example, in ridge regression, a lower degree and a higher alpha contribute to a simpler model.
+Table~\ref{tab:complexity-ordering} defines how model complexity is ordered when applying the 1-SE rule. For each tunable model, the table lists which hyperparameter direction is treated as simpler. For example, in ridge regression, a lower degree and a higher alpha contribute to a simpler model.
