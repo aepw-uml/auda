@@ -12,7 +12,7 @@ _This project is open source and welcomes contributions from developers, researc
 
 > [!NOTE]
 >
-> AUDA currently supports Linux and macOS only.
+> AUDA currently supports **Linux** and **macOS** only.
 
 Before you start, make sure the following tools are installed:
 

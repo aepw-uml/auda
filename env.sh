@@ -39,12 +39,23 @@ function reproduce() {
         --location=United\ States --seed=471 --se_tolerance_coefficient=0.1
 
     # Experiment 5 - Global plastic production forecasting
+    auda workflow run GlobalPlasticsProduction MultipleForecasting --seed=471 \
+        --workflow_name=multiple_global_forecasting_grid_search \
+        --tune_search_type=grid
+    auda workflow run GlobalPlasticsProduction MultipleForecasting --seed=471 \
+        --workflow_name=multiple_global_forecasting_random_search \
+        --tune_search_type=random
+
     auda workflow run GlobalPlasticsProduction Forecasting --seed=471 \
         --workflow_name=global_forecasting --tune_search_type=grid
     auda workflow run GlobalPlasticsProduction Forecasting --seed=471 \
         --workflow_name=global_forecasting --tune_search_type=random
 
     # Experiment 6 - PWG forecasting (Japan)
+    auda workflow run YearPWG MultipleForecasting --location=Japan --seed=471
+    auda workflow run YearPWG MultipleForecasting --location=United\ States \
+        --seed=471
+
     auda workflow run YearPWG Forecasting --location=Japan --seed=471
     auda workflow run YearPWG Forecasting --location=United\ States --seed=471
 
@@ -98,24 +109,24 @@ function move-figures() {
 
     # Experiment 5 - Global plastic production forecasting (random search)
     DIR="results/global_forecasting_random_search/plots"
-    cp "$DIR/theil-sen-regression.png" \
+    cp "$DIR/theil_sen_regression.png" \
         "$DEST/global_forecasting_theil_sen_regression.png"
-    cp "$DIR/ridge-regression.png" \
+    cp "$DIR/ridge_regression.png" \
         "$DEST/global_forecasting_ridge_regression.png"
-    cp "$DIR/gaussian-process-regression.png" \
+    cp "$DIR/gaussian_process_regression.png" \
         "$DEST/global_forecasting_gpr.png"
-    cp "$DIR/support-vector-regression.png" \
+    cp "$DIR/support_vector_regression.png" \
         "$DEST/global_forecasting_svr.png"
 
     # Experiment 6 - PWG forecasting
-    DIR="results/global_forecasting_random_search/plots"
-    cp "$DIR/arima-regression.png" \
+    DIR="results/forecasting_random_search/plots"
+    cp "$DIR/arima_regression.png" \
         "$DEST/japan_pwg_forecasting_arima_regression.png"
-    cp "$DIR/ridge-regression.png" \
+    cp "$DIR/ridge_regression.png" \
         "$DEST/japan_pwg_forecasting_ridge_regression.png"
-    cp "$DIR/gaussian-process-regression.png" \
+    cp "$DIR/gaussian_process_regression.png" \
         "$DEST/japan_pwg_forecasting_gpr.png"
-    cp "$DIR/support-vector-regression.png" \
+    cp "$DIR/support_vector_regression.png" \
         "$DEST/japan_pwg_forecasting_svr.png"
 }
 

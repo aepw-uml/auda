@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE xml>
+<command name="ReviewPaper">
+    <description>
+        Write review comments for the paper in the `paper` directory in the project root directory.
+    </description>
+    <input>
+        <item id="journal">(Optional) The journal to which this paper is being submitted.</item>
+    </input>
+    <steps>
+        <step id="ScanFiles">
+            Scan all .tex files and `.bib` files in the `paper` directory in the project root
+            directory.
+        </step>
+        <step id="WriteComments">
+            Write review comments for the paper based on the scanned files.
+        </step>
+    </steps>
+    <rules>
+        <rule>Do not edit any files.</rule>
+    </rules>
+    <output>
+        <item id="Summary">A brief summary of the paper.</item>
+        <item id="Evaluation">An overall evaluation of the paper.</item>
+        <item id="Strengths">Stengths of the paper.</item>
+        <item id="Weaknesses">Weaknesses of the paper.</item>
+    </output>
+</command>
