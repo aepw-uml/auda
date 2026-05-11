@@ -13,6 +13,8 @@ _This project is open source and welcomes contributions from developers, researc
 > [!NOTE]
 >
 > AUDA currently supports **Linux** (including WSL) and **macOS** only.
+>
+> If you use WSL, make sure to clone the repository in the WSL filesystem (e.g., under `/home/username/`) rather than the Windows filesystem (e.g., under `C:\Users\username\`) to avoid performance issues.
 
 Before you start, make sure the following tools are installed:
 
