@@ -131,7 +131,7 @@ class ReconstructionExperiment(RegressionExperiment):
         metric: RegressionMetricName = tuning_parameters.get('metric', 'wape')
         num_iterations: int = tuning_parameters.get('num_iterations', 128)
         num_points_per_interval: int = tuning_parameters.get(
-            'num_points_per_interval', 16
+            'num_points_per_interval', 12
         )
         complexity_key = tuning_parameters.get('complexity_key')
         validation_rate: float = tuning_parameters.get('validation_rate', 0.2)

@@ -12,33 +12,33 @@ where \(\sigma\) is the standard deviation of the fold-wise performance metrics 
 
 The purpose of the 1-SE rule is to reduce accidental overfitting caused by randomness in hyperparameter search. The selection-efficiency coefficient \(c_{\mathrm{SE}}\) controls how much loss in validation performance is allowed when selecting a simpler model. The smaller \(c_{\mathrm{SE}}\) is, the narrower the range of candidate configurations becomes, and the more simple configurations are excluded.
 
-In this study, the number of random-search iterations is set to \(T = 128\), and the number of grid points for each hyperparameter is set to \(M = 8\). Under these settings, we find that setting \(c_{\mathrm{SE}} = 0.1\) is appropriate.
+In this study, the number of random-search iterations is set to \(T = 128\), and the number of grid points for each hyperparameter is set to \(M = 12\). The ridge regression and Gaussian models each have two tunable hyperparameters, resulting in \(M^2 = 144\) configurations for grid search. The support vector regression with gamma tuning has three tunable hyperparameters, resulting in \(M^3 = 1728\) grid-search configurations.
 
 \begin{table}[t]
 	\centering
 	\caption{
 		\centering
-		Complexity-key definitions used by the 1-SE rule to rank simpler hyperparameter configurations for tunable models.
+		Complexity ordering used by the 1-SE rule to rank simpler hyperparameter configurations for tunable models.
 	}
-	\label{tab:complexity-key-hyperparameters}
 	\begin{tabular}{lll}
 		\toprule
-		Model & Hyperparameter   & Complexity-key contribution \\
+		Model & Hyperparameter   & Simpler configuration favors \\
 		\midrule
 		\multirow{2}{*}{Ridge Regression}
-		      & degree           & $+\text{degree}$            \\
-		      & alpha            & $-\alpha$                   \\
+		      & degree           & $-\text{degree}$             \\
+		      & alpha            & $+\alpha$                    \\
 		\midrule
 		\multirow{2}{*}{Gaussian Process Regression}
-		      & length\_scale    & $-\text{length\_scale}$     \\
-		      & noise\_level     & $-\text{noise\_level}$      \\
+		      & length\_scale    & $+\text{length\_scale}$      \\
+		      & noise\_level     & $+\text{noise\_level}$       \\
 		\midrule
 		\multirow{3}{*}{Support Vector Regression}
-		      & C                & $+C$                        \\
-		      & epsilon          & $-\epsilon$                 \\
-		      & gamma (if tuned) & $+\gamma$                   \\
+		      & C                & $-C$                         \\
+		      & epsilon          & $+\epsilon$                  \\
+		      & gamma (if tuned) & $-\gamma$                    \\
 		\bottomrule
 	\end{tabular}
+	\label{tab:complexity-ordering}
 \end{table}
 
-Table~\ref{tab:complexity-key-hyperparameters} shows the complexity ordering for the hyperparameters of all tunable models. Lower complexity-key values are treated as simpler by the 1-SE rule. For example, in Ridge Regression, a lower degree and a higher alpha contribute to a simpler model.
+Table~\ref{tab:complexity-ordering} defines how model complexity is ordered when applying the 1-SE rule. For each tunable model, the table lists which hyperparameters direction is treated as simpler. For example, in ridge regression, a lower degree and a higher alpha contribute to a simpler model.
