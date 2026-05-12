@@ -15,7 +15,8 @@ fi
 
 function reproduce() {
     # Experiment 1 - Correlation analysis
-    auda workflow run PWDriverFeatureSet Correlation
+    auda workflow run PWDriverFeatureSet Correlation \
+        --use_isolation_forest=1 --anomaly_contamination=0.2
 
     # Experiment 2 - Importance analysis
     auda workflow run PWGPredictors FeatureImportances --contamination=0.2 \
@@ -60,14 +61,18 @@ function reproduce() {
     auda workflow run YearPWG Forecasting --location=United\ States --seed=471
 
     # Experiment 7 - NN PWG forecasting
-    auda workflow run PWDrivers NNForecasting --seed=471
+    auda workflow run PWDrivers NNForecasting --seed=471 \
+        --use_isolation_forest=1 --anomaly_contamination=0.45
 
     # Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)
     auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
-        --location=Japan --workflow_name=multiple_multivariate_forecasting_japan
+        --location=Japan \
+        --workflow_name=multiple_multivariate_forecasting_japan \
+        --pretraining_anomaly_contamination=0.45
     auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
         --location=Slovenia --enable_tuning=0 \
-        --workflow_name=multiple_multivariate_forecasting_slovenia
+        --workflow_name=multiple_multivariate_forecasting_slovenia \
+        --pretraining_anomaly_contamination=0.45
 }
 
 function move-figures() {

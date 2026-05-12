@@ -76,7 +76,8 @@ def get_pretraining_dataset(
     """Builds the auxiliary dataset used for neural-network pretraining.
 
     Args:
-        context: Workflow context containing the optional target location.
+        context: Workflow context containing the optional target location and
+            pretraining anomaly contamination rate.
         seed: Seed used by isolation forest when filtering outliers.
 
     Returns:
@@ -89,7 +90,10 @@ def get_pretraining_dataset(
     if y is None:
         raise ValueError('Target variable y is required for pretraining.')
 
-    result = isolation_forest(X, y, contamination=0.2, seed=seed)
+    contamination = float(
+        context.get('pretraining_anomaly_contamination', 0.45)
+    )
+    result = isolation_forest(X, y, contamination=contamination, seed=seed)
     return Dataset(X=result.X_inliers, y=result.y_inliers)
 
 
