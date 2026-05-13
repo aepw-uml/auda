@@ -38,9 +38,10 @@ with the RBF kernel
 \end{equation}
 where \(C\) controls the penalty for large residuals and \(\epsilon\) defines the width of the insensitive tube around the fitted function.
 
-MLP is a feedforward neural network consisting of multiple layers of neurons, allowing it to capture complex nonlinear relationships in the data. We use a simple architecture with one hidden layer and ReLU activation functions, along with the Adam optimizer~\cite{kingma2014adam}, which is sufficient for the forecasting tasks in this study. We also use early stopping based on validation performance to prevent overfitting.
+An MLP is a feedforward neural network consisting of multiple layers of neurons, allowing it to capture complex nonlinear relationships in the data. We use a simple architecture with one hidden layer and ReLU activation functions, along with the Adam optimizer~\cite{kingma2014adam}, which is sufficient for the forecasting tasks in this study. We also use early stopping based on validation performance to prevent overfitting.
 
+% A
 Additionally, we use isolation forest~\cite{liu2008isolation} as an unsupervised anomaly detection method to identify outliers in the data. An Isolation Forest constructs an ensemble of isolation trees, where each tree recursively selects a feature and a split value at random to partition the data.
 
-% Codex
+% A
 Random forest~\cite{breiman2001random} is an ensemble learning method that trains many decision trees on samples and combines their predictions. At each split, the model considers only a random subset of features, which reduces correlation among trees and improves generalization compared with a single decision tree. The results from random forest should be interpreted as empirical associations instead of causal effects.

@@ -1,6 +1,7 @@
 \subsection{Data Extraction in PRISM}
+%A
 
-The analytical dataset used in this study originates from the Plastic Recovery Insights Steering Model (PRISM), a data ecosystem developed by AEPW to gather country-level plastic waste, demographic, and socioeconomic data from heterogeneous public sources.
+The analytical dataset used in this study originates from the \textit{Plastic Recovery Insights Steering Model (PRISM)}, a platform developed by AEPW to gather plastic waste, demographic, and socioeconomic data from heterogeneous public sources.
 
 \begin{figure}[H]
 	\centering
@@ -14,6 +15,6 @@ The analytical dataset used in this study originates from the Plastic Recovery I
 
 Figure~\ref{fig:prism_data_extraction} illustrates the data extraction workflow used in the PRISM platform to transform uploaded unstructured documents (e.g., PDFs, Excel files) into validated, structured data points. When a user uploads a document, such as a PDF or Excel file, the system classifies the document type to determine the appropriate processing strategy. For PDF documents, textual content is parsed using PyMuPDF, while visual elements such as tables, charts, and images are interpreted using GPT-4o. For Excel documents, structured tables are divided into smaller row-wise chunks to support efficient extraction.
 
-After parsing, the PDF pipeline stores embedded text chunks in Azure AI search to support retrieval-augmented generation for selected fields such as publisher and report date. Then, large language models are applied to identify relevant data points, including year, location, data point name, value, unit, and source context. Subsequently, the extracted outputs are passed through multiple post-processing layers, including data cleaning, location and data-point mapping, duplicate removal, unit standardization, calculated field generation, and quality score computation. Finally, the structured extraction results are appended to the database.
+After parsing, the PDF pipeline stores embedded text chunks in Azure AI Search to support retrieval-augmented generation for selected fields such as publisher and report date. Then, large language models are applied to identify relevant data points, including year, location, data point name, value, unit, and source context. Subsequently, the extracted outputs are passed through multiple post-processing layers, including data cleaning, location and data-point mapping, duplicate removal, unit standardization, calculated field generation, and quality score computation. Finally, the structured extraction results are appended to the database.
 
-Because automated extraction with LLMs can introduce noise and inaccuracies, all extracted records are manually reviewed and approved before being migrated into the AUDA analytical database, where they are used for modeling and visualization.
+Because automated extraction with LLMs can be inaccurate, all extracted records are manually reviewed and approved before being migrated into the AUDA analytical database, where they are used for modeling and visualization.

@@ -48,7 +48,7 @@ Finally, run the reproduction:
 reproduce
 ```
 
-The reproduction outputs are written to the `results` directory.
+The reproduction outputs are written to the `results` directory. The reproduction takes about an hour on a Linux machine with AMD virtual CPU cores at 2.00 GHz and 4 GiB of memory.
 
 ## All-in-One Command
 
