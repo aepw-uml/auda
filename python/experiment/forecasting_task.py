@@ -276,12 +276,12 @@ def get_forecasting_task(context: dict[str, str]) -> ForecastingTask:
     task.add(get_naive_persistence_forecasting(**context))
     task.add(get_drift_baseline_forecasting(**context))
     task.add(get_exponential_smoothing_forecasting(**context))
+    task.add(get_theil_sen_forecasting(**context))
+    task.add(get_arima_forecasting(**context))
     task.add(get_ridge_regression_forecasting(**context))
     task.add(get_gaussian_process_forecasting(**context))
     task.add(get_support_vector_regression_forecasting(**context))
     task.add(get_support_vector_regression_forecasting(**svr_gamma_context))
-    task.add(get_theil_sen_forecasting(**context))
-    task.add(get_arima_forecasting(**context))
     return task
 
 

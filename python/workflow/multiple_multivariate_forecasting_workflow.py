@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import override
+from typing import cast, override
 
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.persistence import (
@@ -9,6 +9,7 @@ from common.experiment.persistence import (
     summarize_metrics_by_name,
 )
 from common.metrics import RegressionMetricName
+from common.task.task import Task
 from common.workflow import Workflow
 from experiment.multivariate_forecasting_task import (
     run_multivariate_forecasting_tasks,
@@ -34,7 +35,7 @@ class MultipleMultivariateForecastingWorkflow(Workflow):
         tasks, _ = run_multivariate_forecasting_tasks(
             num_experiments, dataset, schema, context, seed=seed
         )
-        metrics_by_name = collect_metrics_by_name(tasks)
+        metrics_by_name = collect_metrics_by_name(cast(list[Task], tasks))
         average_metrics, _ = summarize_metrics_by_name(metrics_by_name)
 
         location = to_snake(context.get('location', ''))
@@ -50,8 +51,6 @@ class MultipleMultivariateForecastingWorkflow(Workflow):
         )
         save_metric_table(average_metrics, dir_path)
 
-        plot_metric: RegressionMetricName = context.get(
-            'plot_metric', 'wape'
-        )
+        plot_metric: RegressionMetricName = context.get('plot_metric', 'wape')
         if num_experiments > 1:
             save_metric_summary_plot(metrics_by_name, dir_path, plot_metric)

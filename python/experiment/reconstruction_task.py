@@ -285,10 +285,10 @@ def get_reconstruction_task(
     task.add(get_linear_interpolation_reconstruction(**context))
     task.add(get_moving_average_interpolation_reconstruction(**context))
     task.add(get_cubic_spline_interpolation_reconstruction(**context))
+    task.add(get_theil_sen_reconstruction(**context))
     task.add(get_ridge_regression_reconstruction(**context))
     task.add(get_gaussian_process_reconstruction(**context))
     task.add(get_support_vector_regression_reconstruction(**context))
-    task.add(get_theil_sen_reconstruction(**context))
     return task
 
 
