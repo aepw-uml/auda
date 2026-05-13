@@ -59,6 +59,12 @@ def random_search(
             'Length of search_space must match length of hyperparameter_names.'
         )
 
+    if len(sampling_scales) != len(hyperparameter_names):
+        raise ValueError(
+            'Length of sampling_scales must match length of '
+            'hyperparameter_names.'
+        )
+
     trials: list[Trial] = []
     for i in range(num_iterations):
         hyperparameters: Hyperparameters = [

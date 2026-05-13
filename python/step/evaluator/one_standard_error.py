@@ -79,15 +79,27 @@ def one_standard_error_candidates(
 
     best_trial_mean = trial_means[0][1]
     best_trial_scores = trials[0][1]
+
+    def is_better_mean(trial_mean: float) -> bool:
+        return (
+            trial_mean < best_trial_mean
+            if prefer_lower
+            else trial_mean > best_trial_mean
+        )
+
     for i in range(1, len(trial_means)):
         _, trial_mean = trial_means[i]
-        if trial_mean < best_trial_mean:
+        if is_better_mean(trial_mean):
             best_trial_mean = trial_mean
             best_trial_scores = trials[i][1]
 
+    threshold_offset = se_tolerance_coefficient * standard_error(
+        best_trial_scores
+    )
     threshold = (
-        best_trial_mean
-        + se_tolerance_coefficient * standard_error(best_trial_scores)
+        best_trial_mean + threshold_offset
+        if prefer_lower
+        else best_trial_mean - threshold_offset
     )
 
     def is_within_threshold(mean_score: float) -> bool:

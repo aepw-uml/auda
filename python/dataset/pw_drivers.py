@@ -38,6 +38,7 @@ class PWDrivers(DatasetFetcher):
                 ],
                 notnull_column_names=[
                     DemographyColumn.RURAL_POPULATION,
+                    DemographyColumn.URBAN_POPULATION,
                     DemographyColumn.GDP,
                     WasteGenerationManagementColumn.PLASTIC_WASTE_GENERATED,
                 ],
@@ -52,8 +53,7 @@ class PWDrivers(DatasetFetcher):
             if year <= current_year
         ]
 
-        X = np.array([sample[1:-1] for sample in valid_samples], dtype=float)
-        y = np.array([sample[-1] for sample in valid_samples], dtype=float)
+        filtered_samples = valid_samples
 
         if location:
             location_samples = [
@@ -61,30 +61,18 @@ class PWDrivers(DatasetFetcher):
             ]
             if not location_samples:
                 raise ValueError(f'No data found for location: {location}')
-            X = np.array(
-                [sample[1:-1] for sample in location_samples], dtype=float
-            )
-            y = np.array(
-                [sample[-1] for sample in location_samples], dtype=float
-            )
+            filtered_samples = location_samples
 
         if exclude_location:
-            X = np.array(
-                [
-                    sample[1:-1]
-                    for sample in valid_samples
-                    if sample[0] != exclude_location
-                ],
-                dtype=float,
-            )
-            y = np.array(
-                [
-                    sample[-1]
-                    for sample in valid_samples
-                    if sample[0] != exclude_location
-                ],
-                dtype=float,
-            )
+            filtered_samples = [
+                sample
+                for sample in valid_samples
+                if sample[0] != exclude_location
+            ]
+
+        sorted_samples = sorted(filtered_samples, key=lambda sample: sample[1])
+        X = np.array([sample[1:-1] for sample in sorted_samples], dtype=float)
+        y = np.array([sample[-1] for sample in sorted_samples], dtype=float)
 
         return Dataset(X, y)
 

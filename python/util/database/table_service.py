@@ -635,7 +635,7 @@ class TableService:
         offset: int = (page - 1) * page_size
 
         if offset > 0:
-            query.offset(offset)
+            query = query.offset(offset)
 
         if page_size > 0:
             query = query.limit(page_size)
