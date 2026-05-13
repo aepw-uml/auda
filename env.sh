@@ -62,17 +62,18 @@ function reproduce() {
 
     # Experiment 7 - NN PWG forecasting
     auda workflow run PWDrivers NNForecasting --seed=471 \
-        --use_isolation_forest=1 --anomaly_contamination=0.45
+        --use_isolation_forest=1 \
+        --anomaly_contamination=0.1,0.2,0.3,0.4,0.45,0.5
 
     # Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)
     auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
         --location=Japan \
         --workflow_name=multiple_multivariate_forecasting_japan \
-        --pretraining_anomaly_contamination=0.45
+        --pretraining_anomaly_contamination=0.3
     auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
         --location=Slovenia --enable_tuning=0 \
         --workflow_name=multiple_multivariate_forecasting_slovenia \
-        --pretraining_anomaly_contamination=0.45
+        --pretraining_anomaly_contamination=0.3
 }
 
 function move-figures() {
@@ -165,4 +166,41 @@ function datasets() {
     # Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)
     auda dataset show PWDrivers --location=Japan --no-samples
     auda dataset show PWDrivers --location=Slovenia --no-samples
+}
+
+function tables() {
+    echo "Experiment 2 - Important analysis"
+    cat results/feature_importances/report.txt
+    printf '%*s\n' 80 '' | tr ' ' '-'
+
+    echo "Experiment 3 - Reconstruction (TRC for the United States & Japan)"
+    cat results/multiple_reconstruction_japan/metric_table
+    cat results/multiple_reconstruction_united_states/metric_table
+    printf '%*s\n' 80 '' | tr ' ' '-'
+
+    echo "Experiment 4 - SE tolerance coefficient sweep and complexity ordering"
+    echo "robustness (TRC reconstruction for the United States)"
+    cat results/se_tolerance_coefficient_sweep_united_states/summary_table
+    cat results/complexity_ordering_robustness_united_states/summary_table
+    printf '%*s\n' 80 '' | tr ' ' '-'
+
+    echo "Experiment 5 - Global plastic production forecasting"
+    cat results/global_forecasting_grid_search/metric_table
+    cat results/global_forecasting_random_search/metric_table
+    cat results/global_forecasting_grid_search/time_table
+    cat results/global_forecasting_random_search/metric_table
+    printf '%*s\n' 80 '' | tr ' ' '-'
+
+    echo "Experiment 6 - PWG forecasting (Japan & the United States)"
+    cat results/multiple_forecasting_japan/metric_table
+    # cat results/multiple_forecasting_united_states/metric_table
+    printf '%*s\n' 80 '' | tr ' ' '-'
+
+    echo "Experiment 7 - NN PWG forecasting"
+    cat results/nn_forecasting/metric_table
+    printf '%*s\n' 80 '' | tr ' ' '-'
+
+    echo "Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)"
+    cat results/multiple_multivariate_forecasting_japan/metric_table
+    cat results/multiple_multivariate_forecasting_slovenia/metric_table
 }
