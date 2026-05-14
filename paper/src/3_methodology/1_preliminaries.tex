@@ -40,8 +40,12 @@ where \(C\) controls the penalty for large residuals and \(\epsilon\) defines th
 
 An MLP is a feedforward neural network consisting of multiple layers of neurons, allowing it to capture complex nonlinear relationships in the data. We use a simple architecture with one hidden layer and ReLU activation functions, along with the Adam optimizer~\cite{kingma2014adam}, which is sufficient for the forecasting tasks in this study. We also use early stopping based on validation performance to prevent overfitting.
 
-% A
-Additionally, we use isolation forest~\cite{liu2008isolation} as an unsupervised anomaly detection method to identify outliers in the data. An Isolation Forest constructs an ensemble of isolation trees, where each tree recursively selects a feature and a split value at random to partition the data.
+We also use isolation forest~\cite{liu2008isolation} as an anomaly detection method to identify outliers in the data. It works by isolating observations that differ significantly from normal observations using random partitioning. Because anomalies are few and distinct, they are isolated more quickly than normal data. The contamination rate determines the proportion of outliers in the data and should be set based on the level of noise in the data.
 
-% A
-Random forest~\cite{breiman2001random} is an ensemble learning method that trains many decision trees on samples and combines their predictions. At each split, the model considers only a random subset of features, which reduces correlation among trees and improves generalization compared with a single decision tree. The results from random forest should be interpreted as empirical associations instead of causal effects.
+Random forest~\cite{breiman2001random} is an ensemble learning method that trains many decision trees, each uses random part of the data. At each split, a random subset of features is used to reduce correlation among the trees. The final prediction is obtained by aggregating the predictions of all trees. In this study, random forest is used to analyze feature importance for a regression task, and for regression trees, node impurity is measured by the mean squared error of the target values within a node in \texttt{sklearn}. At each split, the impurity decrease is calculated as
+
+\begin{equation}
+	\Delta I = I_P - \frac{n_L}{n}I_L - \frac{n_R}{n}I_R,
+\end{equation}
+
+where \(I_P\) is the impurity of the parent node, \(I_L\) and \(I_R\) are the impurities of the left and right child nodes, respectively, and \(n_L\) and \(n_R\) are the number of samples in the left and right child nodes, respectively, and \(n = n_L + n_R\). The importance of a feature is then computed by summing the weighted impurity decreases over all splits where the feature is used, averaging this quantity across all trees in the forest, and normalizing the importances so that they sum to one.
