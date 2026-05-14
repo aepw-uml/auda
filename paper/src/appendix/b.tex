@@ -1,0 +1,35 @@
+\section[\appendixname~\thesection]{Evaluation Metrics}
+\label{sec:appendix_b}
+
+Let \(y_i\) be the ground truth value, \(\hat{y}_i\) be the predicted value, \(\bar{y}\) be the mean of the observed values, and \(n\) be the number of test samples.
+
+Mean absolute error (MAE) measures the average absolute residual:
+\begin{equation}
+	\text{MAE} = \frac{1}{n} \sum_{i=1}^{n} \left| y_i - \hat{y}_i \right|.
+\end{equation}
+
+Root mean squared error (RMSE) measures the square root of the average squared residual:
+\begin{equation}
+	\text{RMSE} = \sqrt{
+		\frac{1}{n}\sum_{i = 1}^{n} \left( y_i - \hat{y}_i \right)^2
+	}.
+\end{equation}
+
+The coefficient of determination \(R^2\) compares the residual sum of squares with the total variation in the observed values:
+\begin{equation}
+	R^2 = 1 - \frac{\sum_{i=1}^{n} \left( y_i - \hat{y}_i \right)^2}{\sum_{i=1}^{n} \left( y_i - \bar{y} \right)^2}.
+\end{equation}
+
+Weighted absolute percentage error (WAPE) divides the total absolute residual by the sum of the absolute observed values:
+\begin{equation}
+	\text{WAPE} = 100\% \times
+	\frac{\sum_{i=1}^{n} \left| y_i - \hat{y}_i \right|}
+	{\sum_{i=1}^{n} \left| y_i \right|}.
+\end{equation}
+
+Symmetric mean absolute percentage error (sMAPE) averages the absolute residual scaled by the sum of the absolute observed and predicted values:
+\begin{equation}
+	\text{sMAPE} = \frac{100\%}{n} \sum_{i=1}^{n}
+	\frac{2\left| y_i - \hat{y}_i \right|}
+	{|y_i| + |\hat{y}_i|}.
+\end{equation}

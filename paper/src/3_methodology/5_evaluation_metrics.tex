@@ -1,11 +1,7 @@
 \subsection{Evaluation}
 
-In this study, the evaluation metrics for the reconstruction and forecasting tasks include mean absolute error (MAE), root mean square error (RMSE), the coefficient of determination (\(R^2\)), weighted absolute percentage error (WAPE), and mean absolute percentage error (MAPE).
+In this study, the evaluation metrics for the reconstruction and forecasting tasks include mean absolute error (MAE), root mean square error (RMSE), the coefficient of determination (\(R^2\)), weighted absolute percentage error (WAPE), and symmetric mean absolute percentage error (sMAPE). The formulas for these metrics are presented in Appendix~\ref{sec:appendix_b}.
 
-Since the targets in these tasks are physical quantities, such as plastic waste generation measured in tonnes, WAPE is treated as the primary metric:
+Since the targets in these tasks are physical quantities, such as plastic waste generation measured in tonnes, WAPE is treated as the primary performance metric and for hyperparameter tuning across all reconstruction and forecasting tasks. Other metrics are reported for reference and to provide additional insights into model performance.
 
-\begin{equation}
-	\text{WAPE} = \frac{\sum_{i=1}^{n} |y_i - \hat{y}_i|}{\sum_{i=1}^{n} |y_i|}.
-\end{equation}
-
-MAPE, which is also a percentage-error metric, is less appropriate when there are very different scales of target values~\cite{hyndman2006another}. Therefore, WAPE is used as the primary performance metric and for hyperparameter tuning across all reconstruction and forecasting tasks. We report MAPE alongside WAPE only for pooled cross-country tasks, since the gap between the two helps reveal differences in target magnitudes across rows.
+Many datasets in this study have very few data points (less than 10), and there are only two held-out data points for the experiments. In this case the denominator of \(R^2\) is very small, and modest absolute errors produce a large negative \(R^2\), making it less meaningful than other metrics. For this reason, we do not report \(R^2\) in tasks with very small datasets.
