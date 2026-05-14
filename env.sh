@@ -66,7 +66,7 @@ function reproduce() {
         --seed=471 \
         --split_shuffle=1 \
         --validation_fraction=0.1 \
-        --anomaly_contamination=0.1,0.2,0.3,0.4,0.45,0.5
+        --anomaly_contamination=0.1,0.2,0.3,0.35,0.4,0.45,0.5
 
     # Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)
     auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
