@@ -32,17 +32,17 @@ def save_metric_table(
     """
 
     metric_table = Table(
-        headers=['Experiment', 'MAE', 'RMSE', 'R²', 'WAPE', 'MAPE']
+        headers=['Experiment', 'MAE', 'RMSE', 'R²', 'WAPE', 'sMAPE']
     )
     for name, metrics in metrics_dict.items():
-        [mae_str, rmse_str, r2_str, wape_str, mape_str] = metrics.item_strs()
+        [mae_str, rmse_str, r2_str, wape_str, smape_str] = metrics.item_strs()
         metric_table.append_row(
             name,
             mae_str,
             rmse_str,
             r2_str,
             wape_str,
-            mape_str,
+            smape_str,
         )
 
     metric_table_path: Path = dir_path / 'metric_table'
@@ -157,7 +157,7 @@ def save_metric_summary_plot(
     plot_means = means.copy()
     plot_stds = stds.copy()
     x_label = get_regression_metric_label(metric)
-    if metric in ('wape', 'mape'):
+    if metric in ('wape', 'smape'):
         plot_means *= 100
         plot_stds *= 100
         x_label = f'{x_label} (%)'

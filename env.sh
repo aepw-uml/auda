@@ -61,19 +61,22 @@ function reproduce() {
     auda workflow run YearPWG Forecasting --location=United\ States --seed=471
 
     # Experiment 7 - NN PWG forecasting
-    auda workflow run PWDrivers NNForecasting --seed=471 \
-        --use_isolation_forest=1 \
+    auda workflow run PWDrivers MultipleNNForecasting \
+        --num_experiments=8 \
+        --seed=471 \
+        --split_shuffle=1 \
+        --validation_fraction=0.1 \
         --anomaly_contamination=0.1,0.2,0.3,0.4,0.45,0.5
 
     # Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)
     auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
         --location=Japan \
         --workflow_name=multiple_multivariate_forecasting_japan \
-        --pretraining_anomaly_contamination=0.3
+        --pretraining_anomaly_contamination=0.4
     auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
         --location=Slovenia --enable_tuning=0 \
         --workflow_name=multiple_multivariate_forecasting_slovenia \
-        --pretraining_anomaly_contamination=0.3
+        --pretraining_anomaly_contamination=0.4
 }
 
 function move-figures() {

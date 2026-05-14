@@ -10,7 +10,6 @@ from common.metrics import (
 )
 from sklearn.metrics import (
     mean_absolute_error,
-    mean_absolute_percentage_error,
     mean_squared_error,
     r2_score,
 )
@@ -18,6 +17,30 @@ from step.model.isolation_forest import isolation_forest
 from step.plot.plotter import Plotter, RegressionPlotter
 
 from .experiment import Experiment
+
+
+def _symmetric_mean_absolute_percentage_error(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+) -> float:
+    """Calculates symmetric mean absolute percentage error.
+
+    Args:
+        y_true: Ground-truth target values.
+        y_pred: Predicted target values.
+
+    Returns:
+        The sMAPE value as a fraction, where 1.0 represents 100%.
+    """
+
+    denominator = np.abs(y_true) + np.abs(y_pred)
+    percentage_errors = np.divide(
+        2 * np.abs(y_true - y_pred),
+        denominator,
+        out=np.zeros_like(denominator, dtype=float),
+        where=denominator != 0,
+    )
+    return float(np.mean(percentage_errors))
 
 
 class RegressionExperiment(Experiment):
@@ -190,7 +213,7 @@ class RegressionExperiment(Experiment):
 
         This implementation predicts on ``X_test`` and stores a
         ``RegressionMetrics`` instance in ``self.metrics`` containing MAE,
-        RMSE, R-squared, WAPE, and MAPE.
+        RMSE, R-squared, WAPE, and sMAPE.
 
         Raises:
             ValueError: If the test split or trained model is unavailable.
@@ -204,7 +227,7 @@ class RegressionExperiment(Experiment):
         mae = mean_absolute_error(y_test, y_pred)
         rmse = mean_squared_error(y_test, y_pred) ** 0.5
         r2 = r2_score(y_test, y_pred)
-        mape = mean_absolute_percentage_error(y_test, y_pred)
+        smape = _symmetric_mean_absolute_percentage_error(y_test, y_pred)
         y_scale = float(np.abs(y_test).sum())
         if y_scale == 0.0:
             wape = 0.0
@@ -212,7 +235,7 @@ class RegressionExperiment(Experiment):
             wape = float(np.abs(y_test - y_pred).sum() / y_scale)
 
         self.context['metrics'] = RegressionMetrics(
-            mae=mae, rmse=rmse, r2=r2, wape=wape, mape=mape
+            mae=mae, rmse=rmse, r2=r2, wape=wape, smape=smape
         )
 
     @override

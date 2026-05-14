@@ -11,6 +11,116 @@ from sklearn.preprocessing import StandardScaler
 from torch import nn
 
 TargetTransformName = Literal['none', 'log1p']
+_SKEWED_DRIVER_FEATURE_NAMES = frozenset(
+    {'rural population', 'urban population', 'gdp'}
+)
+_NN_TUNING_BATCH_SIZES = (16, 32, 64)
+_NN_TUNING_LEARNING_RATES = (1e-4, 3e-4, 1e-3, 3e-3)
+_NN_TUNING_WEIGHT_DECAYS = (0.0, 1e-5, 1e-4, 1e-3)
+
+
+class _NNForecastingFeatureScaler:
+    """Scales NN forecasting inputs after compressing skewed driver features."""
+
+    def __init__(self, log_feature_indices: list[int]) -> None:
+        """Initializes the scaler.
+
+        Args:
+            log_feature_indices: Feature indices to transform with ``log1p``
+                before standard scaling.
+        """
+
+        self.log_feature_indices = np.array(log_feature_indices, dtype=int)
+        self.standard_scaler = StandardScaler()
+
+    @classmethod
+    def from_schema(
+        cls,
+        input_dim: int,
+        schema: DatasetSchema | None,
+    ) -> '_NNForecastingFeatureScaler':
+        """Builds a scaler from dataset schema feature names.
+
+        Args:
+            input_dim: Number of input features expected by the model.
+            schema: Optional dataset schema used to identify skewed driver
+                columns.
+
+        Returns:
+            A configured neural-network feature scaler.
+        """
+
+        log_feature_indices: list[int] = []
+        if schema is not None:
+            for index, feature_name in enumerate(schema.feature_names):
+                if index >= input_dim:
+                    break
+
+                if (
+                    feature_name.strip().lower()
+                    in _SKEWED_DRIVER_FEATURE_NAMES
+                ):
+                    log_feature_indices.append(index)
+
+        return cls(log_feature_indices)
+
+    def _transform_skewed_features(self, X: np.ndarray) -> np.ndarray:
+        """Applies ``log1p`` to configured skewed feature columns.
+
+        Args:
+            X: Feature matrix on the original input scale.
+
+        Returns:
+            Feature matrix with skewed columns transformed.
+
+        Raises:
+            ValueError: If a log-transformed feature contains values below -1.
+        """
+
+        X_transformed = X.astype(float, copy=True)
+        if self.log_feature_indices.size == 0:
+            return X_transformed
+
+        log_values = X_transformed[:, self.log_feature_indices]
+        if np.any(log_values < -1):
+            raise ValueError(
+                'NN forecasting log feature scaling requires values >= -1.'
+            )
+
+        X_transformed[:, self.log_feature_indices] = np.log1p(log_values)
+        return X_transformed
+
+    def fit_transform(self, X: np.ndarray) -> np.ndarray:
+        """Fits the scaler and transforms the feature matrix.
+
+        Args:
+            X: Feature matrix on the original input scale.
+
+        Returns:
+            Feature matrix in the scaled model input space.
+        """
+
+        return cast(
+            np.ndarray,
+            self.standard_scaler.fit_transform(
+                self._transform_skewed_features(X)
+            ),
+        )
+
+    def transform(self, X: np.ndarray) -> np.ndarray:
+        """Transforms the feature matrix with the fitted scaler.
+
+        Args:
+            X: Feature matrix on the original input scale.
+
+        Returns:
+            Feature matrix in the scaled model input space.
+        """
+
+        return cast(
+            np.ndarray,
+            self.standard_scaler.transform(self._transform_skewed_features(X)),
+        )
 
 
 def _resolve_target_transform(value: object) -> TargetTransformName:
@@ -330,7 +440,7 @@ class _ForecastingMLP(nn.Module):
             nn.ReLU(),
             nn.Linear(16, 1),
         )
-        self.x_scaler: StandardScaler | None = None
+        self.x_scaler: _NNForecastingFeatureScaler | None = None
         self.y_scaler: StandardScaler | None = None
         self.target_transform: TargetTransformName = 'none'
 
@@ -380,6 +490,17 @@ class _ForecastingMLP(nn.Module):
 
 
 class NNForecastingExperiment(RegressionExperiment):
+    @override
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        train_size: float = 0.9,
+        seed: int = 471,
+    ) -> None:
+        super().__init__(name, description, train_size, seed)
+        self.context['split_shuffle'] = True
+
     def _get_stage_context_value(
         self,
         key: str,
@@ -470,7 +591,11 @@ class NNForecastingExperiment(RegressionExperiment):
             model = _ForecastingMLP(input_dim=input_dim)
 
         # Refit scalers for each stage while preserving the learned weights.
-        model.x_scaler = StandardScaler()
+        schema = cast(DatasetSchema | None, self.context.get('schema'))
+        model.x_scaler = _NNForecastingFeatureScaler.from_schema(
+            input_dim,
+            schema,
+        )
         model.y_scaler = StandardScaler()
         model.target_transform = target_transform
         return model
@@ -505,7 +630,7 @@ class NNForecastingExperiment(RegressionExperiment):
         validation_fraction = float(
             self._get_stage_context_value(
                 'validation_fraction',
-                0.2,
+                0.1,
                 stage_name=stage_name,
             )  # type: ignore[assignment]
         )
@@ -557,7 +682,7 @@ class NNForecastingExperiment(RegressionExperiment):
             target_transform=target_transform,
             existing_model=model,
         )
-        x_scaler = cast(StandardScaler, model.x_scaler)
+        x_scaler = cast(_NNForecastingFeatureScaler, model.x_scaler)
         y_scaler = cast(StandardScaler, model.y_scaler)
 
         self.log(
@@ -661,7 +786,7 @@ class NNForecastingExperiment(RegressionExperiment):
 
         default_num_epochs = int(self.context.get('num_epochs', 500))
         validation_fraction = float(
-            self.context.get('validation_fraction', 0.2)
+            self.context.get('validation_fraction', 0.1)
         )
         tuning_num_epochs = int(
             self.context.get('tuning.num_epochs', min(100, default_num_epochs))
@@ -694,38 +819,30 @@ class NNForecastingExperiment(RegressionExperiment):
 
         candidate_configs = [
             {
-                'batch_size': 32,
-                'learning_rate': 3e-4,
+                'batch_size': batch_size,
+                'learning_rate': learning_rate,
                 'num_epochs': tuning_num_epochs,
-                'weight_decay': 0.0,
-            },
-            {
-                'batch_size': 32,
-                'learning_rate': 1e-3,
-                'num_epochs': tuning_num_epochs,
-                'weight_decay': 1e-4,
-            },
-            {
-                'batch_size': 64,
-                'learning_rate': 3e-4,
-                'num_epochs': tuning_num_epochs,
-                'weight_decay': 1e-4,
-            },
-            {
-                'batch_size': 64,
-                'learning_rate': 1e-3,
-                'num_epochs': tuning_num_epochs,
-                'weight_decay': 1e-3,
-            },
+                'weight_decay': weight_decay,
+            }
+            for batch_size in _NN_TUNING_BATCH_SIZES
+            for learning_rate in _NN_TUNING_LEARNING_RATES
+            for weight_decay in _NN_TUNING_WEIGHT_DECAYS
         ]
 
-        self.log('Tuning neural network with candidate trials.')
+        self.log(
+            'Tuning neural network with '
+            f'{len(candidate_configs)} grid-search trials.'
+        )
 
         best_config: dict[str, int | float] | None = None
         best_validation_loss = float('inf')
 
         for config in candidate_configs:
-            x_scaler = StandardScaler()
+            schema = cast(DatasetSchema | None, self.context.get('schema'))
+            x_scaler = _NNForecastingFeatureScaler.from_schema(
+                X_train.shape[1],
+                schema,
+            )
             y_scaler = StandardScaler()
 
             X_subtrain_scaled = x_scaler.fit_transform(X_subtrain)

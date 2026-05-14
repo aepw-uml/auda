@@ -16,6 +16,7 @@ from .multiple_forecasting_workflow import MultipleForecastingWorkflow
 from .multiple_multivariate_forecasting_workflow import (
     MultipleMultivariateForecastingWorkflow,
 )
+from .multiple_nn_forecasting_workflow import MultipleNNForecastingWorkflow
 from .multiple_reconstruction_workflow import MultipleReconstructionWorkflow
 from .multivariate_forecasting_workflow import MultivariateForecastingWorkflow
 from .nn_forecasting_workflow import NNForecastingWorkflow
@@ -29,6 +30,7 @@ __all__ = [
     'ForecastingWorkflow',
     'MultipleForecastingWorkflow',
     'MultipleMultivariateForecastingWorkflow',
+    'MultipleNNForecastingWorkflow',
     'MultipleReconstructionWorkflow',
     'MultivariateForecastingWorkflow',
     'NNForecastingWorkflow',

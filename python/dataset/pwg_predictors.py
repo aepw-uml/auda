@@ -51,6 +51,7 @@ class PWGPredictors(DatasetFetcher):
         for i in range(len(X)):
             X[i].append(X[i][3] / X[i][2])
             X[i].append(X[i][4] / X[i][2])
+            X[i].append(X[i][0] / X[i][1])
 
         return Dataset(X=np.array(X), y=np.array(y))
 
@@ -65,8 +66,9 @@ class PWGPredictors(DatasetFetcher):
                 'Rural Population',
                 'Urban Population Ratio',
                 'Rural Population Ratio',
+                'GDP Per Capita',
             ],
-            feature_units=['', 'US Dollars', '', '', '', '', '', ''],
+            feature_units=['', 'US Dollars', '', '', '', '', '', '', ''],
             target_names=['Plastic Waste Generation'],
             target_units=['Metric Tonnes'],
         )

@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 from typing import Literal
 
-RegressionMetricName = Literal['mae', 'rmse', 'r2', 'wape', 'mape']
+RegressionMetricName = Literal['mae', 'rmse', 'r2', 'wape', 'smape']
 REGRESSION_METRIC_NAMES: tuple[RegressionMetricName, ...] = (
     'mae',
     'rmse',
     'r2',
     'wape',
-    'mape',
+    'smape',
 )
 
 _REGRESSION_METRIC_LABELS: dict[RegressionMetricName, str] = {
@@ -15,7 +15,7 @@ _REGRESSION_METRIC_LABELS: dict[RegressionMetricName, str] = {
     'rmse': 'RMSE',
     'r2': 'R²',
     'wape': 'WAPE',
-    'mape': 'MAPE',
+    'smape': 'sMAPE',
 }
 
 
@@ -28,34 +28,34 @@ class RegressionMetrics:
         rmse: Root Mean Squared Error.
         r2: R-squared score.
         wape: Weighted Absolute Percentage Error.
-        mape: Mean Absolute Percentage Error.
+        smape: Symmetric Mean Absolute Percentage Error.
     """
 
     mae: float = 0.0
     rmse: float = 0.0
     r2: float = 0.0
     wape: float = 0.0
-    mape: float = 0.0
+    smape: float = 0.0
 
     def __repr__(self) -> str:
         """Returns a compact string representation of the metric values."""
 
-        [mae_str, rmse_str, r2_str, wape_str, mape_str] = self.item_strs()
+        [mae_str, rmse_str, r2_str, wape_str, smape_str] = self.item_strs()
 
         return (
             f'Metrics(mae={mae_str}, rmse={rmse_str}, '
-            f'r2={r2_str}, wape={wape_str}, mape={mape_str})'
+            f'r2={r2_str}, wape={wape_str}, smape={smape_str})'
         )
 
     def item_strs(self) -> list[str]:
-        """Formats metric values as MAE, RMSE, R², WAPE, and MAPE."""
+        """Formats metric values as MAE, RMSE, R², WAPE, and sMAPE."""
 
         return [
             f'{self.mae:.3e}'.replace('e+', 'e'),
             f'{self.rmse:.3e}'.replace('e+', 'e'),
             f'{self.r2:.3f}',
             f'{self.wape * 100:.2f}%',
-            f'{self.mape * 100:.2f}%',
+            f'{self.smape * 100:.2f}%',
         ]
 
     def get_value_by_name(self, name: RegressionMetricName) -> float:
@@ -77,8 +77,8 @@ class RegressionMetrics:
                 return self.r2
             case 'wape':
                 return self.wape
-            case 'mape':
-                return self.mape
+            case 'smape':
+                return self.smape
 
 
 def average_regression_metrics(
@@ -102,7 +102,7 @@ def average_regression_metrics(
         rmse=sum(m.rmse for m in all_regression_metrics) / n,
         r2=sum(m.r2 for m in all_regression_metrics) / n,
         wape=sum(m.wape for m in all_regression_metrics) / n,
-        mape=sum(m.mape for m in all_regression_metrics) / n,
+        smape=sum(m.smape for m in all_regression_metrics) / n,
     )
 
 
@@ -147,7 +147,7 @@ def std_regression_metrics(
         rmse=sample_std('rmse'),
         r2=sample_std('r2'),
         wape=sample_std('wape'),
-        mape=sample_std('mape'),
+        smape=sample_std('smape'),
     )
 
 
@@ -182,7 +182,7 @@ def format_regression_metric_value(
             return f'{value:.3e}'.replace('e+', 'e')
         case 'r2':
             return f'{value:.3f}'
-        case 'wape' | 'mape':
+        case 'wape' | 'smape':
             return f'{value * 100:.2f}%'
 
 

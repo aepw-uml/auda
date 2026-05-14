@@ -75,6 +75,12 @@ def run_workflow(ctx: Context, dataset_name: str, workflow: str) -> None:
             from workflow.nn_forecasting_workflow import NNForecastingWorkflow
 
             NNForecastingWorkflow().run(dataset, schema, **context)
+        case 'MultipleNNForecasting':
+            from workflow.multiple_nn_forecasting_workflow import (
+                MultipleNNForecastingWorkflow,
+            )
+
+            MultipleNNForecastingWorkflow().run(dataset, schema, **context)
         case 'MultivariateForecasting':
             from workflow.multivariate_forecasting_workflow import (
                 MultivariateForecastingWorkflow,
