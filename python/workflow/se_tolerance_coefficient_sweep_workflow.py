@@ -207,6 +207,36 @@ def summarize_trials(
     return trial_summaries
 
 
+def select_candidates(
+    trial_summaries: list[TrialSummary],
+    se_tolerance_coefficient: float,
+) -> list[TrialSummary]:
+    """Returns the trials within the coefficient-adjusted threshold.
+
+    Args:
+        trial_summaries: Summaries of the evaluated trials.
+        se_tolerance_coefficient: Multiplier applied to the standard error of
+            the best-mean trial.
+
+    Returns:
+        The candidate trial summaries whose mean score is within the threshold.
+    """
+
+    if not trial_summaries:
+        raise ValueError('No trials provided.')
+
+    best_mean_trial = min(trial_summaries, key=lambda trial: trial.mean_score)
+    threshold = (
+        math.inf
+        if math.isinf(se_tolerance_coefficient)
+        else best_mean_trial.mean_score
+        + se_tolerance_coefficient * best_mean_trial.standard_error
+    )
+    return [
+        trial for trial in trial_summaries if trial.mean_score <= threshold
+    ]
+
+
 def select_trial(
     trial_summaries: list[TrialSummary],
     complexity_key: Callable[[Hyperparameters], tuple[float, ...]],
@@ -225,19 +255,10 @@ def select_trial(
         The selected trial summary.
     """
 
-    if not trial_summaries:
-        raise ValueError('No trials provided.')
-
-    best_mean_trial = min(trial_summaries, key=lambda trial: trial.mean_score)
-    threshold = (
-        math.inf
-        if math.isinf(se_tolerance_coefficient)
-        else best_mean_trial.mean_score
-        + se_tolerance_coefficient * best_mean_trial.standard_error
+    candidates = select_candidates(
+        trial_summaries=trial_summaries,
+        se_tolerance_coefficient=se_tolerance_coefficient,
     )
-    candidates = [
-        trial for trial in trial_summaries if trial.mean_score <= threshold
-    ]
     return min(
         candidates,
         key=lambda trial: complexity_key(trial.hyperparameters),

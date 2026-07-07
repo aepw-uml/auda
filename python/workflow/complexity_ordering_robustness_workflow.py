@@ -17,6 +17,7 @@ from workflow.se_tolerance_coefficient_sweep_workflow import (
     format_hyperparameters,
     format_percentage,
     save_csv,
+    select_candidates,
     select_trial,
     summarize_trials,
 )
@@ -31,6 +32,7 @@ class ComplexityOrderingRecord:
     run_index: int
     experiment_name: str
     se_tolerance_coefficient: float
+    num_candidate_configurations: int
     original_hyperparameters: Hyperparameters
     flipped_hyperparameters: Hyperparameters
     original_mean_wape: float
@@ -93,11 +95,18 @@ class ComplexityOrderingRobustnessWorkflow(Workflow):
                     complexity_key=flipped_complexity_key,
                     se_tolerance_coefficient=se_tolerance_coefficient,
                 )
+                # The candidate set is fixed by the mean-score threshold and is
+                # independent of the ordering direction, so both keys share it.
+                candidates = select_candidates(
+                    trial_summaries=original_summaries,
+                    se_tolerance_coefficient=se_tolerance_coefficient,
+                )
                 records.append(
                     ComplexityOrderingRecord(
                         run_index=run_index,
                         experiment_name=experiment.name,
                         se_tolerance_coefficient=se_tolerance_coefficient,
+                        num_candidate_configurations=len(candidates),
                         original_hyperparameters=(
                             original_selection.hyperparameters
                         ),
@@ -163,6 +172,9 @@ def save_records(
             'se_tolerance_coefficient': format_float(
                 record.se_tolerance_coefficient
             ),
+            'num_candidate_configurations': str(
+                record.num_candidate_configurations
+            ),
             'original_hyperparameters': format_hyperparameters(
                 record.original_hyperparameters
             ),
@@ -201,6 +213,7 @@ def save_summary_table(
             'Experiment',
             'c_SE',
             'Selection Units',
+            'Mean Candidate Configs',
             'Changed',
             'Changed Rate',
             'Mean Original WAPE',
@@ -218,6 +231,10 @@ def save_summary_table(
             if record.changed_by_flipped_ordering
         )
         coefficient = experiment_records[0].se_tolerance_coefficient
+        mean_num_candidates = mean(
+            record.num_candidate_configurations
+            for record in experiment_records
+        )
         mean_original_wape = mean(
             record.original_mean_wape for record in experiment_records
         )
@@ -234,6 +251,7 @@ def save_summary_table(
             experiment_name,
             format_float(coefficient),
             num_records,
+            f'{mean_num_candidates:.2f}',
             changed_count,
             format_percentage(changed_count / num_records),
             format_percentage(mean_original_wape),
