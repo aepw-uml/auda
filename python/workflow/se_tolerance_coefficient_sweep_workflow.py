@@ -43,6 +43,7 @@ class SelectionRecord:
     run_index: int
     experiment_name: str
     se_tolerance_coefficient: float
+    num_candidate_configurations: int
     selected_hyperparameters: Hyperparameters
     selected_mean_score: float
     selected_complexity_rank: int
@@ -97,6 +98,10 @@ class SEToleranceCoefficientSweepWorkflow(Workflow):
                     se_tolerance_coefficient=0.0,
                 )
                 for coefficient in coefficients:
+                    candidates = select_candidates(
+                        trial_summaries=trial_summaries,
+                        se_tolerance_coefficient=coefficient,
+                    )
                     selected_record = select_trial(
                         trial_summaries=trial_summaries,
                         complexity_key=complexity_key,
@@ -107,6 +112,7 @@ class SEToleranceCoefficientSweepWorkflow(Workflow):
                             run_index=run_index,
                             experiment_name=experiment.name,
                             se_tolerance_coefficient=coefficient,
+                            num_candidate_configurations=len(candidates),
                             selected_hyperparameters=(
                                 selected_record.hyperparameters
                             ),
@@ -320,6 +326,9 @@ def save_selection_records(
             'se_tolerance_coefficient': format_float(
                 record.se_tolerance_coefficient
             ),
+            'num_candidate_configurations': str(
+                record.num_candidate_configurations
+            ),
             'selected_hyperparameters': format_hyperparameters(
                 record.selected_hyperparameters
             ),
@@ -367,6 +376,7 @@ def save_summary_table(
             'Experiment',
             'c_SE',
             'Selection Units',
+            'Mean Candidate Configs',
             'Changed',
             'Changed Rate',
             'Mean Best WAPE',
@@ -380,6 +390,9 @@ def save_summary_table(
         num_records = len(records)
         changed_count = sum(
             1 for record in records if record.changed_from_best_mean
+        )
+        mean_num_candidates = mean(
+            record.num_candidate_configurations for record in records
         )
         mean_best_wape = mean(record.best_mean_score for record in records)
         mean_selected_wape = mean(
@@ -396,6 +409,7 @@ def save_summary_table(
             experiment_name,
             format_coefficient(coefficient),
             num_records,
+            f'{mean_num_candidates:.2f}',
             changed_count,
             format_percentage(changed_count / num_records),
             format_percentage(mean_best_wape),
