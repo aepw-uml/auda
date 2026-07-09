@@ -35,9 +35,11 @@ function reproduce() {
     # Experiment 4 - SE tolerance coefficient sweep and complexity ordering
     # robustness (TRC reconstruction for the United States)
     auda workflow run YearTRC SEToleranceCoefficientSweep \
-        --location=United\ States --seed=471
+        --location=United\ States --seed=471 \
+        --se_tolerance_coefficients=0,0.01,0.1,0.5,1
     auda workflow run YearTRC ComplexityOrderingRobustness \
-        --location=United\ States --seed=471 --se_tolerance_coefficient=0.1
+        --location=United\ States --seed=471 \
+        --se_tolerance_coefficient=0.01
 
     # Experiment 5 - Global plastic production forecasting
     auda workflow run GlobalPlasticsProduction MultipleForecasting --seed=471 \
