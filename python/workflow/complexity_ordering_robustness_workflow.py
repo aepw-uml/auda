@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from common.dataset import Dataset, DatasetSchema
 from common.files import save_content_to_file
 from common.workflow import Workflow
-from experiment.reconstruction_task import run_reconstruction_tasks
+from experiment.imputation_task import run_imputation_tasks
 from step.tuner.types import Hyperparameters
 from util.names import to_snake
 from util.table import Table
@@ -62,7 +62,7 @@ class ComplexityOrderingRobustnessWorkflow(Workflow):
             )
         )
 
-        tasks, _ = run_reconstruction_tasks(
+        tasks, _ = run_imputation_tasks(
             num_experiments, dataset, schema, context, seed=seed
         )
 

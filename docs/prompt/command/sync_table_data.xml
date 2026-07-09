@@ -11,15 +11,15 @@
             <!-- Experiment 3 -->
             <pair>
                 <tex>
-                    paper/src/4_experiments/tables/reconstruction_japan_trc.tex
+                    paper/src/4_experiments/tables/imputation_japan_trc.tex
                 </tex>
-                <result>results/multiple_reconstruction_japan/metric_table</result>
+                <result>results/multiple_imputation_japan/metric_table</result>
             </pair>
             <pair>
                 <tex>
-                    paper/src/4_experiments/tables/reconstruction_united_states_trc.tex
+                    paper/src/4_experiments/tables/imputation_united_states_trc.tex
                 </tex>
-                <result>results/multiple_reconstruction_united_states/metric_table</result>
+                <result>results/multiple_imputation_united_states/metric_table</result>
             </pair>
 
             <!-- Experiment 4 -->

@@ -17,10 +17,10 @@ from .multiple_multivariate_forecasting_workflow import (
     MultipleMultivariateForecastingWorkflow,
 )
 from .multiple_nn_forecasting_workflow import MultipleNNForecastingWorkflow
-from .multiple_reconstruction_workflow import MultipleReconstructionWorkflow
+from .multiple_imputation_workflow import MultipleImputationWorkflow
 from .multivariate_forecasting_workflow import MultivariateForecastingWorkflow
 from .nn_forecasting_workflow import NNForecastingWorkflow
-from .reconstruction_workflow import ReconstructionWorkflow
+from .imputation_workflow import ImputationWorkflow
 from .se_tolerance_coefficient_sweep_workflow import (
     SEToleranceCoefficientSweepWorkflow,
 )
@@ -31,9 +31,9 @@ __all__ = [
     'MultipleForecastingWorkflow',
     'MultipleMultivariateForecastingWorkflow',
     'MultipleNNForecastingWorkflow',
-    'MultipleReconstructionWorkflow',
+    'MultipleImputationWorkflow',
     'MultivariateForecastingWorkflow',
     'NNForecastingWorkflow',
-    'ReconstructionWorkflow',
+    'ImputationWorkflow',
     'SEToleranceCoefficientSweepWorkflow',
 ]

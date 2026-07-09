@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from common.dataset import Dataset, DatasetSchema
 from common.files import save_content_to_file
 from common.workflow import Workflow
-from experiment.reconstruction_task import run_reconstruction_tasks
+from experiment.imputation_task import run_imputation_tasks
 from step.evaluator.one_standard_error import standard_error
 from step.tuner.types import Hyperparameters, Trial
 from util.names import to_snake
@@ -63,7 +63,7 @@ class SEToleranceCoefficientSweepWorkflow(Workflow):
             context.get('se_tolerance_coefficients')
         )
 
-        tasks, _ = run_reconstruction_tasks(
+        tasks, _ = run_imputation_tasks(
             num_experiments, dataset, schema, context, seed=seed
         )
 
@@ -281,7 +281,7 @@ def build_trial_rows(
     """Builds CSV rows for trial-level WAPE scores.
 
     Args:
-        run_index: Zero-based repeated reconstruction run index.
+        run_index: Zero-based repeated imputation run index.
         experiment_name: Name of the tuned experiment.
         hyperparameter_names: Names corresponding to the hyperparameter vector.
         trials: Tuning trials containing fold metrics.

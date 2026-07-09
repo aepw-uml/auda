@@ -18,7 +18,7 @@ from step.tuner.types import (
 )
 
 
-class ReconstructionExperiment(RegressionExperiment):
+class ImputationExperiment(RegressionExperiment):
     @override
     def __init__(
         self,
@@ -34,9 +34,9 @@ class ReconstructionExperiment(RegressionExperiment):
 
     @override
     def split(self) -> None:
-        """Splits reconstruction data while keeping boundary samples in train.
+        """Splits imputation data while keeping boundary samples in train.
 
-        Reconstruction models need observed samples on both ends of the
+        Imputation models need observed samples on both ends of the
         sequence, so the first and last original samples are always assigned to
         the training split. Test samples are selected only from interior
         positions.
@@ -57,7 +57,7 @@ class ReconstructionExperiment(RegressionExperiment):
         n_samples = self.X.shape[0]
         if n_samples < 3:
             raise ValueError(
-                'Reconstruction experiments require at least 3 samples when '
+                'Imputation experiments require at least 3 samples when '
                 'evaluation is enabled.'
             )
 

@@ -2,13 +2,13 @@
 
 \subsubsection{Baseline Models}
 
-Baseline models are simple models used as a reference to compare the performance of more complex models. In this study, we use linear interpolation and moving average as baseline models for time series reconstruction. Linear interpolation estimates missing values by connecting the nearest known data points with a straight line. Moving average interpolation estimates missing values by averaging the known data points within a specified window around the missing value.
+Baseline models are simple models used as a reference to compare the performance of more complex models. In this study, we use linear interpolation and moving average as baseline models for time series imputation. Linear interpolation estimates missing values by connecting the nearest known data points with a straight line. Moving average interpolation estimates missing values by averaging the known data points within a specified window around the missing value.
 
 For time series forecasting tasks, we use naive persistence, drift, and Holt-style exponential smoothing~\cite{holt2004forecasting}. Naive persistence assumes that the future value of a variable will be equal to its most recent observed value. Drift extrapolates the trend observed in the historical data into the future. Holt-style exponential smoothing captures both level and trend components in the data, allowing for more flexible forecasting.
 
 \subsubsection{Statistical Models}
 
-Statistical models use statistical methods to analyze and predict data. In this study, we use cubic spline interpolation~\cite{de1978practical} in reconstruction tasks, which fits a piecewise cubic function to the data while ensuring smoothness at the known data points. For forecasting tasks, we use local Theil--Sen regression~\cite{sen1968estimates}, a non-parametric method that estimates the slope of a trend by taking the median of all pairwise slopes in the data, and a non-seasonal auto-ARIMA model~\cite{box2015time}, a time series forecasting method that automatically selects autoregressive, differencing, and moving-average orders. Since ARIMA models usually perform poorly on tiny datasets, they are mostly used as a baseline in many experiments involving small datasets.
+Statistical models use statistical methods to analyze and predict data. In this study, we use cubic spline interpolation~\cite{de1978practical} in imputation tasks, which fits a piecewise cubic function to the data while ensuring smoothness at the known data points. For forecasting tasks, we use local Theil--Sen regression~\cite{sen1968estimates}, a non-parametric method that estimates the slope of a trend by taking the median of all pairwise slopes in the data, and a non-seasonal auto-ARIMA model~\cite{box2015time}, a time series forecasting method that automatically selects autoregressive, differencing, and moving-average orders. Since ARIMA models usually perform poorly on tiny datasets, they are mostly used as a baseline in many experiments involving small datasets.
 
 The ARIMA model is used as a reference in this study.
 

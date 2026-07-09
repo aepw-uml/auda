@@ -9,8 +9,8 @@ from common.experiment.persistence import (
     save_plots,
     save_time_table,
 )
-from common.experiment.reconstruction_experiment import (
-    ReconstructionExperiment,
+from common.experiment.imputation_experiment import (
+    ImputationExperiment,
 )
 from common.metrics import RegressionMetrics, average_regression_metrics
 from common.task import Task
@@ -34,57 +34,57 @@ from step.plot.support_vector_regression import SupportVectorRegressionPlotter
 from step.plot.theil_sen_regression import TheilSenRegressionPlotter
 
 
-def get_linear_interpolation_reconstruction(
+def get_linear_interpolation_imputation(
     **_,
-) -> ReconstructionExperiment:
-    """Builds a linear-interpolation reconstruction experiment."""
+) -> ImputationExperiment:
+    """Builds a linear-interpolation imputation experiment."""
 
-    return ReconstructionExperiment(
+    return ImputationExperiment(
         name='Linear Interpolation',
         description=(
-            'Reconstruct the original time series with linear interpolation.'
+            'Impute the original time series with linear interpolation.'
         ),
         regressor_cls=LinearInterpolation,
     )
 
 
-def get_moving_average_interpolation_reconstruction(
+def get_moving_average_interpolation_imputation(
     **_,
-) -> ReconstructionExperiment:
-    """Builds a moving-average-interpolation reconstruction experiment."""
+) -> ImputationExperiment:
+    """Builds a moving-average-interpolation imputation experiment."""
 
-    return ReconstructionExperiment(
+    return ImputationExperiment(
         name='Moving Average Interpolation',
         description=(
-            'Reconstruct the original time series with moving average '
+            'Impute the original time series with moving average '
             'interpolation.'
         ),
         regressor_cls=MovingAverageInterpolation,
     )
 
 
-def get_cubic_spline_interpolation_reconstruction(
+def get_cubic_spline_interpolation_imputation(
     **_,
-) -> ReconstructionExperiment:
-    """Builds a cubic-spline-interpolation reconstruction experiment."""
+) -> ImputationExperiment:
+    """Builds a cubic-spline-interpolation imputation experiment."""
 
-    return ReconstructionExperiment(
+    return ImputationExperiment(
         name='Cubic Spline Interpolation',
         description=(
-            'Reconstruct the original time series with cubic spline '
+            'Impute the original time series with cubic spline '
             'interpolation.'
         ),
         regressor_cls=CubicSpline,
     )
 
 
-def get_theil_sen_reconstruction(**_) -> ReconstructionExperiment:
-    """Builds a Theil-Sen reconstruction experiment."""
+def get_theil_sen_imputation(**_) -> ImputationExperiment:
+    """Builds a Theil-Sen imputation experiment."""
 
-    experiment = ReconstructionExperiment(
+    experiment = ImputationExperiment(
         name='Theil-Sen Regression',
         description=(
-            'Reconstruct the original time series with robust Theil-Sen '
+            'Impute the original time series with robust Theil-Sen '
             'regression.'
         ),
         regressor_cls=TheilSenRegression,
@@ -97,15 +97,15 @@ def get_theil_sen_reconstruction(**_) -> ReconstructionExperiment:
     return experiment
 
 
-def get_ridge_regression_reconstruction(
+def get_ridge_regression_imputation(
     **_,
-) -> ReconstructionExperiment:
-    """Builds a ridge-regression reconstruction experiment."""
+) -> ImputationExperiment:
+    """Builds a ridge-regression imputation experiment."""
 
-    experiment = ReconstructionExperiment(
+    experiment = ImputationExperiment(
         name='Ridge Regression',
         description=(
-            'Reconstruct the original time series with ridge regression.'
+            'Impute the original time series with ridge regression.'
         ),
         regressor_cls=RidgeRegression,
     )
@@ -124,15 +124,15 @@ def get_ridge_regression_reconstruction(
     return experiment
 
 
-def get_gaussian_process_reconstruction(
+def get_gaussian_process_imputation(
     **_,
-) -> ReconstructionExperiment:
-    """Builds a Gaussian-process reconstruction experiment."""
+) -> ImputationExperiment:
+    """Builds a Gaussian-process imputation experiment."""
 
-    experiment = ReconstructionExperiment(
+    experiment = ImputationExperiment(
         name='Gaussian Process Regression',
         description=(
-            'Reconstruct the original time series with Gaussian process '
+            'Impute the original time series with Gaussian process '
             'regression.'
         ),
         regressor_cls=GaussianProcessRegression,
@@ -152,15 +152,15 @@ def get_gaussian_process_reconstruction(
     return experiment
 
 
-def get_support_vector_regression_reconstruction(
+def get_support_vector_regression_imputation(
     **context: str,
-) -> ReconstructionExperiment:
-    """Builds a support-vector-regression reconstruction experiment."""
+) -> ImputationExperiment:
+    """Builds a support-vector-regression imputation experiment."""
 
-    experiment = ReconstructionExperiment(
+    experiment = ImputationExperiment(
         name='Support Vector Regression',
         description=(
-            'Reconstruct the original time series with support vector '
+            'Impute the original time series with support vector '
             'regression.'
         ),
         regressor_cls=SupportVectorRegression,
@@ -206,8 +206,8 @@ def get_support_vector_regression_reconstruction(
     return experiment
 
 
-class ReconstructionTask(Task):
-    """Runs the configured reconstruction experiments for one task."""
+class ImputationTask(Task):
+    """Runs the configured imputation experiments for one task."""
 
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema) -> None:
@@ -230,7 +230,7 @@ class ReconstructionTask(Task):
         self.logger.info(f'Using metric "{metric}" for hyperparameter tuning.')
 
         for experiment in self.experiments:
-            experiment = cast(ReconstructionExperiment, experiment)
+            experiment = cast(ImputationExperiment, experiment)
             experiment.seed = seed
             experiment.context['schema'] = schema
 
@@ -243,20 +243,20 @@ class ReconstructionTask(Task):
 
     @override
     def check_dataset(self, dataset: Dataset) -> None:
-        """Validates the dataset required by reconstruction experiments.
+        """Validates the dataset required by imputation experiments.
 
         Args:
             dataset: Dataset containing the feature matrix and target vector.
 
         Raises:
-            ValueError: If the dataset is incompatible with reconstruction.
+            ValueError: If the dataset is incompatible with imputation.
         """
 
         X, y = dataset.X, dataset.y
 
         if y is None:
             raise ValueError(
-                'Label data is required for reconstruction experiments.'
+                'Label data is required for imputation experiments.'
             )
 
         if X.shape[0] != y.shape[0]:
@@ -268,36 +268,36 @@ class ReconstructionTask(Task):
             raise ValueError('Labels must be one-dimensional.')
 
 
-def get_reconstruction_task(
+def get_imputation_task(
     context: dict[str, str],
-) -> ReconstructionTask:
-    """Builds the reconstruction task.
+) -> ImputationTask:
+    """Builds the imputation task.
 
     Args:
-        context: Shared context to inject into every reconstruction experiment.
+        context: Shared context to inject into every imputation experiment.
 
     Returns:
-        The configured reconstruction task.
+        The configured imputation task.
     """
 
-    task = ReconstructionTask(name='Reconstruction')
+    task = ImputationTask(name='Imputation')
     task.set_context(**context)
-    task.add(get_linear_interpolation_reconstruction(**context))
-    task.add(get_moving_average_interpolation_reconstruction(**context))
-    task.add(get_cubic_spline_interpolation_reconstruction(**context))
-    task.add(get_theil_sen_reconstruction(**context))
-    task.add(get_ridge_regression_reconstruction(**context))
-    task.add(get_gaussian_process_reconstruction(**context))
-    task.add(get_support_vector_regression_reconstruction(**context))
+    task.add(get_linear_interpolation_imputation(**context))
+    task.add(get_moving_average_interpolation_imputation(**context))
+    task.add(get_cubic_spline_interpolation_imputation(**context))
+    task.add(get_theil_sen_imputation(**context))
+    task.add(get_ridge_regression_imputation(**context))
+    task.add(get_gaussian_process_imputation(**context))
+    task.add(get_support_vector_regression_imputation(**context))
     return task
 
 
-def run_reconstruction_task(
+def run_imputation_task(
     dataset: Dataset,
     schema: DatasetSchema,
     context: dict[str, str] | None = None,
-) -> ReconstructionTask:
-    """Runs the reconstruction task.
+) -> ImputationTask:
+    """Runs the imputation task.
 
     Args:
         dataset: Dataset containing the feature matrix and target vector.
@@ -305,37 +305,37 @@ def run_reconstruction_task(
         context: Optional shared context for the task.
 
     Returns:
-        The reconstruction task after all experiments finish.
+        The imputation task after all experiments finish.
     """
 
     if context is None:
         context = {}
 
-    task = get_reconstruction_task(context)
+    task = get_imputation_task(context)
     task.run(dataset, schema)
     return task
 
 
-def save_reconstruction_task_results(
-    task: ReconstructionTask,
+def save_imputation_task_results(
+    task: ImputationTask,
 ) -> None:
-    """Saves reconstruction metrics, hyperparameters, plots, and timings."""
+    """Saves imputation metrics, hyperparameters, plots, and timings."""
 
-    task_path = Path('results') / 'reconstruction'
+    task_path = Path('results') / 'imputation'
     build_and_save_metric_table(task, task_path)
     save_hyperparameter_table(task, task_path)
     save_plots(task, task_path)
     save_time_table(task, task_path)
 
 
-def run_reconstruction_tasks(
+def run_imputation_tasks(
     num_experiments: int,
     dataset: Dataset,
     schema: DatasetSchema,
     context: dict[str, str] | None = None,
     seed: int = 42,
-) -> tuple[list[ReconstructionTask], dict[str, RegressionMetrics]]:
-    """Runs multiple reconstruction tasks with different seeds.
+) -> tuple[list[ImputationTask], dict[str, RegressionMetrics]]:
+    """Runs multiple imputation tasks with different seeds.
 
     Args:
         num_experiments: Number of tasks to run.
@@ -352,11 +352,11 @@ def run_reconstruction_tasks(
     rng = np.random.default_rng(seed)
     experiment_seeds = rng.integers(0, 2 << 31, size=num_experiments)
 
-    tasks: list[ReconstructionTask] = []
+    tasks: list[ImputationTask] = []
     for experiment_seed in experiment_seeds:
         run_context = {} if context is None else dict(context)
         run_context['seed'] = str(int(experiment_seed))
-        task = run_reconstruction_task(dataset, schema, run_context)
+        task = run_imputation_task(dataset, schema, run_context)
         tasks.append(task)
 
     metrics_lists_by_name: dict[str, list[RegressionMetrics]] = {}

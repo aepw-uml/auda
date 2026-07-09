@@ -22,18 +22,18 @@ function reproduce() {
     auda workflow run PWGPredictors FeatureImportances --contamination=0.2 \
         --seed=471
 
-    # Experiment 3 - Reconstruction (TRC for the United States & TRC for Japan)
-    auda workflow run YearTRC MultipleReconstruction \
+    # Experiment 3 - Imputation (TRC for the United States & TRC for Japan)
+    auda workflow run YearTRC MultipleImputation \
         --location=United\ States --seed=471
-    auda workflow run YearTRC MultipleReconstruction --location=Japan \
+    auda workflow run YearTRC MultipleImputation --location=Japan \
         --seed=471
 
-    auda workflow run YearTRC Reconstruction --location=United\ States \
+    auda workflow run YearTRC Imputation --location=United\ States \
         --seed=475
-    auda workflow run YearTRC Reconstruction --location=Japan --seed=472
+    auda workflow run YearTRC Imputation --location=Japan --seed=472
 
     # Experiment 4 - SE tolerance coefficient sweep and complexity ordering
-    # robustness (TRC reconstruction for the United States)
+    # robustness (TRC imputation for the United States)
     auda workflow run YearTRC SEToleranceCoefficientSweep \
         --location=United\ States --seed=471 \
         --se_tolerance_coefficients=0,0.01,0.1,0.5,1
@@ -97,20 +97,20 @@ function move-figures() {
     cp "results/feature_importances/feature_importances.png" \
         "$DEST/feature_importances.png"
 
-    # Experiment 3 - Reconstruction (TRC for the United States & TRC for Japan)
-    DIR="results/reconstruction_japan/plots"
+    # Experiment 3 - Imputation (TRC for the United States & TRC for Japan)
+    DIR="results/imputation_japan/plots"
     cp "$DIR/ridge_regression.png" \
-        "$DEST/japan_trc_reconstruction_ridge_regression.png"
+        "$DEST/japan_trc_imputation_ridge_regression.png"
     cp "$DIR/support_vector_regression.png" \
-        "$DEST/japan_trc_reconstruction_svr.png"
-    DIR="results/reconstruction_united_states/plots"
+        "$DEST/japan_trc_imputation_svr.png"
+    DIR="results/imputation_united_states/plots"
     cp "$DIR/gaussian_process_regression.png" \
-        "$DEST/united_states_trc_reconstruction_gpr.png"
+        "$DEST/united_states_trc_imputation_gpr.png"
     cp "$DIR/support_vector_regression.png" \
-        "$DEST/united_states_trc_reconstruction_svr.png"
+        "$DEST/united_states_trc_imputation_svr.png"
 
     # Experiment 4 - SE tolerance coefficient sweep and complexity ordering
-    # robustness (TRC reconstruction for the United States)
+    # robustness (TRC imputation for the United States)
     DIR="results/se_tolerance_coefficient_sweep_united_states"
     cp "$DIR/selection_sensitivity_to_se_tolerance.png" \
         "$DEST/selection_sensitivity_to_se_tolerance.png"
@@ -150,7 +150,7 @@ function datasets() {
     auda dataset show PWGPredictors --no-samples
     printf '%*s\n' 80 '' | tr ' ' '-'
 
-    # Experiment 3 - Reconstruction (TRC for the United States & TRC for Japan)
+    # Experiment 3 - Imputation (TRC for the United States & TRC for Japan)
     auda dataset show YearTRC --location=Japan --no-samples
     auda dataset show YearTRC --location=United\ States --no-samples
     printf '%*s\n' 80 '' | tr ' ' '-'
@@ -178,13 +178,13 @@ function tables() {
     cat results/feature_importances/report.txt
     printf '%*s\n' 80 '' | tr ' ' '-'
 
-    echo "Experiment 3 - Reconstruction (TRC for the United States & Japan)"
-    cat results/multiple_reconstruction_japan/metric_table
-    cat results/multiple_reconstruction_united_states/metric_table
+    echo "Experiment 3 - Imputation (TRC for the United States & Japan)"
+    cat results/multiple_imputation_japan/metric_table
+    cat results/multiple_imputation_united_states/metric_table
     printf '%*s\n' 80 '' | tr ' ' '-'
 
     echo "Experiment 4 - SE tolerance coefficient sweep and complexity ordering"
-    echo "robustness (TRC reconstruction for the United States)"
+    echo "robustness (TRC imputation for the United States)"
     cat results/se_tolerance_coefficient_sweep_united_states/summary_table
     cat results/complexity_ordering_robustness_united_states/summary_table
     printf '%*s\n' 80 '' | tr ' ' '-'

@@ -2,7 +2,7 @@
 
 In Experiment 4, we evaluate the sensitivity and robustness of the hyperparameter selection procedure to the standard-error tolerance coefficient \(c_{\mathrm{SE}}\) and the complexity ordering in Experiment 3 (United States). We perform a sweep over \(c_{\mathrm{SE}} \in \{0, 0.1, 0.2, 0.5, 1\}\) and compare the selected models to the best-performing models in terms of WAPE on the test set. When \(c_{\mathrm{SE}} = 0\), the procedure selects only the configuration with the best mean validation performance; when \(c_{\mathrm{SE}} = 1\), it reduces to the standard one-standard-error rule. We also evaluate the robustness of the complexity ordering by comparing the selected models to the best-performing models in terms of WAPE on the test set.
 
-In Experiment 3, we repeatedly perform 16 reconstruction runs, and in this experiment, we evaluate the sensitivity and robustness of the hyperparameter selection on three tunable models: ridge regression, GPR, and SVR. Therefore, there are 48 selection units for this experiment.
+In Experiment 3, we repeatedly perform 16 imputation runs, and in this experiment, we evaluate the sensitivity and robustness of the hyperparameter selection on three tunable models: ridge regression, GPR, and SVR. Therefore, there are 48 selection units for this experiment.
 
 \input{4_experiments/plots/selection_sensitivity_to_se_tolerance.tex}
 \input{4_experiments/tables/selection_sensitivity.tex}

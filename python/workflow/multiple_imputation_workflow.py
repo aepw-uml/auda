@@ -11,20 +11,20 @@ from common.experiment.persistence import (
 )
 from common.metrics import RegressionMetricName
 from common.workflow import Workflow
-from experiment.reconstruction_task import (
-    run_reconstruction_tasks,
+from experiment.imputation_task import (
+    run_imputation_tasks,
 )
 from util.names import to_snake
 
 
-class MultipleReconstructionWorkflow(Workflow):
+class MultipleImputationWorkflow(Workflow):
     @override
     def run(self, dataset: Dataset, schema: DatasetSchema, **context) -> None:
         super().run(**context)
 
         num_experiments = int(context.get('num_experiments', '16'))
         seed = int(context.get('seed', '42'))
-        tasks, _ = run_reconstruction_tasks(
+        tasks, _ = run_imputation_tasks(
             num_experiments, dataset, schema, context, seed=seed
         )
         metrics_by_name = collect_metrics_by_name(tasks)
@@ -34,9 +34,9 @@ class MultipleReconstructionWorkflow(Workflow):
 
         location = to_snake(context.get('location', ''))
         dir_path = Path('results') / (
-            'multiple_reconstruction'
+            'multiple_imputation'
             if not location
-            else f'multiple_reconstruction_{location}'
+            else f'multiple_imputation_{location}'
         )
         save_metric_table(average_metrics, dir_path)
 

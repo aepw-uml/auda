@@ -23,18 +23,18 @@ def run_workflow(ctx: Context, dataset_name: str, workflow: str) -> None:
     )
 
     match workflow:
-        case 'Reconstruction':
-            from workflow.reconstruction_workflow import (
-                ReconstructionWorkflow,
+        case 'Imputation':
+            from workflow.imputation_workflow import (
+                ImputationWorkflow,
             )
 
-            ReconstructionWorkflow().run(dataset, schema, **context)
-        case 'MultipleReconstruction':
-            from workflow.multiple_reconstruction_workflow import (
-                MultipleReconstructionWorkflow,
+            ImputationWorkflow().run(dataset, schema, **context)
+        case 'MultipleImputation':
+            from workflow.multiple_imputation_workflow import (
+                MultipleImputationWorkflow,
             )
 
-            MultipleReconstructionWorkflow().run(dataset, schema, **context)
+            MultipleImputationWorkflow().run(dataset, schema, **context)
         case 'SEToleranceCoefficientSweep':
             from workflow.se_tolerance_coefficient_sweep_workflow import (
                 SEToleranceCoefficientSweepWorkflow,
