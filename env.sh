@@ -74,11 +74,11 @@ function reproduce() {
     auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
         --location=Japan \
         --workflow_name=multiple_multivariate_forecasting_japan \
-        --pretraining_anomaly_contamination=0.4
+        --pretraining_anomaly_contamination=0.45
     auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
         --location=Slovenia --enable_tuning=0 \
         --workflow_name=multiple_multivariate_forecasting_slovenia \
-        --pretraining_anomaly_contamination=0.4
+        --pretraining_anomaly_contamination=0.45
 }
 
 function move-figures() {
