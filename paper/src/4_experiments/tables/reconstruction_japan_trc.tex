@@ -1,17 +1,18 @@
+% results/multiple_reconstruction_japan/metric_table
 \begin{table}[!ht]
 	\centering
 	\caption{\centering Reconstruction performance for polymer PET consumption in Japan using the \texttt{YearTRC (Japan)} dataset, averaged over 16 runs.}
 	\begin{tabular}{@{}lccccc@{}}
 		\toprule
-		\textbf{Experiment}                & \textbf{MAE}                   & \textbf{RMSE}                  & \textbf{WAPE}       \\
+		\textbf{Experiment}          & \textbf{MAE}                   & \textbf{RMSE}                  & \textbf{WAPE}       \\
 		\midrule
-		Linear Interpolation               & \(5.932 \times 10^4\)          & \(6.677 \times 10^4\)          & 1.59\%              \\
-		Moving Average Interpolation       & \(6.308 \times 10^4\)          & \(7.014 \times 10^4\)          & 1.69\%              \\
-		Cubic Spline Interpolation         & \(5.517 \times 10^4\)          & \(6.028 \times 10^4\)          & 1.48\%              \\
-		Theil-Sen Regression               & \(7.746 \times 10^4\)          & \(9.079 \times 10^4\)          & 2.08\%              \\
-		Ridge Regression                   & \(8.512 \times 10^4\)          & \(9.069 \times 10^4\)          & 2.28\%              \\
-		GPR                                & \(7.347 \times 10^4\)          & \(8.295 \times 10^4\)          & 1.97\%              \\
-		\textbf{SVR}                       & \(\mathbf{5.088 \times 10^4}\) & \(\mathbf{5.483 \times 10^4}\) & \(\mathbf{1.36}\)\% \\
+		Linear Interpolation         & \(5.932 \times 10^4\)          & \(6.677 \times 10^4\)          & 1.59\%              \\
+		Moving Average Interpolation & \(6.308 \times 10^4\)          & \(7.014 \times 10^4\)          & 1.69\%              \\
+		\textbf{Cubic Spline Interpolation} & \(\mathbf{5.517 \times 10^4}\) & \(\mathbf{6.028 \times 10^4}\) & \(\mathbf{1.48}\)\% \\
+		Theil-Sen Regression         & \(7.746 \times 10^4\)          & \(9.079 \times 10^4\)          & 2.08\%              \\
+		Ridge Regression             & \(8.096 \times 10^4\)          & \(8.623 \times 10^4\)          & 2.17\%              \\
+		GPR                          & \(7.172 \times 10^4\)          & \(8.148 \times 10^4\)          & 1.92\%              \\
+		SVR                          & \(5.923 \times 10^4\)          & \(6.377 \times 10^4\)          & 1.59\%              \\
 		\hline
 	\end{tabular}
 	\label{tab:reconstruction_japan_trc}

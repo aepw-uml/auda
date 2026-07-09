@@ -1,34 +1,36 @@
+% results/se_tolerance_coefficient_sweep_united_states/summary_table
 \begin{table}[!ht]
 	\centering
 	\caption{\centering Selection sensitivity to the standard-error tolerance coefficient \(c_{\mathrm{SE}}\) for United States reconstruction models.}
-	\begin{tabular}{lrrrrrr}
+	\begin{tabular}{lrrrrrrr}
 		\toprule
 		Experiment                        &
 		$c_{\mathrm{SE}}$                 &
-		\shortstack{Changed                                                                    \\Rate} &
-		\shortstack{Best                                                                       \\WAPE} &
-		\shortstack{Selected                                                                   \\WAPE} &
-		\shortstack{WAPE                                                                       \\Penalty} &
-		\shortstack{Complexity                                                                 \\Rank}                                                                                             \\
+		\shortstack{Mean                                                                      \\Candidate\\Configurations} &
+		\shortstack{Changed                                                                   \\Rate} &
+		\shortstack{Best                                                                      \\WAPE} &
+		\shortstack{Selected                                                                  \\WAPE} &
+		\shortstack{WAPE                                                                      \\Penalty} &
+		\shortstack{Complexity                                                                \\Rank}                                                                                             \\
 
 		\midrule
-		\multirow{5}{*}{Ridge Regression} & 0   & 0.00\%   & 1.28\% & 1.28\% & 0.00\% & 14.44  \\
-		                                  & 0.1 & 56.25\%  & 1.28\% & 1.29\% & 0.01\% & 11.94  \\
-		                                  & 0.2 & 56.25\%  & 1.28\% & 1.29\% & 0.01\% & 11.81  \\
-		                                  & 0.5 & 68.75\%  & 1.28\% & 1.34\% & 0.06\% & 10.06  \\
-		                                  & 1   & 68.75\%  & 1.28\% & 1.40\% & 0.12\% & 9.81   \\
+		\multirow{5}{*}{Ridge Regression} & 0    & 1.94  & 0.00\%   & 1.28\% & 1.28\% & 0.00\% & 14.44 \\
+		                                  & 0.01 & 6.44  & 56.25\%  & 1.28\% & 1.28\% & 0.00\% & 12.44 \\
+		                                  & 0.1  & 8.19  & 56.25\%  & 1.28\% & 1.29\% & 0.01\% & 11.94 \\
+		                                  & 0.5  & 13.12 & 68.75\%  & 1.28\% & 1.34\% & 0.06\% & 10.06 \\
+		                                  & 1    & 16.75 & 68.75\%  & 1.28\% & 1.40\% & 0.12\% & 9.81  \\
 		\midrule
-		\multirow{5}{*}{GPR}              & 0   & 0.00\%   & 2.43\% & 2.43\% & 0.00\% & 40.19  \\
-		                                  & 0.1 & 62.50\%  & 2.43\% & 2.45\% & 0.01\% & 19.12  \\
-		                                  & 0.2 & 68.75\%  & 2.43\% & 2.46\% & 0.03\% & 18.62  \\
-		                                  & 0.5 & 68.75\%  & 2.43\% & 2.48\% & 0.05\% & 13.44  \\
-		                                  & 1   & 68.75\%  & 2.43\% & 2.52\% & 0.08\% & 12.19  \\
+		\multirow{5}{*}{GPR}              & 0    & 1.00  & 0.00\%   & 2.43\% & 2.43\% & 0.00\% & 40.19 \\
+		                                  & 0.01 & 9.06  & 56.25\%  & 2.43\% & 2.43\% & 0.00\% & 26.50 \\
+		                                  & 0.1  & 14.56 & 62.50\%  & 2.43\% & 2.45\% & 0.01\% & 19.12 \\
+		                                  & 0.5  & 26.06 & 68.75\%  & 2.43\% & 2.48\% & 0.05\% & 13.44 \\
+		                                  & 1    & 32.25 & 68.75\%  & 2.43\% & 2.52\% & 0.08\% & 12.19 \\
 		\midrule
-		\multirow{5}{*}{SVR}              & 0   & 0.00\%   & 3.29\% & 3.29\% & 0.00\% & 68.38  \\
-		                                  & 0.1 & 81.25\%  & 3.29\% & 3.34\% & 0.06\% & 60.19  \\
-		                                  & 0.2 & 81.25\%  & 3.29\% & 3.41\% & 0.12\% & 58.19  \\
-		                                  & 0.5 & 93.75\%  & 3.29\% & 3.72\% & 0.43\% & 50.00  \\
-		                                  & 1   & 100.00\% & 3.29\% & 4.39\% & 1.10\% & 37.31  \\
+		\multirow{5}{*}{SVR}              & 0    & 5.94  & 0.00\%   & 3.29\% & 3.29\% & 0.00\% & 68.38 \\
+		                                  & 0.01 & 10.69 & 31.25\%  & 3.29\% & 3.29\% & 0.00\% & 67.25 \\
+		                                  & 0.1  & 25.25 & 81.25\%  & 3.29\% & 3.34\% & 0.06\% & 60.19 \\
+		                                  & 0.5  & 65.94 & 93.75\%  & 3.29\% & 3.72\% & 0.43\% & 50.00 \\
+		                                  & 1    & 94.31 & 100.00\% & 3.29\% & 4.39\% & 1.10\% & 37.31 \\
 		\bottomrule
 	\end{tabular}
 	\label{tab:selection_sensitivity}

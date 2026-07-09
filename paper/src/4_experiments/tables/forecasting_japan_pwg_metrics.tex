@@ -1,19 +1,20 @@
+% results/forecasting_random_search/metric_table
 \begin{table}[!ht]
 	\centering
 	\caption{\centering Temporal forecasting performance for plastic waste generation in Japan using the \texttt{YearPWG (Japan)} dataset.}
 	\begin{tabular}{@{}lccccc@{}}
 		\toprule
-		\textbf{Experiment}                          & \textbf{MAE}                   & \textbf{RMSE}                  & $\mathbf{R^2}$     & \textbf{WAPE}       \\
+		\textbf{Experiment}    & \textbf{MAE}                   & \textbf{RMSE}                  & $\mathbf{R^2}$     & \textbf{WAPE}       \\
 		\midrule
-		Naive Persistence                            & \(5.900 \times 10^5\)          & \(6.712 \times 10^5\)          & -0.294             & 1.68\%              \\
-		Drift Baseline                               & \(1.674 \times 10^6\)          & \(2.100 \times 10^6\)          & -11.663            & 4.77\%              \\
-		Exponential Smoothing                        & \(2.284 \times 10^6\)          & \(2.742 \times 10^6\)          & -20.591            & 6.51\%              \\
-		Theil-Sen Regression                         & \(1.639 \times 10^6\)          & \(2.019 \times 10^6\)          & -10.710            & 4.67\%              \\
-		ARIMA Regression                             & \(9.476 \times 10^5\)          & \(1.214 \times 10^6\)          & -3.234             & 2.70\%              \\
-		Ridge Regression                             & \(9.447 \times 10^5\)          & \(1.197 \times 10^6\)          & -3.116             & 2.69\%              \\
-		GPR                                          & \(1.375 \times 10^6\)          & \(1.742 \times 10^6\)          & -7.715             & 3.92\%              \\
-		\textbf{SVR}                                 & \(\mathbf{4.437 \times 10^5}\) & \(\mathbf{5.705 \times 10^5}\) & \(\mathbf{0.065}\) & \(\mathbf{1.26}\)\% \\
-		SVR\textsuperscript{*}                       & \(1.430 \times 10^6\)          & \(1.803 \times 10^6\)          & -8.335             & 4.08\%              \\
+		Naive Persistence      & \(5.900 \times 10^5\)          & \(6.712 \times 10^5\)          & -0.294             & 1.68\%              \\
+		Drift Baseline         & \(1.674 \times 10^6\)          & \(2.100 \times 10^6\)          & -11.663            & 4.77\%              \\
+		Exponential Smoothing  & \(2.284 \times 10^6\)          & \(2.742 \times 10^6\)          & -20.591            & 6.51\%              \\
+		Theil-Sen Regression   & \(1.639 \times 10^6\)          & \(2.019 \times 10^6\)          & -10.710            & 4.67\%              \\
+		ARIMA Regression       & \(9.476 \times 10^5\)          & \(1.214 \times 10^6\)          & -3.234             & 2.70\%              \\
+		Ridge Regression       & \(9.447 \times 10^5\)          & \(1.197 \times 10^6\)          & -3.116             & 2.69\%              \\
+		GPR                    & \(1.709 \times 10^6\)          & \(1.880 \times 10^6\)          & -9.151             & 4.87\%              \\
+		\textbf{SVR}           & \(\mathbf{4.442 \times 10^5}\) & \(\mathbf{5.336 \times 10^5}\) & \(\mathbf{0.182}\) & \(\mathbf{1.27}\)\% \\
+		SVR\textsuperscript{*} & \(1.430 \times 10^6\)          & \(1.803 \times 10^6\)          & -8.335             & 4.08\%              \\
 		\hline
 	\end{tabular}
 	\label{tab:forecasting_japan_pwg_metrics}
