@@ -22,7 +22,7 @@ from workflow.se_tolerance_coefficient_sweep_workflow import (
     summarize_trials,
 )
 
-DEFAULT_SE_TOLERANCE_COEFFICIENT = 0.1
+DEFAULT_SE_TOLERANCE_COEFFICIENT = 0.01
 
 
 @dataclass(frozen=True)
@@ -232,8 +232,7 @@ def save_summary_table(
         )
         coefficient = experiment_records[0].se_tolerance_coefficient
         mean_num_candidates = mean(
-            record.num_candidate_configurations
-            for record in experiment_records
+            record.num_candidate_configurations for record in experiment_records
         )
         mean_original_wape = mean(
             record.original_mean_wape for record in experiment_records

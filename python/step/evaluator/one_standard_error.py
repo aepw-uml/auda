@@ -9,7 +9,7 @@ def one_standard_error(
     complexity_key: Callable[[Hyperparameters], tuple[float, ...]],
     *,
     prefer_lower: bool = True,
-    se_tolerance_coefficient: float = 0.1,
+    se_tolerance_coefficient: float = 0.01,
 ) -> Hyperparameters:
     """
     Selects the hyperparameter setting that is within one standard error of the
@@ -50,7 +50,7 @@ def one_standard_error_candidates(
     trials: list[tuple[Hyperparameters, list[float]]],
     *,
     prefer_lower: bool = True,
-    se_tolerance_coefficient: float = 0.1,
+    se_tolerance_coefficient: float = 0.01,
 ) -> list[Hyperparameters]:
     """Selects trial candidates that are within one standard error of the best
     trial.
