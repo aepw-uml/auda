@@ -110,7 +110,9 @@ class ARIMARegression(SupervisedLearningModel):
 
         return self
 
-    def _fit_auto_arima(self, y: np.ndarray) -> tuple[tuple[int, int, int], Any]:
+    def _fit_auto_arima(
+        self, y: np.ndarray
+    ) -> tuple[tuple[int, int, int], Any]:
         """Selects and fits the best ARIMA order by information criterion.
 
         Args:
