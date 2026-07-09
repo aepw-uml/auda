@@ -1,17 +1,21 @@
 % results/se_tolerance_coefficient_sweep_united_states/summary_table
 \begin{table}[!ht]
 	\centering
-	\caption{\centering Selection sensitivity to the standard-error tolerance coefficient \(c_{\mathrm{SE}}\) for United States imputation models.}
+	\caption{
+		\centering
+		Sensitivity of hyperparameter selection to the standard-error tolerance coefficient \(c_{\mathrm{SE}}\) for the United States imputation models.
+		CC is candidate configurations and CR is the complexity rank.
+	}
 	\begin{tabular}{lrrrrrrr}
 		\toprule
 		Experiment                        &
 		$c_{\mathrm{SE}}$                 &
-		\shortstack{Mean                                                                      \\Candidate\\Configurations} &
-		\shortstack{Changed                                                                   \\Rate} &
-		\shortstack{Best                                                                      \\WAPE} &
-		\shortstack{Selected                                                                  \\WAPE} &
-		\shortstack{WAPE                                                                      \\Penalty} &
-		\shortstack{Complexity                                                                \\Rank}                                                                                             \\
+		\shortstack{CC}                   &
+		\shortstack{Changed                                                                            \\Rate} &
+		\shortstack{Best                                                                               \\WAPE} &
+		\shortstack{Selected                                                                           \\WAPE} &
+		\shortstack{WAPE                                                                               \\Penalty} &
+		\shortstack{CR}                                                                                \\
 
 		\midrule
 		\multirow{5}{*}{Ridge Regression} & 0    & 1.94  & 0.00\%   & 1.28\% & 1.28\% & 0.00\% & 14.44 \\

@@ -1,12 +1,12 @@
 \subsection{Data Extraction in PRISM}
 
-The dataset used in this study originates from the \textit{Plastic Recovery Insights Steering Model (PRISM)}, a platform created by AEPW that combines plastic waste, demographic, and socio-economic data from various public sources into a usable format.
+The dataset used in this study originates from the \textit{Plastics Recovery Insights Steering Model (PRISM)}, a platform created by AEPW that combines plastic waste, demographic, and socio-economic data from various public sources into a usable format.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1.0\linewidth]{figures/prism_data_extraction.png}
 	\caption{
-		PRISM data extraction workflow. The system first identifies the input document type (either PDF or tabular file). For PDF documents, PRISM uses \texttt{PyMuPDF} to parse text regions and extract layout elements, and processes images to recover text, tables, and figures using large language models (LLMs). Parsed content is then chunked, indexed, and processed through evidence-grounded extraction using LLMs with retrieval-augmented generation (RAG) and Chain-of-Thought (CoT) reasoning. Subsequently, the extracted data undergo schema enforcement and human validation before being used by downstream analysis.
+		PRISM data extraction workflow. The system first identifies the input document type (either PDF or tabular file). For PDF documents, PRISM uses \texttt{PyMuPDF} to parse text regions and extract layout elements, and processes images to recover text, tables, and figures using large language models (LLMs). Parsed content is then chunked, indexed, and processed through evidence-grounded extraction using LLMs with retrieval-augmented generation (RAG) and Chain-of-Thought (CoT) reasoning. Subsequently, the extracted data undergo schema enforcement and human validation before being used in downstream analysis.
 	}
 	\label{fig:prism_data_extraction}
 \end{figure}
