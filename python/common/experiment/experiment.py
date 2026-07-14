@@ -216,10 +216,16 @@ class Experiment(ABC):
         self.log('Experiment finished.')
 
     def run(self) -> None:
-        """Runs the experiment from start to finish."""
+        """Runs the experiment from start to finish.
 
-        self.anomaly_detection()
+        ``split()`` runs before ``anomaly_detection()`` so that any anomaly
+        removal is fit on, and applied to, the training split alone. This keeps
+        the held-out test set untouched and prevents test observations from
+        influencing outlier detection.
+        """
+
         self.split()
+        self.anomaly_detection()
         self.tune()
         self.train()
         self.evaluate()

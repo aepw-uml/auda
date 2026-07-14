@@ -84,36 +84,47 @@ class RegressionExperiment(Experiment):
 
     @override
     def anomaly_detection(self) -> None:
+        """Removes outliers from the training split with an isolation forest.
+
+        This runs after ``split()``, so the isolation forest is fit on, and
+        applied to, the training data only. The held-out test set is never seen
+        by the filter and is never modified, which avoids leaking test
+        information into outlier removal.
+        """
+
         self.log('Running anomaly detection...')
 
-        if self.X is None or self.y is None:
-            raise ValueError('Data not set up. Call setup() first.')
+        if self.X_train is None or self.y_train is None:
+            raise ValueError('Data not split. Call split() first.')
 
         if not self.get_context_bool('use_isolation_forest', False):
             return
 
-        if self.X.shape[0] < 10:
+        if self.X_train.shape[0] < 10:
             self.log(
-                'Dataset has fewer than 10 samples; skipping anomaly detection.'
+                'Training set has fewer than 10 samples; skipping anomaly '
+                'detection.'
             )
             return
 
         contamination = float(self.context.get('anomaly_contamination', 0.05))
 
-        result = isolation_forest(self.X, self.y, contamination, self.seed)
+        result = isolation_forest(
+            self.X_train, self.y_train, contamination, self.seed
+        )
         self.context['isolation_forest_result'] = result
-        self.context['X_original'] = self.X
-        self.context['y_original'] = self.y
+        self.context['X_train_original'] = self.X_train
+        self.context['y_train_original'] = self.y_train
 
-        self.X = result.X_inliers
-        self.y = result.y_inliers
+        self.X_train = result.X_inliers
+        self.y_train = result.y_inliers
 
         # Log the number of samples removed and remaining after anomaly
         # detection.
         num_removed = np.sum(~result.inlier_mask)
         num_remaining = np.sum(result.inlier_mask)
         self.log(
-            f'Anomaly detection removed {num_removed} samples, '
+            f'Anomaly detection removed {num_removed} training samples, '
             f'leaving {num_remaining} samples for training.'
         )
 
