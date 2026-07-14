@@ -24,7 +24,7 @@ def show(
     ctx: Context,
     dataset_name: str,
     no_samples: bool = Option(
-        True, '--no-samples', help='Do not print sample data from the dataset.'
+        False, '--no-samples', help='Do not print sample data from the dataset.'
     ),
 ) -> None:
     dataset_cls = dataset_map.get(dataset_name)
