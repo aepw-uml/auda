@@ -1,11 +1,13 @@
 \subsection{Experimental Setup}
 
-The experiments were run on a DigitalOcean Droplet with two AMD virtual CPU cores at 2.00 GHz and 4 GiB of memory. The operating system was Debian GNU/Linux 13.4 (trixie), using Linux kernel 6.12.43. All models were trained and evaluated on CPUs without GPU acceleration.
+All experiments were run on a DigitalOcean Droplet with two AMD virtual CPU cores at 2.00 GHz and 4 GiB of memory. The operating system was Debian GNU/Linux 13.4 (trixie), using Linux kernel 6.12.43. All models were trained and evaluated on CPUs without GPU acceleration. All Experiments were conducted using Python 3.12.11 with NumPy 2.4.4, pandas 3.0.3, scikit-learn 1.8.0, statsmodels 0.14.6, PyTorch 2.11.0, and Matplotlib 3.10.8.
 
 For each experiment, 90\% of the samples in the dataset were used for training, and the remaining 10\% were held out for testing, with at least two samples reserved for the test set. For forecasting experiments, chronological splits were used without shuffling, so the test samples came from the end of the time series. For imputation experiments, the data were shuffled and split randomly, while keeping the first and last samples in the training set so that interpolation-style imputation models could work on boundary samples.
 
-All the random processes are controlled by a random seed for reproducibility. To mitigate experimental bias arising from different random seeds, each experiment was repeated 16 times, and the seeds used in these repeated runs are deterministically derived from a master seed.
+For ridge regression, Gaussian process regression, and support vector regression, predictors and targets were standardized using parameters fitted on the corresponding training partition only. ARIMA and exponential-smoothing models were fitted on the original scale. In the neural-network experiments, rural population, urban population, and GDP were transformed using \(\log(1+x)\) before standardization; targets were also standardized.
 
 During hyperparameter tuning, forecasting models used time-series cross-validation with \(K = 4\) validation folds. The ordered training data were split into \(K + 1\) blocks, with the first one serving as the initial training window. Each subsequent block was used once as the validation window after training on all previous blocks. Imputation models used repeated random holdout validation with five masks, each reserving 20\% of the training samples, with at least two validation samples, while using the remaining samples for fitting.
+
+All the random processes are controlled by a random seed for reproducibility. To mitigate experimental bias arising from different random seeds, each experiment was repeated 16 times, and the seeds used in these repeated runs are deterministically derived from a master seed.
 
 For reproducibility, most experiments use a fixed base seed of 471. The metrics reported in the tables are averaged over 16 runs with different sampled seeds to reduce dependence on any single train-test split. In contrast, each plot shows one representative run; for these figures, the seed selected produced behavior consistent with the averaged results.
