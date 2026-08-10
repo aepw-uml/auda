@@ -21,10 +21,16 @@ class FeatureImportancesflow(Workflow):
                 'calculation.'
             )
 
-        # Remove outliers using isolation forest
+        # Remove predictor outliers without using the target variable.
         contamination = float(context.get('contamination', 0.05))
         seed = int(context.get('seed', 417))
-        result = isolation_forest(X, y, contamination=contamination, seed=seed)
+        result = isolation_forest(
+            X,
+            y,
+            contamination=contamination,
+            seed=seed,
+            include_target=False,
+        )
         X = result.X_inliers
         y = result.y_inliers
 

@@ -26,30 +26,35 @@ def isolation_forest(
     y: np.ndarray,
     contamination: float = 0.05,
     seed: int = 471,
+    include_target: bool = True,
 ) -> IsolationForestResult:
-    """Fits an isolation forest model on the joint feature-target space.
+    """Fits an isolation forest model and filters detected outliers.
 
     Args:
         X: Training feature matrix.
         y: Training target vector.
         contamination: Expected proportion of outliers in the training set.
         seed: Random seed used for reproducibility.
+        include_target: Whether to include the target variable when fitting and
+            applying the isolation forest.
 
     Returns:
         An ``IsolationForestResult`` containing the fitted model and the
         filtered training data.
     """
 
-    y_column = y.reshape(-1, 1)
-    joint_data = np.column_stack([X, y_column])
+    data = X
+    if include_target:
+        data = np.column_stack([X, y.reshape(-1, 1)])
+
     model = IsolationForest(
         contamination=contamination,  # type: ignore
         n_estimators=200,
         random_state=seed,
     )
-    model.fit(joint_data)
+    model.fit(data)
 
-    inlier_mask = model.predict(joint_data) == 1
+    inlier_mask = model.predict(data) == 1
 
     return IsolationForestResult(
         model=model,
