@@ -35,11 +35,11 @@ The differences in model performance between the global plastics production and 
 
 % ---- Experiment 7: PWDrivers (NN Forecasting)
 
-We speculate that the environmental data in this study are influenced by policy factors, which are not explicitly included in the analysis tables. Therefore, we attempt to employ a neural network to capture the implicit relationships between the input features and target variables. In Experiment 7, we apply a multilayer perceptron (MLP) model to the \texttt{PWDrivers} dataset after removing outliers using an isolation forest with a contamination rate \(r_c = 0.1\) on the training set. This experiment aims to determine whether the MLP can effectively learn these latent relationships and produce accurate forecasts.
+Policy-related factors may influence plastic waste generation but are not represented in the available predictor set. In Experiment 7, we apply a multilayer perceptron (MLP) model to the \texttt{PWDrivers} dataset after removing outliers using an isolation forest with a contamination rate \(r_c = 0.1\) on the training set. The experiment evaluates whether the MLP can capture predictive structure in the heterogeneous pooled dataset; because policy variables are not included, it does not test whether the MLP captures policy-related effects.
 
 \input{4_experiments/tables/nn_forecasting_metrics.tex}
 
-Table~\ref{tab:nn_forecasting_metrics} shows a WAPE of 70.05\% and an \(R^2\) of 0.281, suggesting that the MLP captures only broad structure and its forecasts stay far from the observed values. This is consistent with the heterogeneity of the pooled \texttt{PWDrivers} data points drawn from different organizations, methodologies, and occasionally inconsistent units. With the absence of explicit policy variables, we treat Experiment 7 as an exploratory benchmark rather than a deployable forecaster.
+Table~\ref{tab:nn_forecasting_metrics} shows a WAPE of 70.05\% and an \(R^2\) of 0.281, indicating that the MLP captures only broad predictive structure and that its forecasts remain far from the observed values. This is consistent with the heterogeneity of the pooled \texttt{PWDrivers} data points, which are drawn from different organizations, methodologies, and occasionally inconsistent units. We therefore treat Experiment 7 as an exploratory benchmark rather than a deployable forecaster; it provides no evidence about unobserved policy-related effects.
 
 % ---- Experiment 8: PWDrivers (Japan & Slovenia); Multivariate Forecasting
 
