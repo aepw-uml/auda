@@ -15,4 +15,4 @@ Figure~\ref{fig:prism_data_extraction} illustrates the data extraction workflow 
 
 After parsing, the PDF pipeline stores embedded text chunks in Azure AI Search to support retrieval-augmented generation for selected fields such as publisher and report date. Then, large language models are applied to identify relevant data points, including year, location, data point name, value, unit, and source context. Subsequently, the extracted outputs are passed through multiple post-processing layers, including data cleaning, location and data-point mapping, duplicate removal, unit standardization, calculated field generation, and quality score computation. Finally, the structured extraction results are appended to the database.
 
-Because automated extraction with LLMs can be inaccurate, all extracted records are manually reviewed and approved before being migrated into the AUDA analytical database, where they are used for modeling and visualization.
+Because automated extraction with LLMs can be inaccurate, all extracted records are human-reviewed before migration into the AUDA analytical database, where they are used for modeling and visualization.

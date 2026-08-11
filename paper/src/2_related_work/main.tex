@@ -12,11 +12,10 @@ AUDA differs from both of these paths: it offers a reproducible multitask benchm
 This study builds directly upon the PRISM data ecosystem, which is developed through a collaboration between the Alliance to End Plastic Waste and IBM.
 The PRISM platform integrates heterogeneous data sources and converts them into standardized plastic waste information.
 To date, no peer-reviewed research has previously utilized records derived by PRISM as a foundation for systematic model benchmarking.
-AUDA represents the first analytical tool to transform verified PRISM records into standardized "country-year" analysis tables and to use this data to establish reproducible benchmarks for imputation and forecasting.
+To our knowledge, AUDA is among the first analytical workflows to transform human-reviewed extracted PRISM records into standardized "country-year" analysis tables and to use these data to establish reproducible benchmarks for imputation and forecasting.
 
 Research in related fields also addresses the issue of model selection.
 Hyperparameter tuning typically employs methods such as grid search, random search, and cross-validation~\cite{bergstra2012random,kohavi1995study,hyndman2018forecasting}.
 However, consistently selecting the configuration with the lowest validation error may lead to the choice of an overly complex configuration, resulting in possible overfitting.
 This phenomenon is particularly pronounced when the validation error estimate has high variance~\cite{cawley2010over}.
 The one standard error (1-SE) rule mitigates this issue by selecting the simplest configuration whose validation error is within one standard error of the best observed error~\cite{breiman2017classification,hastie2009elements}.
-
