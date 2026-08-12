@@ -36,7 +36,7 @@ with the RBF kernel
 \end{equation}
 where \(C\) controls the penalty for large residuals and \(\epsilon\) defines the width of the insensitive tube around the fitted function.
 
-An MLP is a feedforward neural network consisting of multiple layers of neurons, allowing it to capture complex nonlinear relationships in the data. We use a simple architecture with one hidden layer and ReLU activation functions, along with the Adam optimizer~\cite{kingma2014adam}, which is sufficient for the forecasting tasks in this study. We also use early stopping based on validation performance to prevent overfitting.
+An MLP is a feedforward neural network consisting of multiple layers of neurons, allowing it to capture complex nonlinear relationships in the data. We use a simple architecture with two hidden layers and ReLU activation functions, along with the Adam optimizer~\cite{kingma2014adam}, which is sufficient for the forecasting tasks in this study. We also use early stopping based on validation performance to prevent overfitting.
 
 We also use isolation forest~\cite{liu2008isolation} as an anomaly detection method to identify outliers in the data. It works by isolating observations that differ significantly from normal observations using random partitioning. Because anomalies are few and distinct, they are isolated more quickly than normal data. The contamination rate determines the proportion of outliers in the data and should be set based on the level of noise in the data.
 

@@ -6,13 +6,12 @@ Research on the quantitative modeling of plastic waste has primarily developed a
 Geyer et al. provided the foundational global data of plastic production, use, and end-of-life fates~\cite{geyer2017production}, while subsequent studies projected future waste generation and mismanaged plastic volumes under alternative policy and consumption scenarios~\cite{lebreton2019future,borrelle2020predicted,lau2020evaluating,dokl2024global,pottinger2024pathways}.
 Although these studies yielded influential large-scale estimates, they were not designed to compare the predictive accuracy of statistical models to machine learning models against observational records.
 The second path applies machine learning to waste forecasting by training support vector regression, tree ensemble models, and neural networks on socioeconomic and demographic indicators such as population and GDP.
-More closely aligned with the context of the present study, existing research has utilized neural networks to forecast plastic waste generation and evaluate the efficacy of interventions~\cite{fan2022forecasting}.
-AUDA differs from both of these paths: it offers a reproducible multitask benchmarking framework that compares the performance of interpolation methods, statistical models, and machine learning models using sparse country-level analysis tables, with a specific emphasis on aligning model complexity and validation strategies with available data.
+Closely aligned with the context of the present study, existing research has utilized neural networks to forecast plastic waste generation and evaluate the efficacy of interventions~\cite{fan2022forecasting}.
+AUDA belongs primarily to this second line of research. It extends this work by providing a reproducible multitask benchmarking framework that compares interpolation methods, statistical models, and machine-learning models across sparse country-level analysis tables, with particular attention to model complexity and validation under limited data availability.
 
 This study builds directly upon the PRISM data ecosystem, which is developed through a collaboration between the Alliance to End Plastic Waste and IBM.
-The PRISM platform integrates heterogeneous data sources and converts them into standardized plastic waste information.
-To date, no peer-reviewed research has previously utilized records derived by PRISM as a foundation for systematic model benchmarking.
-To our knowledge, AUDA is among the first analytical workflows to transform human-reviewed extracted PRISM records into standardized "country-year" analysis tables and to use these data to establish reproducible benchmarks for imputation and forecasting.
+The PRISM platform integrates heterogeneous data sources and converts them into normalized plastic waste information.
+To our knowledge, AUDA is the first analytical workflow to transform human-reviewed extracted PRISM records into standardized "country-year" analysis tables and to use these data to establish reproducible benchmarks for imputation and forecasting.
 
 Research in related fields also addresses the issue of model selection.
 Hyperparameter tuning typically employs methods such as grid search, random search, and cross-validation~\cite{bergstra2012random,kohavi1995study,hyndman2018forecasting}.

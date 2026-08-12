@@ -1,10 +1,10 @@
-\subsection{Experiment 4: Hyperparameter-selection Sensitivity and Robustness}
+\subsection{Experiment 4: Hyperparameter-Selection Sensitivity}
 
 In Experiment 4, we evaluate the sensitivity of the hyperparameter-selection procedure to the standard-error tolerance coefficient \(c_{\mathrm{SE}}\) and the complexity ordering in Experiment 3 (United States). We perform a sweep over \(c_{\mathrm{SE}} \in \{0, 0.01, 0.1, 0.5, 1\}\) and compare the selected models with the minimum mean validation-error configurations in terms of validation WAPE. When \(c_{\mathrm{SE}} = 0\), the procedure retains configurations with the minimum mean validation error and selects the simplest among any tied configurations. When \(c_{\mathrm{SE}} = 1\), the threshold corresponds to the standard 1-SE rule. We record the number of candidate configurations that fall within the selection threshold, the percentage of selection units where the selected configuration changes, the WAPE of the minimum mean validation-error configuration, and the WAPE of the final selected configuration. The penalty is defined as the difference between the WAPE of the selected configuration and the WAPE of the minimum mean validation-error configuration. The complexity rank of a configuration is its position when all evaluated configurations are ordered from simplest to most complex. We record the complexity rank of the selected configuration.
 
-We also evaluate the robustness of the complexity ordering by comparing the selected configurations when the signs of the complexity-ordering keys are flipped.
+We also evaluate the sensitivity to the complexity ordering by comparing the selected configurations when the signs of the complexity-ordering keys are flipped.
 
-In Experiment 3, we repeatedly perform 16 imputation runs and record the mean of results. In this experiment, we evaluate the sensitivity and robustness of the hyperparameter selection on three tunable models: ridge regression, GPR, and SVR. Therefore, there are 48 selection units for this experiment.
+In Experiment 3, we repeatedly perform 16 imputation runs and record the mean of results. In this experiment, we evaluate the sensitivity of the hyperparameter selection on three tunable models: ridge regression, GPR, and SVR. Therefore, there are 48 selection units for this experiment.
 
 \input{4_experiments/plots/selection_sensitivity_to_se_tolerance.tex}
 \input{4_experiments/tables/selection_sensitivity.tex}

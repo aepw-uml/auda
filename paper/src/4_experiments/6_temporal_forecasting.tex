@@ -1,6 +1,6 @@
-\subsection{Experiments 5--8: Temporal Forecasting}
+\subsection{Experiments 5--6: Temporal Forecasting}
 
-Producing business-as-usual projections from historical data is a fundamental task in environmental data analysis. In this study, we design four experiments to evaluate the performance of various forecasting methods across datasets with different characteristics.
+Producing business-as-usual projections from historical data is a fundamental task in environmental data analysis. In this study, we design two experiments to evaluate the performance of various forecasting methods across datasets with different characteristics.
 
 % ---- Experiment 5 - GlobalPlasticsProduction
 
@@ -33,27 +33,3 @@ Table~\ref{tab:forecasting_japan_pwg_metrics} shows that SVR has the best values
 
 The differences in model performance between the global plastics production and the Japan plastic waste generation series suggest that model choice depends strongly on both sample size and trend shape. Flexible machine learning models can perform well when the temporal signal is smooth, and enough observations are available, while simple time-series baselines may be more robust for short, non-monotonic country-level series. Across Experiments 5 and 6, SVR obtained the best metrics in both cases, although the small test sets (5 and 2 observations, respectively) mean this should be read as a tentative rather than a definitive pattern.
 
-% ---- Experiment 7: PWDrivers (NN Forecasting)
-
-Policy-related factors may influence plastic waste generation but are not represented in the available predictor set. In Experiment 7, we apply a multilayer perceptron (MLP) model to the \texttt{PWDrivers} dataset after removing outliers using an isolation forest with a contamination rate \(r_c = 0.1\) on the training set. The experiment evaluates whether the MLP can capture predictive structure in the heterogeneous pooled dataset; because policy variables are not included, it does not test whether the MLP captures policy-related effects.
-
-\input{4_experiments/tables/nn_forecasting_metrics.tex}
-
-Table~\ref{tab:nn_forecasting_metrics} shows a WAPE of 70.05\% and an \(R^2\) of 0.281, indicating that the MLP captures only broad predictive structure and that its forecasts remain far from the observed values. This is consistent with the heterogeneity of the pooled \texttt{PWDrivers} data points, which are drawn from different organizations, methodologies, and occasionally inconsistent units. We therefore treat Experiment 7 as an exploratory benchmark rather than a deployable forecaster; it provides no evidence about unobserved policy-related effects.
-
-% ---- Experiment 8: PWDrivers (Japan & Slovenia); Multivariate Forecasting
-
-%
-In Experiment 8, we evaluate conditional prediction of plastic waste generation using GPR, SVR, and MLP models on the \texttt{PWDrivers (Japan)} and \texttt{PWDrivers (Slovenia)} datasets. For each held-out country-year, the models receive the GDP and population variables from that same year, as well as the year itself, to predict plastic waste generation. Thus, this experiment is not a fully autonomous future-forecasting task: deployment would require those contemporaneous covariates to be observed or forecast separately. For the MLP, we first pretrain the model on pooled \texttt{PWDrivers} data after excluding all rows from the target country and removing outliers with an isolation forest using a contamination rate of \(r_c = 0.1\). We then train it on the target country's training data. This experiment compares conditional-prediction performance across methods on tiny datasets. For the \texttt{PWDrivers (Slovenia)} dataset, which contains only \(6\) samples, hyperparameter tuning is not performed due to the limited data availability.
-
-\input{4_experiments/tables/multivariate_forecasting_japan_metrics.tex}
-\input{4_experiments/tables/multivariate_forecasting_slovenia_metrics.tex}
-
-%
-Table~\ref{tab:multivariate_forecasting_japan_metrics} shows that, on the \texttt{PWDrivers (Japan)} dataset, the pretrained MLP achieves the best performance across all reported metrics, with a WAPE of 5.82\%—roughly half the error of GPR (11.14\%) and SVR (11.67\%), which are close to each other. The MLP's advantage suggests that pretraining on the pooled driver data lets the network learn latent driver--target relationships that transfer usefully to the Japanese series, whereas the two kernel-based models, fitted only on the small target training set, cannot recover them. Because only two observations are held out for testing, however, these results should be interpreted as indicative rather than definitive.
-
-%
-Table~\ref{tab:multivariate_forecasting_slovenia_metrics} shows a different pattern on the \texttt{PWDrivers (Slovenia)} dataset. Here SVR attains the lowest error (WAPE 8.67\%), while the MLP performs worst (17.17\%) and GPR is intermediate (16.94\%). With only six samples and no hyperparameter tuning, the flexible MLP cannot convert its pretraining into an advantage and instead fails to adapt to the target series, whereas the simpler SVR generalizes more robustly. Given the tiny dataset, these rankings are likewise indicative rather than definitive.
-
-%
-Taken together, the conditional-prediction results in Experiment 8 are dataset-dependent: the pretrained MLP has the lowest WAPE for Japan, whereas the simpler SVR has the lowest WAPE for Slovenia. Pretraining on the pooled data appears to help only when the target series is large and regular enough to benefit from the transferred representation; for the smallest, noisiest targets, simple kernel methods remain more reliable. These results do not establish autonomous future-forecasting performance, because the observed same-year covariates are supplied to the models. We omit \(R^2\) from both tables because, on hold-out sets of two (Japan) and a handful (Slovenia) of observations, its denominator is near zero and the values become large and negative, reflecting the test-set size rather than model quality, and WAPE is thus the operative metric for this experiment.
