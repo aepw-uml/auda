@@ -471,7 +471,6 @@ def save_figure(
             label=experiment_name,
         )
 
-    ax.axhline(30.0, color='#555555', linewidth=1.0, linestyle='--')
     ax.set_xticks(x_positions)
     ax.set_xticklabels(
         [format_coefficient(coefficient) for coefficient in coefficients]

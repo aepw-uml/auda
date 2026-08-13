@@ -110,7 +110,11 @@ class RegressionExperiment(Experiment):
         contamination = float(self.context.get('anomaly_contamination', 0.05))
 
         result = isolation_forest(
-            self.X_train, self.y_train, contamination, self.seed
+            self.X_train,
+            self.y_train,
+            contamination,
+            self.seed,
+            include_target=False,
         )
         self.context['isolation_forest_result'] = result
         self.context['X_train_original'] = self.X_train
