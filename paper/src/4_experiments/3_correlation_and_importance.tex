@@ -1,6 +1,6 @@
 \subsection{Experiments 1 and 2: Correlation and Importance Analysis}
 
-In Experiment 1, the correlation analysis workflow computed the Pearson correlation matrix over the features in the \texttt{PWDriverFeatureSet} dataset. In Experiment 2, we removed outliers from the \texttt{PWGPredictors} dataset using an isolation forest fitted on the predictors with a contamination rate of \(0.2\), then trained a random forest regressor on the filtered data. The resulting importance profile is conditional on this contamination setting and should be interpreted descriptively. Both experiments do not employ a train--test split.
+In Experiment 1, the correlation analysis workflow computed the Pearson correlation matrix over the features in the \texttt{PWDriverFeatureSet} dataset. In Experiment 2, we removed outliers from the \texttt{PWGPredictors} dataset using an isolation forest fitted on the predictors with a contamination rate of \(0.2\), then trained a random forest regressor on the filtered data. The resulting importance profile is conditional on this contamination setting and should be interpreted descriptively. Neither experiment employs a train--test split.
 
 \input{4_experiments/plots/correlation_matrix.tex}
 

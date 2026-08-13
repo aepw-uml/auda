@@ -8,7 +8,7 @@ For time series forecasting tasks, we use naive persistence, drift, and Holt-sty
 
 \subsubsection{Statistical Models}
 
-Statistical models use statistical methods to analyze and predict data. In this study, we use cubic spline interpolation~\cite{de1978practical} in imputation tasks, which fits a piecewise cubic function to the data while ensuring smoothness at the known data points. For forecasting tasks, we use local Theil--Sen regression~\cite{sen1968estimates}, a non-parametric method that estimates the slope of a trend by taking the median of all pairwise slopes in the data, and a non-seasonal auto-ARIMA model~\cite{box2015time}, a time series forecasting method that automatically selects autoregressive, differencing, and moving-average orders. Since ARIMA models usually perform poorly on tiny datasets, they are mostly used as a baseline in many experiments involving small datasets.
+Statistical models use statistical methods to analyze and predict data. In this study, we use cubic spline interpolation~\cite{de1978practical} in imputation tasks, which fits a piecewise cubic function to the data while ensuring smoothness at the known data points. For forecasting tasks, we use local Theil--Sen regression~\cite{sen1968estimates}, a non-parametric method that estimates the slope of a trend by taking the median of all pairwise slopes in the data, and a non-seasonal Auto ARIMA model~\cite{box2015time}, a time series forecasting method that automatically selects autoregressive, differencing, and moving-average orders. Since ARIMA models usually perform poorly on tiny datasets, they are mostly used as a baseline in many experiments involving small datasets.
 
 \subsubsection{Machine Learning Models}
 
