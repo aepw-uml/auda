@@ -1,18 +1,18 @@
 % results/multiple_imputation_united_states/metric_table
 \begin{table}[!ht]
 	\centering
-	\caption{\centering Imputation performance for total resin consumption in the United States using the \texttt{YearTRC (US)} dataset, averaged over 16 runs.}
+	\caption{\centering Imputation performance for artificially masked total resin consumption in the United States using the \texttt{YearTRC (US)} dataset, averaged over 16 runs with test \(n=2\) per run.}
 	\begin{tabular}{@{}lccccc@{}}
 		\toprule
-		\textbf{Experiment}          & \textbf{MAE}                   & \textbf{RMSE}                  & \textbf{WAPE}       \\
+		\textbf{Experiment}            & \textbf{MAE}                   & \textbf{RMSE}                  & \textbf{WAPE}       \\
 		\midrule
-		Linear Interpolation         & \(1.749 \times 10^5\)          & \(1.962 \times 10^5\)          & 1.19\%              \\
-		Moving Average Interpolation & \(3.054 \times 10^5\)          & \(3.229 \times 10^5\)          & 2.06\%              \\
-		Cubic Spline Interpolation   & \(2.335 \times 10^5\)          & \(2.623 \times 10^5\)          & 1.59\%              \\
+		Linear Interpolation           & \(1.749 \times 10^5\)          & \(1.962 \times 10^5\)          & 1.19\%              \\
+		Moving Average Interpolation   & \(3.054 \times 10^5\)          & \(3.229 \times 10^5\)          & 2.06\%              \\
+		Cubic Spline Interpolation     & \(2.335 \times 10^5\)          & \(2.623 \times 10^5\)          & 1.59\%              \\
 		\textbf{Theil--Sen Regression} & \(\mathbf{1.722 \times 10^5}\) & \(\mathbf{1.890 \times 10^5}\) & \(\mathbf{1.17}\)\% \\
-		Ridge Regression             & \(1.902 \times 10^5\)          & \(2.091 \times 10^5\)          & 1.29\%              \\
-		GPR                          & \(2.369 \times 10^5\)          & \(2.700 \times 10^5\)          & 1.61\%              \\
-		SVR                          & \(1.802 \times 10^5\)          & \(1.999 \times 10^5\)          & 1.22\%              \\
+		Ridge Regression               & \(1.902 \times 10^5\)          & \(2.091 \times 10^5\)          & 1.29\%              \\
+		GPR                            & \(2.369 \times 10^5\)          & \(2.700 \times 10^5\)          & 1.61\%              \\
+		SVR                            & \(1.802 \times 10^5\)          & \(1.999 \times 10^5\)          & 1.22\%              \\
 		\hline
 	\end{tabular}
 	\label{tab:imputation_united_states_trc}

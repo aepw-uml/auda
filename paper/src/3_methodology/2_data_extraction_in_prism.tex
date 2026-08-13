@@ -11,7 +11,7 @@ The dataset used in this study originates from the \textit{Plastics Recovery Ins
 	\label{fig:prism_data_extraction}
 \end{figure}
 
-Figure~\ref{fig:prism_data_extraction} illustrates the data extraction workflow used by the PRISM platform to transform unstructured documents such as PDF or Excel files. The workflow consists of separate parsers utilized based on the input document type. Layout elements such as images, charts, and tables are interpreted using GPT-4o to produce meaningful context. PDF files are parsed using the \texttt{PyMuPDF} library, and on the other hand, Excel files are read in using the \textbf{Pandas} library.
+Figure~\ref{fig:prism_data_extraction} illustrates the data extraction workflow used by the PRISM platform to transform unstructured documents such as PDF or Excel files. The workflow consists of separate parsers selected by input-document type. Layout elements such as images, charts, and tables are interpreted using GPT-4o to produce meaningful context. PDF files are parsed using the \texttt{PyMuPDF} library, whereas Excel files are read using the \texttt{pandas} library.
 
 After parsing, the PDF pipeline stores embedded text chunks in Azure AI Search to support retrieval-augmented generation for selected fields such as publisher and report date. Then, large language models are applied to identify relevant data points, including year, location, data point name, value, unit, and source context. Subsequently, the extracted outputs are passed through multiple post-processing layers, including data cleaning, location and data-point mapping, duplicate removal, unit standardization, calculated field generation, and quality score computation. Finally, the structured extraction results are appended to the database.
 

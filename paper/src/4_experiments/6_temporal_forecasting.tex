@@ -4,7 +4,7 @@ Producing business-as-usual projections from historical data is a fundamental ta
 
 % ---- Experiment 5 - GlobalPlasticsProduction
 
-In Experiment 5, we apply forecasting models to the \texttt{GlobalPlasticsProduction} dataset. This dataset contains 59 samples, making it relatively large for time series analysis. This experiment serves as a benchmark for evaluating model performance on larger datasets. Additionally, we tune hyperparameters using both grid search and random search methods and compare their runtime and performance.
+In Experiment 5, we apply forecasting models to the \texttt{GlobalPlasticsProduction} dataset. This dataset contains 59 samples, making it relatively large for time series analysis. The 1974 observation is absent in the dataset. Regarding this, regression models use the observed calendar years directly, whereas ARIMA and exponential-smoothing models treat the observed sequence as equally spaced. This experiment serves as a benchmark for evaluating model performance on larger datasets. Additionally, we tune hyperparameters using both grid search and random search methods and compare their runtime and performance.
 
 \input{4_experiments/tables/global_forecasting_grid_search_metrics.tex}
 \input{4_experiments/tables/global_forecasting_random_search_metrics.tex}

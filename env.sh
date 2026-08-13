@@ -64,21 +64,21 @@ function reproduce() {
 
     # Experiment 7 - NN PWG forecasting
     auda workflow run PWDrivers MultipleNNForecasting \
-        --num_experiments=8 \
+        --num_experiments=16 \
         --seed=471 \
         --split_shuffle=1 \
         --validation_fraction=0.1 \
         --anomaly_contamination=0.1
 
     # Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)
-    auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
-        --location=Japan \
-        --workflow_name=multiple_multivariate_forecasting_japan \
-        --pretraining_anomaly_contamination=0.1
-    auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
-        --location=Slovenia --enable_tuning=0 \
-        --workflow_name=multiple_multivariate_forecasting_slovenia \
-        --pretraining_anomaly_contamination=0.1
+    # auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
+    #     --location=Japan \
+    #     --workflow_name=multiple_multivariate_forecasting_japan \
+    #     --pretraining_anomaly_contamination=0.1
+    # auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
+    #     --location=Slovenia --enable_tuning=0 \
+    #     --workflow_name=multiple_multivariate_forecasting_slovenia \
+    #     --pretraining_anomaly_contamination=0.1
 }
 
 function move-figures() {
@@ -169,8 +169,8 @@ function datasets() {
     printf '%*s\n' 80 '' | tr ' ' '-'
 
     # Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)
-    auda dataset show PWDrivers --location=Japan --no-samples
-    auda dataset show PWDrivers --location=Slovenia --no-samples
+    # auda dataset show PWDrivers --location=Japan --no-samples
+    # auda dataset show PWDrivers --location=Slovenia --no-samples
 }
 
 function tables() {
@@ -205,7 +205,7 @@ function tables() {
     cat results/nn_forecasting/metric_table
     printf '%*s\n' 80 '' | tr ' ' '-'
 
-    echo "Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)"
-    cat results/multiple_multivariate_forecasting_japan/metric_table
-    cat results/multiple_multivariate_forecasting_slovenia/metric_table
+    # echo "Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)"
+    # cat results/multiple_multivariate_forecasting_japan/metric_table
+    # cat results/multiple_multivariate_forecasting_slovenia/metric_table
 }
