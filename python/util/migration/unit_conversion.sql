@@ -26,10 +26,9 @@ CREATE TABLE IF NOT EXISTS unit_conversion (
 
 -- Register this as a system table, never an analytical data table.
 LOCK TABLE table_metadata IN SHARE ROW EXCLUSIVE MODE;
-INSERT INTO table_metadata (id, name, type)
-SELECT COALESCE(MAX(id), 0) + 1, 'unit_conversion', 'system'
-FROM table_metadata
-HAVING NOT EXISTS (
+INSERT INTO table_metadata (name, type)
+SELECT 'unit_conversion', 'system'
+WHERE NOT EXISTS (
     SELECT 1 FROM table_metadata WHERE name = 'unit_conversion'
 );
 
