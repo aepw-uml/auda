@@ -1,4 +1,4 @@
-from typing import Callable
+from collections.abc import Callable
 
 import numpy as np
 from common.metrics import RegressionMetrics
@@ -52,9 +52,9 @@ def time_series_cross_validation(
             f'X and y must have the same number of rows, got {m} and {len(y)}.'
         )
 
-    if num_k_folds <= 0 or num_k_folds >= m:
+    if num_k_folds <= 2 or num_k_folds >= m:
         raise ValueError(
-            f'num_k_folds must be > 0 and < {m}, but got {num_k_folds}.'
+            f'num_k_folds must be > 2 and < {m}, but got {num_k_folds}.'
         )
 
     all_metrics: list[RegressionMetrics] = []
