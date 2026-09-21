@@ -1,3 +1,5 @@
+import json
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -238,7 +240,7 @@ def get_hyperparameters_str(hyperparameters: dict[str, Any]) -> str:
 
 
 def save_hyperparameter_table(task: Task, task_path: Path) -> None:
-    """Saves a hyperparameter table for the given task to a file.
+    """Saves a hyperparameter table and any internally optimized GPR fits.
 
     Args:
         task: The task containing the experiments with their hyperparameters.
@@ -261,6 +263,39 @@ def save_hyperparameter_table(task: Task, task_path: Path) -> None:
 
     print(f'Saved hyperparameter table to "{hyperparameter_table_path}".\n')
     print(hyperparameter_table.__repr__() + '\n')
+
+    save_gpr_fit_details([task], task_path)
+
+
+def save_gpr_fit_details(tasks: Sequence[Task], task_path: Path) -> None:
+    """Saves GPR optimizer settings and fitted kernels for every supplied run.
+
+    Args:
+        tasks: Completed tasks in run order.
+        task_path: Directory where ``gpr_fits.json`` will be written.
+    """
+
+    from step.model.gaussian_process_regression import GaussianProcessRegression
+
+    records: list[dict[str, Any]] = []
+    for run_index, task in enumerate(tasks):
+        for experiment in task.experiments:
+            regressor = getattr(experiment.model, 'regressor_', None)
+            if not isinstance(regressor, GaussianProcessRegression):
+                continue
+
+            records.append({
+                'run_index': run_index,
+                'experiment': experiment.name,
+                'experiment_seed': int(experiment.seed),
+                **regressor.parameters,
+                'kernel': str(regressor.parameters['kernel']),
+            })
+
+    if records:
+        save_content_to_file(
+            task_path / 'gpr_fits.json', json.dumps(records, indent=2)
+        )
 
 
 def save_plots(task: Task, task_path: Path) -> None:

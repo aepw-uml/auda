@@ -4,6 +4,7 @@ from typing import override
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.persistence import (
     collect_metrics_by_name,
+    save_gpr_fit_details,
     save_metric_summary_plot,
     save_metric_table,
     save_plots,
@@ -39,6 +40,7 @@ class MultipleImputationWorkflow(Workflow):
             else f'multiple_imputation_{location}'
         )
         save_metric_table(average_metrics, dir_path)
+        save_gpr_fit_details(tasks, dir_path)
 
         plot_metric: RegressionMetricName = context.get(
             'plot_metric', 'wape'

@@ -6,7 +6,6 @@ from common.experiment.forecasting_experiment import ForecastingExperiment
 from common.metrics import RegressionMetrics, average_regression_metrics
 from common.task import Task
 from step.evaluator.complexity_key import (
-    gaussian_process_regression_complexity_key,
     ridge_regression_complexity_key,
     support_vector_regression_complexity_key,
 )
@@ -130,6 +129,8 @@ def get_ridge_regression_forecasting(**_) -> ForecastingExperiment:
 
 
 def get_gaussian_process_forecasting(**_) -> ForecastingExperiment:
+    """Builds a GPR experiment with internal kernel optimization."""
+
     experiment = ForecastingExperiment(
         name='Gaussian Process Regression',
         description=(
@@ -141,12 +142,6 @@ def get_gaussian_process_forecasting(**_) -> ForecastingExperiment:
 
     experiment.set_context(
         plotter_factory=GaussianProcessRegressionPlotter,
-        tuning_parameters={
-            'hyperparameter_names': ['length_scale', 'noise_level'],
-            'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
-            'sampling_scales': ['log_uniform', 'log_uniform'],
-            'complexity_key': gaussian_process_regression_complexity_key,
-        },
     )
 
     return experiment

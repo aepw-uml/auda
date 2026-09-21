@@ -4,6 +4,7 @@ from typing import override
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.persistence import (
     build_and_save_metric_table,
+    save_gpr_fit_details,
 )
 from common.workflow import Workflow
 from experiment.multivariate_forecasting_task import (
@@ -34,3 +35,4 @@ class MultivariateForecastingWorkflow(Workflow):
         )
         dir_path = Path('results') / workflow_name
         build_and_save_metric_table(task, dir_path)
+        save_gpr_fit_details([task], dir_path)

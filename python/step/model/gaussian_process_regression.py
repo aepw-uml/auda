@@ -10,13 +10,13 @@ class GaussianProcessRegression(Regression):
     """Gaussian process regressor with an RBF kernel and additive noise.
 
     The model learns a smooth latent function with an RBF kernel while a
-    white-noise term captures observation noise. Hyperparameters are read from
-    ``hyperparameters`` and stored as floats so they are safe to pass directly
-    to scikit-learn.
+    white-noise term captures observation noise. Scikit-learn optimizes the
+    kernel by maximizing log-marginal likelihood on the supplied training
+    data. AUDA does not externally search or apply the 1-SE rule to GPR.
 
     Attributes:
         hyperparameters: Model configuration containing ``length_scale`` and
-            ``noise_level``.
+            ``noise_level`` initialization values and optimizer restart count.
     """
 
     def __init__(
@@ -28,7 +28,10 @@ class GaussianProcessRegression(Regression):
 
         Args:
             hyperparameters: Model configuration containing ``length_scale``
-                and ``noise_level``.
+                and ``noise_level`` initialization values, plus optional
+                ``n_restarts_optimizer`` (default zero) and ``random_state``
+                (default 42). Zero restarts performs one optimization from
+                the initial kernel; additional restarts use the fixed seed.
             **kwargs: Additional keyword arguments forwarded to the base class.
         """
 
@@ -36,6 +39,10 @@ class GaussianProcessRegression(Regression):
         self.hyperparameters: dict[str, Any] = {
             'length_scale': float(hyperparameters.get('length_scale', 1.0)),
             'noise_level': float(hyperparameters.get('noise_level', 1e-2)),
+            'n_restarts_optimizer': int(
+                hyperparameters.get('n_restarts_optimizer', 0)
+            ),
+            'random_state': int(hyperparameters.get('random_state', 42)),
         }
 
     @override
@@ -78,12 +85,35 @@ class GaussianProcessRegression(Regression):
 
         self.regressor_ = GaussianProcessRegressor(
             kernel=kernel,
+            optimizer='fmin_l_bfgs_b',
+            n_restarts_optimizer=self.hyperparameters['n_restarts_optimizer'],
+            random_state=self.hyperparameters['random_state'],
+            alpha=1e-10,
+            normalize_y=False,
         )
         self.regressor_.fit(X, y)
 
         self.parameters['kernel'] = self.regressor_.kernel_
-        self.parameters['length_scale'] = length_scale
-        self.parameters['noise_level'] = noise_level
+        self.parameters['length_scale'] = float(
+            self.regressor_.kernel_.k1.length_scale
+        )
+        self.parameters['noise_level'] = float(
+            self.regressor_.kernel_.k2.noise_level
+        )
+        self.parameters['initial_length_scale'] = length_scale
+        self.parameters['initial_noise_level'] = noise_level
+        self.parameters['length_scale_bounds'] = kernel.k1.length_scale_bounds
+        self.parameters['noise_level_bounds'] = kernel.k2.noise_level_bounds
+        self.parameters['optimizer'] = self.regressor_.optimizer
+        self.parameters['n_restarts_optimizer'] = (
+            self.regressor_.n_restarts_optimizer
+        )
+        self.parameters['random_state'] = self.regressor_.random_state
+        self.parameters['alpha'] = self.regressor_.alpha
+        self.parameters['normalize_y'] = self.regressor_.normalize_y
+        self.parameters['log_marginal_likelihood'] = float(
+            self.regressor_.log_marginal_likelihood_value_
+        )
 
         return self
 

@@ -4,6 +4,7 @@ from typing import cast, override
 from common.dataset import Dataset, DatasetSchema
 from common.experiment.persistence import (
     collect_metrics_by_name,
+    save_gpr_fit_details,
     save_hyperparameter_table,
     save_metric_summary_plot,
     save_metric_table,
@@ -69,5 +70,6 @@ class MultipleForecastingWorkflow(Workflow):
                 experiment.context['plot_metric'] = plot_metric
 
         save_hyperparameter_table(representative_task, dir_path)
+        save_gpr_fit_details(tasks, dir_path)
         save_plots(representative_task, dir_path)
         save_time_table(representative_task, dir_path)

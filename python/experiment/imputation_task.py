@@ -15,7 +15,6 @@ from common.experiment.imputation_experiment import (
 from common.metrics import RegressionMetrics, average_regression_metrics
 from common.task import Task
 from step.evaluator.complexity_key import (
-    gaussian_process_regression_complexity_key,
     ridge_regression_complexity_key,
     support_vector_regression_complexity_key,
 )
@@ -127,7 +126,7 @@ def get_ridge_regression_imputation(
 def get_gaussian_process_imputation(
     **_,
 ) -> ImputationExperiment:
-    """Builds a Gaussian-process imputation experiment."""
+    """Builds a GPR imputation experiment with internal kernel optimization."""
 
     experiment = ImputationExperiment(
         name='Gaussian Process Regression',
@@ -140,13 +139,6 @@ def get_gaussian_process_imputation(
 
     experiment.set_context(
         plotter_factory=GaussianProcessRegressionPlotter,
-        tuning_parameters={
-            'search_type': 'grid',
-            'hyperparameter_names': ['length_scale', 'noise_level'],
-            'search_space': [[(1e-3, 1e3)], [(1e-6, 1e1)]],
-            'sampling_scales': ['log_uniform', 'log_uniform'],
-            'complexity_key': gaussian_process_regression_complexity_key,
-        },
     )
 
     return experiment
