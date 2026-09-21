@@ -3,6 +3,7 @@ from .prism_data_extraction import PrismDataExtraction
 from .prism_data_point import PrismDataPoint
 from .prism_location import PrismLocation
 from .table_metadata import TableMetadata
+from .unit_conversion import UnitConversion
 
 # Register all models for export here (do not include the base model)
 __all__ = [
@@ -11,4 +12,5 @@ __all__ = [
     'PrismDataPoint',
     'PrismLocation',
     'PrismDataExtraction',
+    'UnitConversion',
 ]

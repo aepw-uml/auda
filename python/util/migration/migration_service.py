@@ -24,12 +24,14 @@ from util.database.model import (
     PrismDataPoint,
     PrismLocation,
     TableMetadata,
+    UnitConversion,
 )
 from util.env import env
 from util.logging import get_logger
 
 from .datapoint import Datapoint
 from .migration_options import MigrationOptions
+from .unit_converter import UnitConverter
 
 
 class MigrationService:
@@ -44,6 +46,7 @@ class MigrationService:
         self.logger: Logger = get_logger('MigrationService')
         self.auda_db: Database = Database(env.dbUrl)
         self.prism_db: Database = Database(env.prismDbUrl)
+        self.unit_converter: UnitConverter | None = None
 
     def migrate(self) -> None:
         batch_size: int = self.options.batch_size
@@ -66,6 +69,10 @@ class MigrationService:
         )
 
         self.logger.info('Preparing migration...')
+
+        # Load once before writing any analytical records. The table may be
+        # empty, but must exist; operators create it using unit_conversion.sql.
+        self.unit_converter = self.get_unit_converter()
 
         num_datapoints = self.get_num_datapoints()
         self.logger.info(
@@ -185,6 +192,17 @@ class MigrationService:
 
         with self.prism_db.get_session() as prism_session:
             return prism_session.execute(query).scalar_one()
+
+    def get_unit_converter(self) -> UnitConverter:
+        """Loads and validates operator-configured unit conversion rules.
+
+        Returns:
+            A converter that also supports unchanged canonical-unit values.
+        """
+
+        with self.auda_db.get_session() as session:
+            rules = list(session.execute(select(UnitConversion)).scalars())
+            return UnitConverter(rules)
 
     def get_data_column_map(self) -> dict[str, PrismDataPoint]:
         """Retrieves a mapping of the IDs in the PrismDataPoint (data column
@@ -320,13 +338,29 @@ class MigrationService:
         location: str = prism_location.location_name
         year: int = datapoint.year
 
+        if self.unit_converter is None:
+            self.unit_converter = self.get_unit_converter()
+        try:
+            value, target_unit = self.unit_converter.convert(
+                datapoint.value, datapoint.unit
+            )
+        except ValueError as error:
+            raise ValueError(
+                f'Cannot migrate extraction {datapoint.id} '
+                f'({original_column_name}, {location}, {year}): {error}'
+            ) from error
+
+        self.logger.debug(
+            f'Extraction {datapoint.id}: {datapoint.unit} -> {target_unit}.'
+        )
+
         # Insert or update the datapoint.
         return self.insert_or_update_datapoint(
             data_table,
             column_metadata.column_name,
             location,
             year,
-            datapoint.value,
+            value,
         )
 
     def insert_or_update_datapoint(
