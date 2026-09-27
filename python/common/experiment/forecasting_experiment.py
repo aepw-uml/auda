@@ -35,6 +35,27 @@ class ForecastingExperiment(RegressionExperiment):
         self.context['split_shuffle'] = False
 
     @override
+    def split(self) -> None:
+        """Splits at an explicit rolling origin when one is configured.
+
+        The supplied dataset must end at the last test observation. Otherwise,
+        the existing chronological holdout procedure is used.
+        """
+
+        if 'forecast_train_size' not in self.context:
+            return super().split()
+
+        if self.X is None or self.y is None:
+            raise ValueError('Data not set up. Call setup() first.')
+        if not self.get_context_bool('enable_evaluation', True):
+            raise ValueError('Rolling-origin forecasting requires evaluation.')
+        train_end = int(self.context['forecast_train_size'])
+        if not 0 < train_end < len(self.y):
+            raise ValueError('Forecast training size must leave test samples.')
+        self.X_train, self.y_train = self.X[:train_end], self.y[:train_end]
+        self.X_test, self.y_test = self.X[train_end:], self.y[train_end:]
+
+    @override
     def train(self) -> None:
         super().train()
 

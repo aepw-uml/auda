@@ -55,6 +55,12 @@ def run_workflow(ctx: Context, dataset_name: str, workflow: str) -> None:
             from workflow.forecasting_workflow import ForecastingWorkflow
 
             ForecastingWorkflow().run(dataset, schema, **context)
+        case 'RollingOriginForecasting':
+            from workflow.rolling_origin_forecasting_workflow import (
+                RollingOriginForecastingWorkflow,
+            )
+
+            RollingOriginForecastingWorkflow().run(dataset, schema, **context)
         case 'MultipleForecasting':
             from workflow.multiple_forecasting_workflow import (
                 MultipleForecastingWorkflow,

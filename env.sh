@@ -41,26 +41,39 @@ function reproduce() {
         --location=United\ States --seed=471 \
         --se_tolerance_coefficient=0.01
 
-    # Experiment 5 - Global plastic production forecasting
-    auda workflow run GlobalPlasticsProduction MultipleForecasting --seed=471 \
-        --workflow_name=multiple_global_forecasting_grid_search \
+    # Experiment 5 - Four rolling origins, five observations per test window.
+    # Retain 16 tuning seeds per origin; summaries average seeds, then origins.
+    auda workflow run GlobalPlasticsProduction RollingOriginForecasting \
+        --seed=471 --initial_train_size=39 --horizon=5 --step=5 \
+        --num_experiments=16 \
+        --workflow_name=rolling_global_forecasting_grid_search \
         --tune_search_type=grid
-    auda workflow run GlobalPlasticsProduction MultipleForecasting --seed=471 \
-        --workflow_name=multiple_global_forecasting_random_search \
+    auda workflow run GlobalPlasticsProduction RollingOriginForecasting \
+        --seed=471 --initial_train_size=39 --horizon=5 --step=5 \
+        --num_experiments=16 \
+        --workflow_name=rolling_global_forecasting_random_search \
         --tune_search_type=random
 
+    # Single-holdout fits for illustrative plots, not rolling-origin summaries.
     auda workflow run GlobalPlasticsProduction Forecasting --seed=471 \
         --workflow_name=global_forecasting --tune_search_type=grid
     auda workflow run GlobalPlasticsProduction Forecasting --seed=471 \
         --workflow_name=global_forecasting --tune_search_type=random
 
-    # Experiment 6 - PWG forecasting (Japan)
-    auda workflow run YearPWG MultipleForecasting --location=Japan --seed=471
+    # Experiment 6 - Japan: four rolling origins with two test observations.
+    auda workflow run YearPWG RollingOriginForecasting \
+        --location=Japan --seed=471 \
+        --initial_train_size=18 --horizon=2 --step=2 --num_experiments=16 \
+        --workflow_name=rolling_forecasting_japan --tune_search_type=random
+
+    # The US series has only nine observations: retain its holdout evaluation.
     auda workflow run YearPWG MultipleForecasting --location=United\ States \
         --seed=471
 
+    # Keep separate holdout plot directories for Japan and the United States.
     auda workflow run YearPWG Forecasting --location=Japan --seed=471
-    auda workflow run YearPWG Forecasting --location=United\ States --seed=471
+    auda workflow run YearPWG Forecasting --location=United\ States --seed=471 \
+        --workflow_name=forecasting_united_states
 
     # Experiment 7 - NN PWG forecasting
     # auda workflow run PWDrivers MultipleNNForecasting \
@@ -118,7 +131,7 @@ function move-figures() {
     cp "$DIR/complexity_ordering_robustness.png" \
         "$DEST/complexity_ordering_robustness.png"
 
-    # Experiment 5 - Global plastic production forecasting (random search)
+    # Experiment 5 - Illustrative single-holdout plots (random search)
     DIR="results/global_forecasting_random_search/plots"
     cp "$DIR/theil_sen_regression.png" \
         "$DEST/global_forecasting_theil_sen_regression.png"
@@ -129,7 +142,7 @@ function move-figures() {
     cp "$DIR/support_vector_regression.png" \
         "$DEST/global_forecasting_svr.png"
 
-    # Experiment 6 - PWG forecasting
+    # Experiment 6 - Japan illustrative single-holdout plots
     DIR="results/forecasting_random_search/plots"
     cp "$DIR/arima_regression.png" \
         "$DEST/japan_pwg_forecasting_arima_regression.png"
@@ -189,16 +202,19 @@ function tables() {
     cat results/complexity_ordering_robustness_united_states/summary_table
     printf '%*s\n' 80 '' | tr ' ' '-'
 
-    echo "Experiment 5 - Global plastic production forecasting"
-    cat results/global_forecasting_grid_search/metric_table
-    cat results/global_forecasting_random_search/metric_table
-    cat results/global_forecasting_grid_search/time_table
-    cat results/global_forecasting_random_search/metric_table
+    echo "Experiment 5 - Global rolling-origin forecasting (grid: mean, SD)"
+    cat results/rolling_global_forecasting_grid_search/metric_table
+    cat results/rolling_global_forecasting_grid_search/origin_std/metric_table
+    echo "Global rolling-origin forecasting (random: mean, SD)"
+    cat results/rolling_global_forecasting_random_search/metric_table
+    cat results/rolling_global_forecasting_random_search/origin_std/metric_table
     printf '%*s\n' 80 '' | tr ' ' '-'
 
-    echo "Experiment 6 - PWG forecasting (Japan & the United States)"
-    cat results/multiple_forecasting_japan/metric_table
-    # cat results/multiple_forecasting_united_states/metric_table
+    echo "Experiment 6 - Japan rolling-origin forecasting (mean, SD)"
+    cat results/rolling_forecasting_japan/metric_table
+    cat results/rolling_forecasting_japan/origin_std/metric_table
+    echo "United States forecasting (single holdout, averaged across seeds)"
+    cat results/multiple_forecasting_united_states/metric_table
     printf '%*s\n' 80 '' | tr ' ' '-'
 
     # echo "Experiment 7 - NN PWG forecasting"
