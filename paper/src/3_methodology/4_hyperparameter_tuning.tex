@@ -1,18 +1,34 @@
 \subsection{Hyperparameter Tuning}
 
-For tunable models, AUDA provides two widely used methods for hyperparameter tuning: grid search \cite{hastie2009elements} and random search \cite{bergstra2012random}. The procedure for constructing the configurations \(\mathcal{G}\) is described in Appendix~\ref{sec:appendix_a}. Grid search evaluates all configurations \(\mathcal{G}\) in a predefined grid, while random search samples configurations randomly from the search space. For both methods, each configuration \(\lambda \in \mathcal{G}\) is used to train the model and evaluate its performance on a validation set. Forecasting tasks use time-series cross-validation~\cite{hyndman2018forecasting}, whereas imputation tasks use repeated random holdout validation~\cite{kohavi1995study}.
+For tunable models, AUDA provides two widely used methods for hyperparameter tuning: grid search~\cite{hastie2009elements} and random search~\cite{bergstra2012random} to select hyperparameters for ridge regression and SVR. GPR is fitted with its own internal optimizer defined in \texttt{scikit-learn}.
 
-Each configuration \(\lambda\) is combined with the fold-wise performance metrics to form pairs \((\lambda, (\mathcal{L}^{(1)}(\lambda), \mathcal{L}^{(2)}(\lambda), \dots, \mathcal{L}^{(K)}(\lambda)))\), where \(K\) is the number of folds.
+The procedure for constructing the configuration set \(\mathcal{G}\) is described in Appendix~\ref{sec:appendix_a}.
+Grid search evaluates all configurations in a predefined grid \(\mathcal{G}\), whereas random search samples configurations randomly from the search space.
+For both methods, each configuration \(\lambda \in \mathcal{G}\) is used to train the model and evaluate its performance on a validation set.
+Forecasting tasks use time-series cross-validation~\cite{hyndman2018forecasting}, whereas imputation tasks use repeated random holdout validation~\cite{kohavi1995study}.
+These two validation methods are described in Appendix~\ref{sec:appendix_c}.
 
-We then find the mean performance \(\mu(\lambda)\) for each configuration. Next, we compute the standard error of the validation metrics for the configuration with the lowest mean validation error:
+Each configuration \(\lambda\) is paired with its fold-wise performance metrics, forming \((\lambda, (\mathcal{L}^{(1)}(\lambda), \mathcal{L}^{(2)}(\lambda), \dots, \mathcal{L}^{(K)}(\lambda)))\), where \(K\) is the number of folds.
+
+We then compute the mean validation performance \(\mu(\lambda)\) for each configuration.
+Next, we compute the standard error of the validation metrics for the configuration with the lowest mean validation error:
 \[
 	E = \frac{\sigma}{\sqrt{K}},
 \]
-where \(\sigma\) is the sample standard deviation of the fold-wise validation metrics for that configuration. We identify all configurations whose mean validation performance satisfies \(\mu(\lambda) \leq \mu^\star + c_{\mathrm{SE}} E\), where \(\mu^\star\) is the minimum mean validation error and \(c_{\mathrm{SE}}\) is the tolerance coefficient. We then select the simplest configuration among these candidates according to the predefined complexity ordering. At \(c_{\mathrm{SE}} = 0\), the implementation uses exact IEEE-754 floating-point comparisons (no relative or absolute tie tolerance): a configuration is retained only when its mean validation error is less than or equal to \(\mu^\star\). If several configurations are retained, their complexity tuples are compared lexicographically, in the key order listed in Table~\ref{tab:complexity-ordering}.
+where \(\sigma\) is the sample standard deviation of the fold-wise validation metrics for that configuration.
+We identify all configurations whose mean validation performance satisfies \(\mu(\lambda) \leq \mu^\star + c_{\mathrm{SE}} E\), where \(\mu^\star\) is the minimum mean validation error and \(c_{\mathrm{SE}}\) is the tolerance coefficient.
+We then select the simplest configuration among these candidates according to the predefined complexity ordering in Table~\ref{tab:complexity-ordering}.
+When \(c_{\mathrm{SE}} = 0\), the procedure selects a configuration with the minimum mean validation error, whereas \(c_{\mathrm{SE}} = 1\) corresponds to the original 1-SE rule.
+If multiple configurations are retained, their complexity tuples are compared lexicographically according to the key order listed in the complexity-ordering table.
 
-The standard-error tolerance coefficient \(c_{\mathrm{SE}}\) controls the size of the candidate set considered by the complexity ordering. Smaller values impose a narrower validation-error threshold, whereas larger values retain more configurations. The procedure provides a structured way to examine the empirical trade-off between mean validation error and model simplicity in this benchmark.
+The standard-error tolerance coefficient \(c_{\mathrm{SE}}\) controls the size of the candidate set considered by the complexity ordering.
+Smaller values impose a narrower validation-error threshold, whereas larger values retain more configurations.
 
-In this study, the number of random-search iterations is set to \(T = 128\), and the number of grid points for each hyperparameter is set to \(M = 12\). The ridge regression and GPR models each have two tunable hyperparameters, resulting in \(M^2 = 144\) configurations for grid search. The SVR model with gamma tuning has three tunable hyperparameters, resulting in \(M^3 = 1728\) grid-search configurations.
+Preliminary exploratory runs produced irregular fitted curves for some configurations selected by minimum validation error, as these configurations may exploit variation specific to the validation data and result in overfitting, particularly when few observations are available~\cite{cawley2010over}. This motivated the use of the 1-SE variant, which explicitly favors simpler configurations while having little impact on performance. We examine how this setting affects configuration selection without assuming that it improves performance on unseen data.
+
+In this study, the number of random-search iterations is set to \(T = 128\), and the number of grid points for each hyperparameter is set to \(M = 12\).
+The ridge regression and SVR models each have two tunable hyperparameters, resulting in \(M^2 = 144\) configurations for grid search.
+The SVR model with gamma tuning has three tunable hyperparameters, resulting in \(M^3 = 1728\) grid-search configurations.
 
 \begin{table}[t]
 	\centering
@@ -25,21 +41,16 @@ In this study, the number of random-search iterations is set to \(T = 128\), and
 		Model & Hyperparameter   & Simpler configuration favors \\
 		\midrule
 		\multirow{2}{*}{Ridge Regression}
-		      & degree           & $-\text{degree}$             \\
-		      & alpha            & $+\alpha$                    \\
-		\midrule
-		\multirow{2}{*}{GPR}
-		      & length\_scale    & $+\text{length\_scale}$      \\
-		      & noise\_level     & $+\text{noise\_level}$       \\
+		      & degree           & lower                        \\
+		      & alpha            & higher                       \\
 		\midrule
 		\multirow{3}{*}{SVR}
-		      & C                & $-C$                         \\
-		      & epsilon          & $+\epsilon$                  \\
-		      & gamma (if tuned) & $-\gamma$                    \\
+		      & C                & lower                        \\
+		      & epsilon          & higher                       \\
+		      & gamma (if tuned) & lower                        \\
 		\bottomrule
 	\end{tabular}
 	\label{tab:complexity-ordering}
 \end{table}
 
-% Table~\ref{tab:complexity-ordering} defines how model complexity is ordered when applying the 1-SE rule. For each tunable model, the table lists which hyperparameter direction is treated as simpler. For example, in ridge regression, a lower degree and a higher alpha contribute to a simpler model.
-Table~\ref{tab:complexity-ordering} defines the lexicographic complexity tuples used when applying the 1-SE rule. For ridge regression, the tuple is \((\mathrm{degree},-\alpha)\); for GPR, it is \(( -\mathrm{length\_scale},-\mathrm{noise\_level})\); and for SVR, it is \((C,-\epsilon)\), with \(\gamma\) appended as the final key when gamma tuning is enabled. Lower tuples are selected first. Thus, lower degree and \(C\), but higher \(\alpha\), \(\epsilon\), length scale, and noise level, are treated as simpler; lower tuned \(\gamma\) is treated as simpler.
+Table~\ref{tab:complexity-ordering} defines the complexity tuples used when applying the 1-SE rule. For ridge regression, the tuple is \((\mathrm{degree},-\alpha)\); for SVR, it is \((C,-\epsilon)\), with \(\gamma\) appended as the final key when gamma tuning is enabled. Lower tuples are selected first.

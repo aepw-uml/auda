@@ -25,3 +25,6 @@ indent.log
 # Paper draft and paper zip files
 /paper-*
 paper.zip
+
+# Old paper
+paper_old

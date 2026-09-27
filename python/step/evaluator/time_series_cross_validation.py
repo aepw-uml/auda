@@ -14,12 +14,12 @@ def time_series_cross_validation(
 ) -> list[RegressionMetrics]:
     """Performs expanding-window time series cross-validation.
 
-    This function preserves chronological order. It first splits the sample
-    indices into ``num_k_folds + 1`` contiguous blocks with
-    ``np.array_split(np.arange(m), num_k_folds + 1)``. The first block is used
-    only as the initial training window. For validation fold ``i``, the
+    This function preserves chronological order. It splits the sample indices
+    into ``num_k_folds`` contiguous blocks with
+    ``np.array_split(np.arange(m), num_k_folds)``. The first block is used
+    only as the initial training window. For validation block ``i``, the
     training set is the concatenation of all blocks before ``i``, and the
-    validation set is block ``i`` itself. This produces ``num_k_folds``
+    validation set is block ``i`` itself. This produces ``num_k_folds - 1``
     validation runs, each evaluated on data that occurs strictly after its
     training data.
 
@@ -30,9 +30,9 @@ def time_series_cross_validation(
             targets, validation features, and validation targets, and returns a
             RegressionMetrics object containing the evaluation metrics for that
             fold.
-        num_k_folds: The number of validation folds to evaluate. The function
-            creates ``num_k_folds + 1`` chronological blocks so that the first
-            block can serve as the initial training window.
+        num_k_folds: The number of chronological blocks. The function
+            evaluates every block after the first, so it produces
+            ``num_k_folds - 1`` validation runs.
 
     Returns:
         A list of ``RegressionMetrics`` objects, one for each validation fold,
@@ -60,11 +60,12 @@ def time_series_cross_validation(
     all_metrics: list[RegressionMetrics] = []
 
     # Create a list of indices for each fold. If num_k_folds is 4 and m is 10,
-    # then folds will be [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9]]. One extra
-    # block is needed so the first block can serve as initial training data.
-    folds: list[np.ndarray] = np.array_split(np.arange(m), num_k_folds + 1)
+    # then folds will contain four contiguous blocks. The first block serves
+    # as the initial training data, and the remaining three are validation
+    # blocks.
+    folds: list[np.ndarray] = np.array_split(np.arange(m), num_k_folds)
 
-    for fold_idx in range(1, num_k_folds + 1):
+    for fold_idx in range(1, num_k_folds):
         train_idx = np.concatenate(folds[:fold_idx])
         val_idx = folds[fold_idx]
 

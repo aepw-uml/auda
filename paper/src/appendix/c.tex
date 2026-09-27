@@ -1,0 +1,53 @@
+\section[\appendixname~\thesection]{Validation Methods}
+\label{sec:appendix_c}
+
+Suppose the training set contains \(n\) samples, \(x_1, x_2, \dots, x_n\).
+Let
+\[
+	\mathcal{M} : \mathcal{D}_{\mathrm{train}} \times \mathcal{D}_{\mathrm{val}} \to \mathbb{R}
+\]
+denote an evaluation function that maps a training set and a validation set to a scalar performance metric.
+
+The following defines the time-series cross-validation procedure used in this study.
+
+Let \(K\), with \(K \ge 3\), denote the number of folds.
+We require the samples to be ordered chronologically by their observation times.
+That is, for any \(1 \le i < j \le n\), sample \(x_i\) is observed before sample \(x_j\).
+The ordered samples are partitioned into \(K\) consecutive folds, denoted by \(F_1, F_2, \dots, F_K\), with approximately equal sizes.
+Each fold must contain at least one sample.
+
+For each validation fold \(F_i\), where \(i = 2, \dots, K\), the model is trained using all preceding folds, \(\bigcup_{j=1}^{i-1} F_j\), and evaluated on \(F_i\).
+The mean performance metric across the \(K-1\) validation folds is defined as
+\[
+	\bar{m} = \frac{1}{K-1} \sum_{i=2}^{K} \mathcal{M} \left( \bigcup_{j=1}^{i-1} F_j, F_i \right).
+\]
+
+In the implementation, \(K\) defaults to 4.
+
+The following defines the repeated random holdout validation procedure used in this study.
+
+Let \(T\) denote the number of iterations and \(r\) denote the validation rate.
+For each iteration \(t = 1, 2, \dots, T\), let
+\[
+	u = \max \left(2, \left\lfloor nr \right\rfloor \right)
+\]
+denote the number of samples selected for validation.
+
+Randomly select \(u\) distinct indices \(i_1^{(t)}, i_2^{(t)}, \dots, i_u^{(t)}\).
+Let
+\[
+	I_t = \left\{ i_1^{(t)}, i_2^{(t)}, \dots, i_u^{(t)} \right\}
+\]
+
+denote the set of validation indices for iteration \(t\).
+The performance metric for iteration \(t\) is defined as
+\[
+	m_t = \mathcal{M} \left( \{x_j : j \notin I_t\}, \{x_j : j \in I_t\} \right).
+\]
+
+The mean performance metric across all \(T\) iterations is then defined as
+\[
+	\bar{m} = \frac{1}{T} \sum_{t=1}^{T} m_t.
+\]
+
+In the implementation, the default validation rate is \(r=0.2\) and \(T\) defaults to 5.

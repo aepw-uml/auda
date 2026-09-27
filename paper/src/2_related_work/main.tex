@@ -1,20 +1,29 @@
 \section{Related Work}
 
-Sparse observations, heterogeneous reporting practices, and noisy measurements often constrain environmental forecasting. Large comparative studies show that regression-based methods can be competitive with, and sometimes outperform, classical time-series methods in environmental forecasting when overfitting is controlled~\cite{effrosynidis2023time}. In waste management applications, machine learning methods such as support vector regression and neural networks have been used to forecast municipal solid waste generation using socioeconomic and demographic predictors~\cite{abbasi2013forecasting}. These studies motivate the use of statistical and machine learning models for environmental forecasting, but they often focus on a few datasets or a single modeling task.
+Sparse observations, heterogeneous practices, and noisy measurements often constrain environmental forecasting and imputation.
+Large comparative studies show that regression-based methods can be competitive with, and sometimes outperform, classical time-series methods in environmental forecasting when overfitting is controlled~\cite{effrosynidis2023time}.
+In waste management applications, machine learning methods such as support vector regression and neural networks have been used to forecast municipal solid waste generation using socioeconomic and demographic predictors~\cite{abbasi2013forecasting}.
+These studies motivate the modeling approaches present in this study, which focuses on documenting how selected PRISM records are transformed into analysis datasets and how interpolation and forecasting are evaluated under the constraints of those datasets.
 
-Research on the quantitative modeling of plastic waste has primarily developed along two paths. The first path involves material flow inventory analysis and scenario forecasting.
-Geyer et al. provided the foundational global data of plastic production, use, and end-of-life fates~\cite{geyer2017production}, while subsequent studies projected future waste generation and mismanaged plastic volumes under alternative policy and consumption scenarios~\cite{lebreton2019future,borrelle2020predicted,lau2020evaluating,dokl2024global,pottinger2024pathways}.
-Although these studies yielded influential large-scale estimates, they were not designed to compare the predictive accuracy of statistical models to machine learning models against observational records.
-The second path applies machine learning to waste forecasting by training support vector regression, tree ensemble models, and neural networks on socioeconomic and demographic indicators such as population and GDP.
-Closely aligned with the context of the present study, existing research has utilized neural networks to forecast plastic waste generation and evaluate the efficacy of interventions~\cite{fan2022forecasting}.
-AUDA belongs primarily to this second line of research. It extends this work by providing a reproducible multitask benchmarking framework that compares interpolation methods, statistical models, and machine-learning models across sparse country-level analysis tables, with particular attention to model complexity and validation under limited data availability.
+Research on the quantitative modeling of plastic waste has primarily developed along two paths.
+The first involves material flow inventory analysis and scenario forecasting.
+Geyer et al. provided foundational global data on plastic production, use, and end-of-life fates~\cite{geyer2017production}, while subsequent studies projected waste generation and mismanaged plastic volumes under alternative policy and consumption scenarios~\cite{borrelle2020predicted,lau2020evaluating,dokl2024global,pottinger2024pathways}.
+Although these studies yielded influential large-scale estimates, they were not designed to compare the predictive accuracy of statistical and machine learning models against observed data.
 
-This study builds directly upon the PRISM data ecosystem, which is developed through a collaboration between the Alliance to End Plastic Waste and IBM.
+The second path applies machine learning to waste forecasting using socioeconomic and demographic indicators such as population and GDP.
+Methods explored in this area include support vector regression, ensemble models, and neural networks.
+Recent research has also utilized multilayer perceptrons to forecast waste generation and evaluate the effectiveness of interventions~\cite{fan2022forecasting}.
+
+This study follows the second path of research by applying statistical and machine learning methods to selected plastic-related datasets.
+Through illustrative case studies, it examines interpolation and forecasting within the AUDA workflow, with a particular focus on how limited data availability affects model selection, evaluation, and interpretation.
+
 The PRISM platform integrates heterogeneous data sources and converts them into normalized plastic waste information.
-To our knowledge, AUDA is the first analytical workflow to transform human-reviewed extracted PRISM records into standardized "country-year" analysis tables and to use these data to establish reproducible benchmarks for imputation and forecasting.
+AUDA transforms human-reviewed PRISM records into country–year analytical tables and provides reproducible workflows for the interpolation and forecasting case studies presented in this paper.
 
-Research in related fields also addresses the issue of model selection.
+Research in related fields has also addressed the issue of model selection.
 Hyperparameter tuning typically employs methods such as grid search, random search, and cross-validation~\cite{bergstra2012random,kohavi1995study,hyndman2018forecasting}.
-However, consistently selecting the configuration with the lowest validation error may lead to the choice of an overly complex configuration, resulting in possible overfitting.
-This phenomenon is particularly pronounced when the validation error estimate has high variance~\cite{cawley2010over}.
-The one standard error (1-SE) rule mitigates this issue by selecting the simplest configuration whose validation error is within one standard error of the best observed error~\cite{breiman2017classification,hastie2009elements}.
+However, consistently selecting the configuration with the lowest validation error may favor an overly complex configuration and increase the risk of overfitting.
+This issue is particularly pronounced when the validation error estimate has high variance~\cite{cawley2010over}.
+The one-standard-error (1-SE) rule addresses this concern by favoring the simplest configuration whose validation error falls within one standard error of the minimum observed validation error~\cite{breiman2017classification,hastie2009elements}.
+However, Chen and Yang~\cite{chen2021one} pointed out that cross-validation errors across folds are not independent and showed that the usual standard-error estimate can substantially overestimate or underestimate the variability of the cross-validation error.
+For this reason, we treat the standard-error tolerance coefficient as an exploratory sensitivity setting, without assuming that it corrects the uncertainty estimate or improves predictive performance.

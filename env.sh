@@ -63,12 +63,12 @@ function reproduce() {
     auda workflow run YearPWG Forecasting --location=United\ States --seed=471
 
     # Experiment 7 - NN PWG forecasting
-    auda workflow run PWDrivers MultipleNNForecasting \
-        --num_experiments=16 \
-        --seed=471 \
-        --split_shuffle=1 \
-        --validation_fraction=0.1 \
-        --anomaly_contamination=0.1
+    # auda workflow run PWDrivers MultipleNNForecasting \
+    #     --num_experiments=16 \
+    #     --seed=471 \
+    #     --split_shuffle=1 \
+    #     --validation_fraction=0.1 \
+    #     --anomaly_contamination=0.1
 
     # Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)
     # auda workflow run PWDrivers MultipleMultivariateForecasting --seed=471 \
@@ -165,8 +165,8 @@ function datasets() {
     printf '%*s\n' 80 '' | tr ' ' '-'
 
     # Experiment 7 - NN PWG forecasting
-    auda dataset show PWDrivers --no-samples
-    printf '%*s\n' 80 '' | tr ' ' '-'
+    # auda dataset show PWDrivers --no-samples
+    # printf '%*s\n' 80 '' | tr ' ' '-'
 
     # Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)
     # auda dataset show PWDrivers --location=Japan --no-samples
@@ -201,9 +201,9 @@ function tables() {
     # cat results/multiple_forecasting_united_states/metric_table
     printf '%*s\n' 80 '' | tr ' ' '-'
 
-    echo "Experiment 7 - NN PWG forecasting"
-    cat results/nn_forecasting/metric_table
-    printf '%*s\n' 80 '' | tr ' ' '-'
+    # echo "Experiment 7 - NN PWG forecasting"
+    # cat results/nn_forecasting/metric_table
+    # printf '%*s\n' 80 '' | tr ' ' '-'
 
     # echo "Experiment 8 - PWG multivariate forecasting (Japan & Slovenia)"
     # cat results/multiple_multivariate_forecasting_japan/metric_table

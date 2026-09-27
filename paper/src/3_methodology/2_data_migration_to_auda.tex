@@ -1,0 +1,14 @@
+\subsection{Data Migration to AUDA Analytical Database}
+
+AUDA uses a script to migrate human-reviewed records extracted from PRISM into its analytical database through an Extract-Transform-Load (ETL) process.
+This migration stage reorganizes the records into a schema in which all tables are keyed by location and year.
+In the PRISM database, each extracted record is associated with a predefined ``group,'' representing an indicator such as GDP, plastic waste generation, or PP resin consumption.
+These group names are defined by developers, and an LLM determines which group each extracted record should be assigned to during the extraction process.
+
+During migration, AUDA excludes records with unavailable units and converts numerical values to the data types required by the analytical tables.
+Records are processed in ascending order by extraction ID, regardless of publication date.
+When multiple records map to the same indicator, location, and year, each subsequently processed valid value replaces the previously stored value.
+As a result, the procedure retains one value for each combination of location, year, and indicator.
+Also, alternative estimates and record-level source identifiers are not preserved in the analytical tables.
+
+All analyses and experiments in this study use the AUDA analytical database snapshot dated March 4, 2025.
