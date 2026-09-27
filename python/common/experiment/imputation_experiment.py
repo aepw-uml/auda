@@ -135,7 +135,7 @@ class ImputationExperiment(RegressionExperiment):
         )
         complexity_key = tuning_parameters.get('complexity_key')
         validation_rate: float = tuning_parameters.get('validation_rate', 0.2)
-        num_masks: int = tuning_parameters.get('num_masks', 5)
+        num_masks: int = tuning_parameters.get('num_masks', 4)
 
         if complexity_key is None:
             raise ValueError(

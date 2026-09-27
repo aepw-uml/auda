@@ -11,7 +11,7 @@ def masked_value_validation(
         [np.ndarray, np.ndarray, np.ndarray, np.ndarray], RegressionMetrics
     ],
     validation_rate: float = 0.2,
-    num_masks: int = 5,
+    num_masks: int = 4,
     seed: int = 42,
 ) -> list[RegressionMetrics]:
     """Evaluates a model on multiple randomly masked validation subsets.
