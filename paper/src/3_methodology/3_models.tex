@@ -1,10 +1,10 @@
-\subsection{Preliminaries}
+\subsection{Models}
 
-This section introduces existing models commonly used in similar studies.
-They were selected to provide reference points for the case studies rather than to constitute a comprehensive model comparison.
-Baseline models, such as linear interpolation and drift, provide simple references for interpreting more flexible and complex methods.
-Statistical models, such as cubic spline interpolation and Theil–Sen regression, make assumptions about the relationships among variables and use data to estimate those relationships.
-Machine learning models, such as ridge regression, are generally more flexible and can handle noisy data more effectively.
+The models were selected to compare several ways of interpolating and forecasting the available time series, rather than to provide a comprehensive comparison of them.
+Linear and moving-average interpolation provide simple references based on nearby observations, while cubic splines represent smooth curves between observed values.
+For forecasting, persistence predicts the most recent observed value for all future time points, while drift, Holt-style exponential smoothing, and local Theil--Sen regression represent different ways of extending historical trends.
+Non-seasonal ARIMA uses past values and past prediction errors, with differencing when needed, to forecast future values.
+Polynomial ridge regression, GPR, and SVR provide alternative ways to represent nonlinear relationships.
 Together, these models allow the workflow to examine how conclusions vary across modeling assumptions.
 
 \subsubsection{Baseline Models}
@@ -17,7 +17,7 @@ Moving average interpolation estimates missing values by averaging known data po
 For time series forecasting tasks, we use naive persistence, drift, and Holt-style exponential smoothing~\cite{holt2004forecasting}.
 Naive persistence assumes that the future value of a variable remains the same as its most recent observed value.
 Drift extrapolates the trend observed in the historical data into the future.
-Holt-style exponential smoothing captures both level and trend components in the data, allowing for more flexible forecasting.
+Holt-style exponential smoothing captures both level and trend components in the data; internal gaps in the training series are filled by linear interpolation using only observed training values.
 
 \subsubsection{Statistical Models}
 
@@ -25,17 +25,18 @@ Statistical models use statistical methods to analyze data and make predictions.
 In this study, we use cubic spline interpolation~\cite{de1978practical} for imputation tasks, which fits a piecewise cubic function to the data while ensuring smoothness at the known data points.
 For forecasting tasks, we use local Theil--Sen regression~\cite{sen1968estimates}, a non-parametric method that estimates the slope of a trend by taking the median of all pairwise slopes.
 We also include a non-seasonal Auto-ARIMA model~\cite{box2015time} as an additional statistical comparator.
+Missing years are marked as unobserved before processing, and the model is fitted using state-space estimation without imputing the missing values.
 Because the available time series are short, ARIMA results are interpreted only for the specific case studies analyzed here and are not taken as evidence of general performance.
 
 \subsubsection{Machine Learning Models}
 
 Machine learning models used in this study include polynomial ridge regression~\cite{hoerl1970ridge}, Gaussian process regression (GPR)~\cite{seeger2004gaussian}, and support vector regression (SVR)~\cite{smola2004tutorial}. We also use random forest~\cite{breiman2001random} for feature-importance analysis.
 
-Polynomial ridge regression is a linear model that incorporates polynomial features and applies L2 regularization to prevent overfitting.
+Polynomial ridge regression is a linear model that incorporates polynomial features and applies L2 regularization to reduce the risk of overfitting.
 
 GPR is a Bayesian approach that models the underlying function as a Gaussian process. The trend is modeled as
 \begin{equation}
-	f(x) = \mathcal{GP}(0, k(x, x')),
+	f \sim \mathcal{GP}(0, k(x, x')),
 \end{equation}
 with an RBF-plus-noise kernel
 \begin{equation}
@@ -59,7 +60,7 @@ Because anomalies are few and distinct, they are isolated more quickly than norm
 The contamination rate specifies the approximate fraction of observations that the method flags as potential anomalies.
 
 Random forest~\cite{breiman2001random} is an ensemble learning method that trains many decision trees, each fitted to a bootstrap sample of the training data.
-At each split, a random subset of features is used to reduce correlation among the trees.
+In our configuration, each tree considers all predictor variables at each split.
 The final prediction is obtained by aggregating the predictions of all trees.
 In this study, random forest is used to analyze feature importance for a regression task, and for regression trees, node impurity is measured by the mean squared error of the target values within a node in \texttt{sklearn}.
 At each split, the impurity decrease is calculated as
@@ -68,4 +69,3 @@ At each split, the impurity decrease is calculated as
 \end{equation}
 where \(I_P\) is the impurity of the parent node, \(I_L\) and \(I_R\) are the impurities of the left and right child nodes, respectively, and \(n_L\) and \(n_R\) are the number of samples in the left and right child nodes, respectively, and \(n = n_L + n_R\).
 The importance of a feature is then computed by summing the weighted impurity decreases over all splits where the feature is used, averaging this quantity across all trees in the forest, and normalizing the importances.
-

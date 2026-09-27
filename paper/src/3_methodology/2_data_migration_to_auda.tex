@@ -6,9 +6,10 @@ In the PRISM database, each extracted record is associated with a predefined ``g
 These group names are defined by developers, and an LLM determines which group each extracted record should be assigned to during the extraction process.
 
 During migration, AUDA excludes records with unavailable units and converts numerical values to the data types required by the analytical tables.
-Records are processed in ascending order by extraction ID, regardless of publication date.
+Records are processed in ascending order by extraction ID.
+This selection follows extraction-ID order rather than a comparison of source reliability, publication date, or measurement methods.
 When multiple records map to the same indicator, location, and year, each subsequently processed valid value replaces the previously stored value.
 As a result, the procedure retains one value for each combination of location, year, and indicator.
 Also, alternative estimates and record-level source identifiers are not preserved in the analytical tables.
 
-All analyses and experiments in this study use the AUDA analytical database snapshot dated March 4, 2025.
+All the datasets constructed from migrated data in this study use the AUDA analytical database snapshot dated March 4, 2025.

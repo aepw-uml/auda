@@ -1,0 +1,19 @@
+% results/multiple_imputation_japan/metric_table
+\begin{table}[!ht]
+	\centering
+	\caption{\centering Imputation performance for artificially masked total resin consumption in Japan using the \texttt{YearTRC (Japan)} dataset, averaged over 16 runs with test \(n=2\) per run.}
+	\begin{tabular}{@{}lccc@{}}
+		\toprule
+		\textbf{Experiment}                 & \textbf{MAE}                   & \textbf{RMSE}                  & \textbf{WAPE}       \\
+		\midrule
+		Linear Interpolation & \(5.932 \times 10^{4}\) & \(6.677 \times 10^{4}\) & 1.59\% \\
+		Moving Average Interpolation & \(6.308 \times 10^{4}\) & \(7.014 \times 10^{4}\) & 1.69\% \\
+		\textbf{Cubic Spline Interpolation} & \(\mathbf{5.517 \times 10^{4}}\) & \(\mathbf{6.028 \times 10^{4}}\) & \textbf{1.48\%} \\
+		Theil--Sen Regression & \(7.746 \times 10^{4}\) & \(9.079 \times 10^{4}\) & 2.08\% \\
+		Ridge Regression & \(7.586 \times 10^{4}\) & \(7.854 \times 10^{4}\) & 2.03\% \\
+		GPR & \(8.808 \times 10^{4}\) & \(9.254 \times 10^{4}\) & 2.35\% \\
+		SVR & \(5.881 \times 10^{4}\) & \(6.331 \times 10^{4}\) & 1.58\% \\
+		\hline
+	\end{tabular}
+	\label{tab:imputation_japan_trc}
+\end{table}

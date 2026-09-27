@@ -10,7 +10,7 @@ denote an evaluation function that maps a training set and a validation set to a
 
 The following defines the time-series cross-validation procedure used in this study.
 
-Let \(K\), with \(K \ge 3\), denote the number of folds.
+Let \(K\) denote the number of folds.
 We require the samples to be ordered chronologically by their observation times.
 That is, for any \(1 \le i < j \le n\), sample \(x_i\) is observed before sample \(x_j\).
 The ordered samples are partitioned into \(K\) consecutive folds, denoted by \(F_1, F_2, \dots, F_K\), with approximately equal sizes.
@@ -38,7 +38,6 @@ Let
 \[
 	I_t = \left\{ i_1^{(t)}, i_2^{(t)}, \dots, i_u^{(t)} \right\}
 \]
-
 denote the set of validation indices for iteration \(t\).
 The performance metric for iteration \(t\) is defined as
 \[
@@ -50,4 +49,8 @@ The mean performance metric across all \(T\) iterations is then defined as
 	\bar{m} = \frac{1}{T} \sum_{t=1}^{T} m_t.
 \]
 
-In the implementation, the default validation rate is \(r=0.2\) and \(T\) defaults to 5.
+In the implementation, the default validation rate is \(r=0.2\) and \(T\) defaults to 4.
+The interpolation test set contains only interior observations, with the first and last observations retained in the training set.
+During hyperparameter selection, however, validation masks are sampled from all observations in the training set, including its endpoints.
+This retains more possible validation subsets in very small training sets, but some validation splits may involve extrapolation.
+The tuning results therefore reflect a mixture of interpolation and extrapolation performance, whereas the final test evaluates only interpolation.

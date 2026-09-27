@@ -3,27 +3,32 @@
 In this study, the evaluation metrics for the imputation and temporal forecasting tasks include mean absolute error (MAE), root mean squared error (RMSE), the coefficient of determination (\(R^2\)), weighted absolute percentage error (WAPE), and symmetric mean absolute percentage error (sMAPE).
 The formulas for these metrics are presented in Appendix~\ref{sec:appendix_b}.
 
-Since the targets in these tasks are physical quantities, such as plastic waste generation measured in tonnes, WAPE is treated as the primary performance metric.
+Targets in these tasks are physical quantities, such as plastic waste generation measured in tonnes.
+WAPE is treated as the primary performance metric because it expresses total absolute prediction error relative to the total magnitude of the observed values.
 It is used for hyperparameter tuning in the imputation and temporal forecasting tasks.
+
+With very small test sets, \(R^2\) is sensitive to the variation among the observed test values.
+When that variation is small, modest prediction errors can produce large negative values.
+We therefore report \(R^2\) only for test windows containing at least five observations.
+
 Other metrics are reported for reference and to provide additional insights into model performance.
 
-Some datasets in this study have very few data points (less than 10), and there are only two held-out data points for those experiments.
-In this case the denominator of \(R^2\) is very small, and modest absolute errors can produce a large negative \(R^2\), making it less meaningful than other metrics.
-For this reason, we do not report \(R^2\) for experiments with fewer than five test observations.
-
-For each model and metric, let \(q_{r,m}\) denote the value of metric \(m\) obtained in run \(r\), where \(r=1,\ldots,R\).
-We report the arithmetic mean across runs:
+For repeated imputation and single-holdout forecasting, let \(q_{r,m}\) denote metric \(m\) for run \(r\), where
+\(r=1,\ldots,R\).
+We report the arithmetic mean and sample standard deviation across
+runs:
 \[
-	\bar{q}_m = \frac{1}{R}\sum_{r=1}^{R}q_{r,m}.
+	\bar{q}_m = \frac{1}{R}\sum_{r=1}^{R}q_{r,m},
+	\qquad
+	s_m =
+	\sqrt{\frac{1}{R-1}\sum_{r=1}^{R}
+		(q_{r,m}-\bar{q}_m)^2}.
 \]
-All runs use the same dataset, model definitions, configured hyperparameter ranges, evaluation metrics, and workflow settings.
-The run seed varies, so random operations, such as data partitioning and validation masking, may differ across runs.
 
-% We also report the sample standard deviation across runs as a
-% measure of dispersion:
-% \[
-% 	s_m=\sqrt{\frac{1}{R-1}\sum_{r=1}^{R}
-% 		(q_{r,m}-\bar{q}_{m})^2}.
-% \]
-% Results therefore summarize each metric as a mean and run-to-run standard
-% deviation.
+For rolling-origin forecasting, let \(q_{o,r,m}\) denote metric \(m\) for run \(r\) at origin \(o\).
+We first average across runs within each origin,
+\[
+	\bar{q}_{o,m} = \frac{1}{R}\sum_{r=1}^{R}q_{o,r,m},
+\]
+and then report the mean and sample standard deviation of these averages across the \(O\) origins.
+At each forecast origin, all repeated runs use the same training and test observations.

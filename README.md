@@ -39,3 +39,6 @@ cp .env.example .env
 Update `DB_URL` in `.env` to point to the correct PostgreSQL instance. Also update `PRISM_DB_URL` to point to the PRISM production PostgreSQL instance.
 
 [1]: ./docs/reproduction_guide.md
+
+For forecasting at several historical cutoffs, see the
+[rolling-origin workflow guide](docs/rolling_origin_forecasting.md).

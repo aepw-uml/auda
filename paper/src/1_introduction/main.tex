@@ -15,20 +15,21 @@ However, current decision-making frameworks used by governments, non-governmenta
 To help address these gaps, the Alliance to End Plastic Waste (AEPW) has invested in the Plastics Recovery Insights Steering Model (PRISM) data ecosystem~\cite{edie2023IBMPrismPlatform}.
 This ecosystem leverages large language models (LLMs) to extract diverse data points from unstructured sources, including government reports, academic publications, and industry datasets, thereby creating a comprehensive repository of plastic waste-related information.
 
-Nevertheless, collecting observations alone does not produce datasets that are suitable for analysis.
-Researchers must select and combine relevant records and evaluate models using the resulting datasets.
+Nevertheless, applying analytical models to these records remains challenging because the observations are heterogeneous and often form short or incomplete time series.
+This limits the evidence available for comparing interpolation and forecasting methods and makes model selection results difficult to interpret.
+This study examines these practical limitations through selected case studies.
 
 This paper presents AUDA (AEPW x UMass Lowell Data Analysis), a data modeling tool for analyzing data migrated from PRISM.
 It aims to document this analytical process and illustrate its use through selected case studies on plastic production, waste generation, and resin consumption.
-AUDA transforms human-reviewed PRISM records into a normalized country-year database and provides reusable workflows for constructing modeling datasets, filtering anomalous observations, imputing missing values, forecasting temporal trends, and evaluating model performance.
+AUDA transforms human-reviewed PRISM records into a country-year analytical database and provides reusable workflows for constructing modeling datasets, filtering anomalous observations, imputing missing values, forecasting temporal trends, and evaluating model performance.
 Using AUDA, we conduct a series of experiments on plastic waste and related driver variables, including demographic, socioeconomic, waste-management, resin-consumption, and polymer-specific indicators.
-In addition, this paper merely serves as a preliminary study examining the use of an analytical workflow on selected sparse and heterogeneous plastic-related datasets.
+In addition, this paper serves as a preliminary study examining the use of an analytical workflow on selected sparse and heterogeneous plastic-related datasets.
 The case studies presented in this paper examine only descriptive relationships and predictive performance; they do not estimate the effects of policy interventions or establish causal relationships.
 
 This paper also introduces a variant of the 1-SE rule for hyperparameter selection.
 The rule selects the simplest configuration whose mean validation error falls within a specified standard-error threshold of the minimum mean validation error.
-However, for heterogeneous and noisy datasets, the standard error estimated across validation folds may produce an overly broad candidate set.
-We therefore introduce a standard-error tolerance coefficient, \(c_{\mathrm{SE}}\), which adjusts this threshold and provides a trade-off between validation error and model simplicity.
+We introduce a standard-error tolerance coefficient, \(c_{\mathrm{SE}}\), to adjust this threshold and examine how the resulting candidate set affects hyperparameter selection.
+We treat this coefficient as an exploratory sensitivity setting rather than a correction to the standard-error estimate.
 
 In brief, this paper makes two main contributions.
 First, we present AUDA and use it to construct and analyze country-year datasets from human-reviewed PRISM records.

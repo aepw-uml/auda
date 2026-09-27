@@ -1,0 +1,21 @@
+% results/rolling_forecasting_japan/metric_table
+\begin{table}[!ht]
+	\centering
+	\caption{\centering Temporal forecasting performance for plastic waste generation in Japan using the \texttt{YearPWG (Japan)} dataset, averaged first over 16 runs at each origin and then over four forecast origins, with 2 test observations per origin.}
+	\begin{tabular}{@{}lccc@{}}
+		\toprule
+		\textbf{Experiment}    & \textbf{MAE}                   & \textbf{RMSE}                  & \textbf{WAPE}       \\
+		\midrule
+		\textbf{Naive Persistence} & \(\mathbf{3.914 \times 10^{5}}\) & \(\mathbf{4.005 \times 10^{5}}\) & \textbf{9.28\%} \\
+		Drift Baseline & \(3.978 \times 10^{5}\) & \(4.038 \times 10^{5}\) & 9.44\% \\
+		Exponential Smoothing & \(4.700 \times 10^{5}\) & \(4.717 \times 10^{5}\) & 11.10\% \\
+		Theil--Sen Regression & \(4.487 \times 10^{5}\) & \(4.623 \times 10^{5}\) & 10.53\% \\
+		\textbf{ARIMA Regression} & \(\mathbf{3.914 \times 10^{5}}\) & \(\mathbf{4.005 \times 10^{5}}\) & \textbf{9.28\%} \\
+		Ridge Regression & \(4.380 \times 10^{5}\) & \(4.473 \times 10^{5}\) & 10.35\% \\
+		GPR & \(5.245 \times 10^{5}\) & \(5.329 \times 10^{5}\) & 12.91\% \\
+		SVR & \(4.436 \times 10^{5}\) & \(4.484 \times 10^{5}\) & 10.65\% \\
+		SVR\textsuperscript{*} & \(4.945 \times 10^{5}\) & \(4.965 \times 10^{5}\) & 11.67\% \\
+		\hline
+	\end{tabular}
+	\label{tab:forecasting_japan_pwg_metrics}
+\end{table}

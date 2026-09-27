@@ -1,0 +1,21 @@
+% results/rolling_global_forecasting_random_search/metric_table
+\begin{table}[!ht]
+	\centering
+	\caption{\centering Temporal forecasting performance for global plastic production using random-search tuning for tunable models, averaged first over 16 runs at each origin and then over four forecast origins, with 5 test observations per origin. The \textsuperscript{*} marker denotes the SVR variant with \(\gamma\) tuning enabled.}
+	\begin{tabular}{@{}lccccc@{}}
+		\toprule
+		\textbf{Experiment}    & \textbf{MAE}                   & \textbf{RMSE}                  & $\mathbf{R^2}$     & \textbf{WAPE}       & \textbf{sMAPE}      \\
+		\midrule
+		Naive Persistence & \(3.990 \times 10^{7}\) & \(4.399 \times 10^{7}\) & -5.015 & 12.41\% & 13.07\% \\
+		Drift Baseline & \(2.267 \times 10^{7}\) & \(2.568 \times 10^{7}\) & -0.934 & 6.84\% & 6.99\% \\
+		Exponential Smoothing & \(1.495 \times 10^{7}\) & \(1.694 \times 10^{7}\) & -0.202 & 4.40\% & 4.42\% \\
+		\textbf{Theil--Sen Regression} & \(\mathbf{1.244 \times 10^{7}}\) & \(\mathbf{1.396 \times 10^{7}}\) & \textbf{0.090} & \textbf{3.75\%} & \textbf{3.75\%} \\
+		ARIMA Regression & \(1.593 \times 10^{7}\) & \(1.869 \times 10^{7}\) & -0.540 & 4.70\% & 4.71\% \\
+		Ridge Regression & \(2.664 \times 10^{7}\) & \(2.852 \times 10^{7}\) & -2.008 & 8.37\% & 8.69\% \\
+		GPR & \(2.438 \times 10^{7}\) & \(2.712 \times 10^{7}\) & -1.566 & 6.99\% & 7.23\% \\
+		SVR & \(3.031 \times 10^{7}\) & \(3.408 \times 10^{7}\) & -2.839 & 9.22\% & 9.64\% \\
+		SVR\textsuperscript{*} & \(2.011 \times 10^{7}\) & \(2.173 \times 10^{7}\) & -1.091 & 6.78\% & 7.04\% \\
+		\hline
+	\end{tabular}
+	\label{tab:global_forecasting_random_search_metrics}
+\end{table}

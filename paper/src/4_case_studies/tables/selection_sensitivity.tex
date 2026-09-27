@@ -1,0 +1,39 @@
+% results/se_tolerance_coefficient_sweep_united_states/summary_table
+\begin{table}[!ht]
+	\centering
+	\caption{
+		\centering
+		Sensitivity of hyperparameter selection to the standard-error tolerance coefficient \(c_{\mathrm{SE}}\) for the United States imputation models.
+%		CC is candidate configurations and CR is the complexity rank.
+		CC is candidate configurations and CR is the complexity rank; both are averaged over 16 runs.
+	}
+	\small
+	\scriptsize
+	\begin{tabular}{lrrrrrrr}
+		\toprule
+		Experiment                        &
+		$c_{\mathrm{SE}}$                 &
+		\shortstack{CC}                   &
+		\shortstack{Changed                                                                            \\Rate} &
+		%		\shortstack{Best                                                                               \\WAPE} &
+		\shortstack{Minimum                                                                            \\ Validation                                                                \\WAPE} &
+		\shortstack{Selected                                                                           \\WAPE} &
+		\shortstack{WAPE                                                                               \\Penalty} &
+		\shortstack{CR}                                                                                \\
+
+		\midrule
+		\multirow{5}{*}{Ridge Regression} & 0 & 1.88 & 0.00\% & 1.26\% & 1.26\% & 0.00\% & 18.12 \\
+		 & 0.01 & 6.38 & 43.75\% & 1.26\% & 1.26\% & 0.00\% & 16.31 \\
+		 & 0.1 & 9.12 & 62.50\% & 1.26\% & 1.27\% & 0.01\% & 13.44 \\
+		 & 0.5 & 13.19 & 81.25\% & 1.26\% & 1.33\% & 0.07\% & 11.56 \\
+		 & 1 & 18.00 & 81.25\% & 1.26\% & 1.39\% & 0.12\% & 9.88 \\
+		\midrule
+		\multirow{5}{*}{SVR} & 0 & 5.81 & 0.00\% & 3.31\% & 3.31\% & 0.00\% & 70.81 \\
+		 & 0.01 & 11.12 & 43.75\% & 3.31\% & 3.31\% & 0.00\% & 70.00 \\
+		 & 0.1 & 31.38 & 81.25\% & 3.31\% & 3.38\% & 0.07\% & 59.81 \\
+		 & 0.5 & 69.12 & 100.00\% & 3.31\% & 3.78\% & 0.47\% & 46.69 \\
+		 & 1 & 91.19 & 100.00\% & 3.31\% & 4.42\% & 1.11\% & 33.62 \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:selection_sensitivity}
+\end{table}

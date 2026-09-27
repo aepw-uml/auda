@@ -2,20 +2,19 @@
 
 Sparse observations, heterogeneous practices, and noisy measurements often constrain environmental forecasting and imputation.
 Large comparative studies show that regression-based methods can be competitive with, and sometimes outperform, classical time-series methods in environmental forecasting when overfitting is controlled~\cite{effrosynidis2023time}.
-In waste management applications, machine learning methods such as support vector regression and neural networks have been used to forecast municipal solid waste generation using socioeconomic and demographic predictors~\cite{abbasi2013forecasting}.
-These studies motivate the modeling approaches present in this study, which focuses on documenting how selected PRISM records are transformed into analysis datasets and how interpolation and forecasting are evaluated under the constraints of those datasets.
+In the broader field of municipal solid waste forecasting, Abbasi et al.~\cite{abbasi2013forecasting} applied a hybrid support vector machine and partial least squares model using socioeconomic and demographic predictors.
 
 Research on the quantitative modeling of plastic waste has primarily developed along two paths.
 The first involves material flow inventory analysis and scenario forecasting.
 Geyer et al. provided foundational global data on plastic production, use, and end-of-life fates~\cite{geyer2017production}, while subsequent studies projected waste generation and mismanaged plastic volumes under alternative policy and consumption scenarios~\cite{borrelle2020predicted,lau2020evaluating,dokl2024global,pottinger2024pathways}.
-Although these studies yielded influential large-scale estimates, they were not designed to compare the predictive accuracy of statistical and machine learning models against observed data.
+These studies primarily examine material flows and future plastic waste outcomes under alternative scenarios.
 
 The second path applies machine learning to waste forecasting using socioeconomic and demographic indicators such as population and GDP.
 Methods explored in this area include support vector regression, ensemble models, and neural networks.
 Recent research has also utilized multilayer perceptrons to forecast waste generation and evaluate the effectiveness of interventions~\cite{fan2022forecasting}.
-
-This study follows the second path of research by applying statistical and machine learning methods to selected plastic-related datasets.
-Through illustrative case studies, it examines interpolation and forecasting within the AUDA workflow, with a particular focus on how limited data availability affects model selection, evaluation, and interpretation.
+These studies motivate the use of statistical and machine learning models for waste prediction.
+However, their findings do not establish how the same methods will perform on the short plastic-related time series examined here.
+Our case studies therefore compare selected models with simple baselines and interpret their predictive performance within the limits of each dataset.
 
 The PRISM platform integrates heterogeneous data sources and converts them into normalized plastic waste information.
 AUDA transforms human-reviewed PRISM records into country–year analytical tables and provides reproducible workflows for the interpolation and forecasting case studies presented in this paper.
