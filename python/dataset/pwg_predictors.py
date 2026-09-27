@@ -51,7 +51,7 @@ class PWGPredictors(DatasetFetcher):
         for i in range(len(X)):
             X[i].append(X[i][3] / X[i][2])
             X[i].append(X[i][4] / X[i][2])
-            X[i].append(X[i][0] / X[i][1])
+            X[i].append(X[i][1] / X[i][2])
 
         return Dataset(X=np.array(X), y=np.array(y))
 

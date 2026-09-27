@@ -44,6 +44,18 @@ class FeatureImportancesflow(Workflow):
             f'{schema.feature_names[index]} ({feature_importances[index]:.4f})'
             for index in sorted_indices
         )
+        num_original = len(result.inlier_mask)
+        num_retained = int(result.inlier_mask.sum())
+        num_excluded = num_original - num_retained
+        report_str += (
+            '\n\nIsolation forest filtering (predictors only):\n'
+            f'Contamination setting: {contamination:g}\n'
+            f'Random seed: {seed}\n'
+            f'Original observations: {num_original}\n'
+            f'Flagged and excluded observations: {num_excluded}\n'
+            f'Retained observations: {num_retained}\n'
+            f'Excluded percentage: {100 * num_excluded / num_original:.2f}%\n'
+        )
         print(report_str)
 
         dir_path = Path('results') / 'feature_importances'
