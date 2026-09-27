@@ -2,6 +2,7 @@ from typing import Self, override
 
 import numpy as np
 from statsmodels.tsa.holtwinters import ExponentialSmoothing as EST
+from step.model.annual_series import annual_training_series
 from step.model.model import SupervisedLearningModel
 
 
@@ -10,7 +11,10 @@ class ExponentialSmoothing(SupervisedLearningModel):
 
     @override
     def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
-        """Fits the exponential smoothing model.
+        """Fits Holt smoothing after filling internal training-year gaps.
+
+        Missing years are linearly interpolated between observed training
+        values. No test observations enter this preprocessing step.
 
         Args:
             X: Training time indices with shape ``(n_samples, 1)``.
@@ -22,9 +26,14 @@ class ExponentialSmoothing(SupervisedLearningModel):
 
         super().fit(X, y, num_features=1)
 
-        order = np.argsort(X[:, 0])
-        X_sorted = X[order, 0]
-        y_sorted = y[order]
+        X_sorted, y_sorted = annual_training_series(X, y)
+        missing = np.isnan(y_sorted)
+        self.parameters['missing_years'] = X_sorted[missing].tolist()
+        self.parameters['missing_year_method'] = 'training_linear_interpolation'
+        if missing.any():
+            y_sorted[missing] = np.interp(
+                X_sorted[missing], X_sorted[~missing], y_sorted[~missing]
+            )
 
         self.parameters['last_x'] = float(X_sorted[-1])
         self.model_ = EST(

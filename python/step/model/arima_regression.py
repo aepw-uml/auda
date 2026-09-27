@@ -4,6 +4,7 @@ from typing import Any, Self, override
 
 import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
+from step.model.annual_series import annual_training_series
 from step.model.model import SupervisedLearningModel
 
 
@@ -71,7 +72,10 @@ class ARIMARegression(SupervisedLearningModel):
 
     @override
     def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
-        """Fits the ARIMA model on the sorted time series.
+        """Fits ARIMA on an annual grid with missing years retained as NaN.
+
+        State-space estimation handles missing observations without imputing
+        targets. All automatic order candidates use the same annual grid.
 
         Args:
             X: Training time indices with shape ``(n_samples, 1)``.
@@ -86,9 +90,11 @@ class ARIMARegression(SupervisedLearningModel):
 
         super().fit(X, y, num_features=1)
 
-        order = np.argsort(X[:, 0])
-        X_sorted = X[order, 0]
-        y_sorted = y[order]
+        X_sorted, y_sorted = annual_training_series(X, y)
+        self.parameters['missing_years'] = X_sorted[
+            np.isnan(y_sorted)
+        ].tolist()
+        self.parameters['missing_year_method'] = 'state_space'
 
         if self.hyperparameters['auto']:
             arima_order, fitted_model = self._fit_auto_arima(y_sorted)
@@ -185,7 +191,8 @@ class ARIMARegression(SupervisedLearningModel):
                 y,
                 order=order,
                 trend=self.hyperparameters['trend'],
-            ).fit()
+                missing='none',
+            ).fit(method='statespace')
 
     def _validate_order(self, order: tuple[int, int, int]) -> None:
         """Validates that an ARIMA order contains non-negative integers.
