@@ -2,38 +2,26 @@
 
 This study presents AUDA, a workflow for constructing analytical tables from human-reviewed records extracted by PRISM and conducting descriptive and predictive analyses of plastic-related data.
 The case studies illustrate correlation analysis, random-forest feature importance, interpolation, and temporal forecasting using sparse country-level records and an external global production series.
-AUDA supports these analyses, but does not reconcile differences in measurement methods across the underlying sources.
+AUDA supports these analyses but does not reconcile differences in definitions, data collection procedures, policy effects, or statistical methods across source organizations.
 
 In the two interpolation case studies, cubic spline interpolation achieved the lowest mean WAPE for Japan, while GPR achieved the lowest mean WAPE for the United States.
 Under rolling-origin forecasting, Theil--Sen regression achieved the lowest mean WAPE for global plastic production, while persistence and ARIMA tied for the lowest mean WAPE for Japanese plastic waste generation.
-These findings support including simple methods as reference models in these tasks.
 However, the small number of series and observations limits the extent to which these rankings can be generalized.
-The descriptive analyses likewise do not establish causal relationships or estimate the effects of policy interventions.
+Likewise, the descriptive analyses do not establish causal relationships or estimate the effects of policy interventions.
+
+We also explored pooled prediction of plastic waste generation using a multilayer perceptron (MLP)~\cite{goodfellow2016deep}, which yielded a mean WAPE of \(75.21\%\) across 16 random holdout runs.
+However, this exploratory experiment lacked comparisons with baseline models and evaluation on unseen countries or future years, limiting the conclusions that could be drawn.
+We therefore omit a detailed presentation of this exploratory experiment.
 
 The standard-error tolerance coefficient makes the validation-error threshold used in hyperparameter selection adjustable.
 The sensitivity analysis shows that both this coefficient and the chosen complexity ordering can affect which configuration is selected.
-Because the analysis uses a single nine-observation series and compares validation errors, it does not establish improved performance on unseen data or a generally preferable coefficient.
+Because the analysis uses a single series with nine observations and compares validation errors, it does not establish improved performance on unseen data or identify a generally preferable coefficient.
 
-Reproducibility is limited to downstream analyses using the frozen datasets and code; external researchers cannot independently repeat the restricted upstream extraction and validation process.
-Future work should preserve record-level provenance and alternative estimates, examine differences among source definitions and measurement methods, and evaluate the workflows on additional series and missingness patterns.
+Reproducibility is limited to downstream analyses using the frozen datasets and code.
+External researchers cannot independently repeat the restricted upstream extraction and validation process.
 
-% --- former
-% This study leverages PRISM, a data platform developed by AEPW that extracts plastic waste-related records from heterogeneous sources using large language models and other tools.
-% It also presents AUDA, an analytical tool that migrates human-reviewed extracted records from PRISM into structured analytical tables and produces reproducible modeling workflows.
-%
-% We used these workflows to evaluate correlation and feature importance, missing-value imputation, univariate temporal forecasting, and pooled neural-network prediction.
-% The experimental results do not point to one model that works best in every situation. Support Vector Regression (SVR) performs well in global plastic production forecasting, which is a single-source time-series dataset with over 50 samples; it also performs relatively well in both imputation tasks.
-% However, simple interpolation, smoothing, and statistical baselines remain competitive for short country-level series, where machine learning models can easily overfit or become unstable.
-% The pooled neural-network experiment is an exploratory case study: its performance is limited by the heterogeneity of the underlying records and does not support deployment as a prediction model.
-% Since most country-level time-series datasets used in this study are short and noisy, the experimental results are provided for reference only.
-%
-% The proposed standard-error tolerance coefficient for the one standard error (1-SE) rule provides a practical way to examine validation performance alongside model simplicity.
-% In the imputation sensitivity study, when \(c_{\mathrm{SE}} = 0.01\), the selected hyperparameter configuration often differs from the minimum mean validation-error configuration, while the reported average WAPE penalty is \(0.00\%\).
-% Larger coefficients expand the candidate range and select simpler configurations, but \(c_{\mathrm{SE}} = 0.5\) and \(c_{\mathrm{SE}} = 1\) produce larger validation-performance penalties.
-% Overall, the results show that the standard-error tolerance coefficient provides an empirical trade-off between validation error and model simplicity in this benchmark.
-%
-% Reports from different organizations often rely on different data collection and processing protocols, resulting in systematic inconsistencies across sources. Analyzing such noisy, heterogeneous data therefore requires accounting for the provenance of each observation, for example by incorporating the reporting organization as a predictor.
-% Future work will develop a model that jointly learns latent environmental states and source-specific technical variation from the heterogeneous dataset, under the assumption that observations from the same organization share a common technical-noise distribution.
-% Such variation may arise from differences in organizational protocols, measurement-instrument error, preprocessing procedures, and other source-specific factors.
-% In bioinformatics, variational autoencoders (VAEs) have recently been used to model and disentangle technical variation associated with different laboratories and experimental batches~\cite{he2024mosaic}.
-% By identifying and removing organization-specific technical variation, we may recover cleaner estimates of the underlying environmental states and thereby improve the accuracy of forecasting and imputation.
+The experimental results show that traditional machine learning models, such as ridge regression and SVR, do not perform noticeably better than baseline and statistical models in the interpolation and forecasting case studies.
+Future work will investigate models that distinguish variation in plastic-related indicators from differences associated with source organizations, including their definitions, data collection procedures, and statistical methods.
+One possible approach is to jointly model underlying environmental patterns and source-specific variation, drawing inspiration from variational autoencoders (VAEs) used to account for technical variation in single-cell data~\cite{he2024mosaic}.
+This approach would require preserving source identifiers and examining whether observations from the same organization share common reporting characteristics.
+Further evaluation would be needed to determine whether such models can separate source effects from genuine environmental differences and improve forecasting or imputation.

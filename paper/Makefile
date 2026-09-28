@@ -40,7 +40,7 @@ remove-mdpi-template:
 	@echo "Removing soft links to MDPI definition files..."
 	@rm -f src/Definitions
 
-paper.zip:
+manuscript.zip:
 	@echo "Creating a zip archive of the paper..."
-	@zip -r paper.zip src
-	@echo "Created paper.zip archive."
+	@zip -r $@ src
+	@echo "Created manuscript.zip archive."
