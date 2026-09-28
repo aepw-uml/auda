@@ -30,7 +30,7 @@ Copy `.env.example` to `.env`. AUDA checks for this file at startup, but the rep
 cp .env.example .env
 ```
 
-Copy `.cache-reproduction` to `cache`. The original source records from the PRISM production database are not publicly available, so this project includes a cached copy in `.cache-reproduction`. When the `cache` directory exists, AUDA reads source records from it, which lets you reproduce the results without access to the production database.
+Copy `.cache-reproduction` to `cache`. Please ensure that the `cache` directory does not exist before copying. The original source records from the PRISM production database are not publicly available, so this project includes a cached copy in `.cache-reproduction`. When the `cache` directory is present, AUDA reads cached datasets from it, which lets you reproduce the results without access to the AUDA database.
 
 ```bash
 cp -r .cache-reproduction cache
@@ -59,6 +59,7 @@ python --version && \
 poetry --version && \
 poetry install --no-root && \
 cp .env.example .env && \
+rm -rf cache && \
 cp -r .cache-reproduction cache && \
 source env.sh && \
 reproduce
