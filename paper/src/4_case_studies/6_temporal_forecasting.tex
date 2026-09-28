@@ -1,1 +1,62 @@
 \subsection{Temporal Forecasting}
+
+Producing business-as-usual (BAU) projections from historical data is a fundamental task in environmental data analysis.
+We conduct two case studies to compare forecasting methods on datasets with different characteristics.
+
+\subsubsection{Global Plastic Production}
+
+We apply forecasting models to the \texttt{GlobalPlasticsProduction} dataset.
+It contains 59 observations, more than the other time series examined in this study.
+The observation for 1974 is missing and is handled as described in Section~\ref{sec:models}.
+We also compare grid search and random search in terms of tuning runtime and predictive performance.
+We use four forecast origins: 1999, 2004, 2009, and 2014. Each test window contains five observations, starting in 2000, 2005, 2010, and 2015, respectively.
+
+\input{4_case_studies/tables/global_forecasting_grid_search_metrics.tex}
+\input{4_case_studies/tables/global_forecasting_random_search_metrics.tex}
+
+Tables~\ref{tab:global_forecasting_grid_search_metrics} and~\ref{tab:global_forecasting_random_search_metrics} show that Theil--Sen regression achieved the lowest mean MAE, RMSE, WAPE, and sMAPE and the highest mean \(R^2\) among the evaluated methods under both tuning settings. Exponential smoothing achieves the second-lowest WAPE (\(4.40\%\)), followed by ARIMA regression (\(4.70\%\)).
+These results summarize the four forecast origins.
+Appendix~\ref{sec:appendix_d} reports run-to-run standard deviations calculated within each origin and averaged across origins; they do not represent variability across independent forecast periods.
+
+\input{4_case_studies/tables/global_forecasting_by_origin}
+
+To examine performance across forecast windows, we report WAPE for exponential smoothing, Theil--Sen regression, ridge regression, and SVR in Table~\ref{tab:global_forecasting_by_origin}.
+WAPE is higher in the 2010--2014 window for exponential smoothing, Theil--Sen regression, and SVR than in the other windows.
+This increase may be related to the dip in the observed series in 2009, after a generally rising trend.
+It is largest for SVR, whose WAPE in that window is \(16.17\%\), compared with \(1.31\%\) in the 2015--2019 window.
+
+\input{4_case_studies/plots/global_forecasting.tex}
+
+Figure~\ref{fig:global_forecasting} shows observed values and fitted forecasts for one run of each method across the test windows.
+The plotted predictions illustrate individual runs and therefore do not correspond exactly to the average WAPE values reported in Table~\ref{tab:global_forecasting_by_origin}.
+
+\input{4_case_studies/tables/global_forecasting_tuning_time.tex}
+
+Table~\ref{tab:global_forecasting_grid_search_metrics} and Table~\ref{tab:global_forecasting_random_search_metrics} show that random search evaluated fewer configurations and reduced hyperparameter-tuning time for all tunable models, but its predictive performance was not uniformly equivalent to grid search.
+Random search produced lower WAPE for ridge regression, whereas grid search produced lower WAPE for SVR and SVR\textsuperscript{*}.
+As shown in Table~\ref{tab:global_forecasting_tuning_time}, random search reduced tuning time by \(48.15\%\) for ridge regression and \(43.81\%\) for SVR.
+For SVR\textsuperscript{*}, which tunes three hyperparameters including \(\gamma\), grid search evaluates \(M^3 = 1728\) configurations, where \(M = 12\).
+In comparison, random search draws a fixed \(T = 128\) configurations and reduced tuning time by \(96.49\%\).
+We therefore use random search in the subsequent case studies as a computational-budget choice, while recognizing that it can yield different predictive performance from grid search.
+
+\subsubsection{Japanese Plastic Waste Generation}
+
+In Experiment 6, we evaluate the same forecasting models on the \texttt{YearPWG (Japan)} dataset.
+This series contains only 26 annual observations, and hence the hold-out set is small.
+
+\input{4_case_studies/plots/forecasting_japan_pwg.tex}
+\input{4_case_studies/tables/forecasting_japan_pwg_metrics.tex}
+Run-to-run standard deviations for these results are reported in Appendix~\ref{sec:appendix_d}.
+
+Unlike the global plastics production series, the Japan plastic waste generation series is not generally monotonic.
+Figure~\ref{fig:forecasting_japan_pwg} shows that the trend increases in the earlier years, declines sharply, and then partially recovers.
+This makes the task a useful check of whether flexible regression models can handle short and irregular environmental time series.
+
+Among the three machine learning models, GPR has the lowest WAPE of \(9.52\%\), followed by SVR with a WAPE of \(10.71\%\).
+The identical metric values for naive persistence and ARIMA regression are not coincidental.
+In this study, ARIMA selected order \((0,1,0)\) with \texttt{trend='n'}, corresponding to a random walk without drift. Therefore, its forecast remains at the last observed value.
+
+Performance differed between the two case studies. Theil--Sen regression had the lowest mean WAPE for global plastic production, while naive persistence and ARIMA had the lowest mean WAPE for Japan’s plastic-waste series.
+In these two case studies, none of the evaluated machine-learning models outperformed the best baseline or statistical model by mean WAPE.
+
+Because each evaluation uses a short series and a limited number of forecast origins, the rankings should be interpreted cautiously.

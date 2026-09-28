@@ -28,7 +28,8 @@ runs:
 For rolling-origin forecasting, let \(q_{o,r,m}\) denote metric \(m\) for run \(r\) at origin \(o\).
 We first average across runs within each origin,
 \[
-	\bar{q}_{o,m} = \frac{1}{R}\sum_{r=1}^{R}q_{o,r,m},
+	\bar{q}_{o,m} = \frac{1}{R}\sum_{r=1}^{R}q_{o,r,m}.
 \]
-and then report the mean and sample standard deviation of these averages across the \(O\) origins.
+We then average the resulting \(O\) values, giving each forecast origin equal weight.
+Appendix~\ref{sec:appendix_d} reports run-to-run sample standard deviations calculated separately within each origin and then averaged across origins.
 At each forecast origin, all repeated runs use the same training and test observations.

@@ -1,0 +1,88 @@
+\section[\appendixname~\thesection]{Run-to-Run Variability}
+\label{sec:appendix_d}
+
+Tables~\ref{tab:dispersion_imputation},~\ref{tab:dispersion_japan_forecasting}, and~\ref{tab:dispersion_global_forecasting} report sample standard deviations for MAE, RMSE, and WAPE as reported in the corresponding main-text tables.
+\setcounter{table}{0}
+\renewcommand{\thetable}{D\arabic{table}}
+
+\begin{table}[!ht]
+	\centering
+	\caption{Run-to-run sample standard deviations for the imputation case studies. MAE and RMSE are in tonnes; WAPE is in percentage points. Standard deviations are calculated across 16 repeated runs.}
+	\scriptsize
+	\begin{tabular}{@{}llrrr@{}}
+		\toprule
+		Dataset       & Method                       & SD (MAE)                & SD (RMSE)               & SD (WAPE) \\
+		\midrule
+		Japan         & Linear Interpolation         & \(5.531 \times 10^{4}\) & \(5.928 \times 10^{4}\) & 1.49      \\
+		Japan         & Moving Average Interpolation & \(2.799 \times 10^{4}\) & \(2.836 \times 10^{4}\) & 0.76      \\
+		Japan         & Cubic Spline Interpolation   & \(4.100 \times 10^{4}\) & \(4.333 \times 10^{4}\) & 1.11      \\
+		Japan         & Theil--Sen Regression        & \(5.367 \times 10^{4}\) & \(6.052 \times 10^{4}\) & 1.45      \\
+		Japan         & Ridge Regression             & \(4.239 \times 10^{4}\) & \(4.383 \times 10^{4}\) & 1.15      \\
+		Japan         & GPR                          & \(5.233 \times 10^{4}\) & \(5.683 \times 10^{4}\) & 1.41      \\
+		Japan         & SVR                          & \(4.553 \times 10^{4}\) & \(4.659 \times 10^{4}\) & 1.23      \\
+		\midrule
+		United States & Linear Interpolation         & \(5.518 \times 10^{4}\) & \(4.505 \times 10^{4}\) & 0.39      \\
+		United States & Moving Average Interpolation & \(1.205 \times 10^{5}\) & \(1.168 \times 10^{5}\) & 0.79      \\
+		United States & Cubic Spline Interpolation   & \(6.308 \times 10^{4}\) & \(5.528 \times 10^{4}\) & 0.47      \\
+		United States & Theil--Sen Regression        & \(6.451 \times 10^{4}\) & \(6.248 \times 10^{4}\) & 0.46      \\
+		United States & Ridge Regression             & \(5.223 \times 10^{4}\) & \(4.721 \times 10^{4}\) & 0.38      \\
+		United States & GPR                          & \(5.776 \times 10^{4}\) & \(5.798 \times 10^{4}\) & 0.41      \\
+		United States & SVR                          & \(1.107 \times 10^{5}\) & \(1.126 \times 10^{5}\) & 0.78      \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:dispersion_imputation}
+\end{table}
+
+\begin{table}[!ht]
+	\centering
+	\caption{Run-to-run sample standard deviations for Japanese plastic-waste forecasting, averaged over four fixed forecast origins. MAE and RMSE are in tonnes; WAPE is in percentage points.}
+	\scriptsize
+	\begin{tabular}{@{}lrrr@{}}
+		\toprule
+		Method                     & SD (MAE)                & SD (RMSE)               & SD (WAPE) \\
+		\midrule
+		Naive Persistence          & 0                       & 0                       & 0.00      \\
+		Drift Baseline             & 0                       & 0                       & 0.00      \\
+		Exponential Smoothing      & 0                       & 0                       & 0.00      \\
+		Theil--Sen Regression      & 0                       & 0                       & 0.00      \\
+		ARIMA Regression           & 0                       & 0                       & 0.00      \\
+		Ridge Regression           & \(1.287 \times 10^{5}\) & \(1.264 \times 10^{5}\) & 2.98      \\
+		GPR                        & 0                       & 0                       & 0.00      \\
+		SVR                        & \(4.930 \times 10^{4}\) & \(5.158 \times 10^{4}\) & 1.17      \\
+		SVR with \(\gamma\) tuning & \(8.218 \times 10^{4}\) & \(8.248 \times 10^{4}\) & 1.95      \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:dispersion_japan_forecasting}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\caption{Run-to-run sample standard deviations for global plastic-production forecasting, averaged over four fixed forecast origins. MAE and RMSE are in tonnes; WAPE is in percentage points. Grid search is deterministic in the evaluated configuration, so its run-to-run standard deviations are zero.}
+	\scriptsize
+	\begin{tabular}{@{}llrrr@{}}
+		\toprule
+		Search & Method                     & SD (MAE)                & SD (RMSE)               & SD (WAPE) \\
+		\midrule
+		Grid   & Naive Persistence          & 0                       & 0                       & 0.00      \\
+		Grid   & Drift Baseline             & 0                       & 0                       & 0.00      \\
+		Grid   & Exponential Smoothing      & 0                       & 0                       & 0.00      \\
+		Grid   & Theil--Sen Regression      & 0                       & 0                       & 0.00      \\
+		Grid   & ARIMA Regression           & 0                       & 0                       & 0.00      \\
+		Grid   & Ridge Regression           & 0                       & 0                       & 0.00      \\
+		Grid   & GPR                        & 0                       & 0                       & 0.00      \\
+		Grid   & SVR                        & 0                       & 0                       & 0.00      \\
+		Grid   & SVR with \(\gamma\) tuning & 0                       & 0                       & 0.00      \\
+		\midrule
+		Random & Naive Persistence          & 0                       & 0                       & 0.00      \\
+		Random & Drift Baseline             & 0                       & 0                       & 0.00      \\
+		Random & Exponential Smoothing      & 0                       & 0                       & 0.00      \\
+		Random & Theil--Sen Regression      & 0                       & 0                       & 0.00      \\
+		Random & ARIMA Regression           & 0                       & 0                       & 0.00      \\
+		Random & Ridge Regression           & \(2.599 \times 10^{6}\) & \(2.587 \times 10^{6}\) & 0.68      \\
+		Random & GPR                        & 0                       & 0                       & 0.00      \\
+		Random & SVR                        & \(1.318 \times 10^{6}\) & \(1.381 \times 10^{6}\) & 0.42      \\
+		Random & SVR with \(\gamma\) tuning & \(3.026 \times 10^{6}\) & \(2.860 \times 10^{6}\) & 0.99      \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:dispersion_global_forecasting}
+\end{table}

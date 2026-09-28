@@ -11,7 +11,7 @@ For rolling-origin forecasting, hyperparameter selection is repeated separately 
 The selected configuration is then fitted to all training observations at that origin and evaluated on the subsequent test observations.
 
 Each configuration \(\lambda\) is evaluated on \(N_{\mathrm{val}}\) validation splits, producing scores \(\mathcal{L}^{(1)}(\lambda), \ldots, \mathcal{L}^{(N_{\mathrm{val}})}(\lambda)\).
-For forecasting, \(K=4\) chronological blocks produce \(N_{\mathrm{val}}=K-1=3\) validation scores.
+For forecasting, \(K+1=5\) chronological blocks produce \(N_{\mathrm{val}}=K=4\) validation scores.
 For interpolation, four repeated random holdouts produce \(N_{\mathrm{val}}=4\) validation scores.
 
 We then compute the mean validation performance \(\mu(\lambda)\) for each configuration.
@@ -32,7 +32,7 @@ Preliminary exploratory runs produced irregular fitted curves for some configura
 
 In this study, the number of random-search iterations is set to \(T = 128\), and the number of grid points for each hyperparameter is set to \(M = 12\).
 Ridge regression and SVR each have two tunable hyperparameters, resulting in \(M^2 = 144\) grid-search trials.
-For ridge regression, sampled polynomial degrees are converted to integers before fitting, so different trials can evaluate the same degree–alpha configuration.
+For ridge regression, sampled polynomial degrees are rounded to integers before fitting, so different trials can evaluate the same degree–alpha configuration.
 The SVR model with gamma tuning has three tunable hyperparameters, resulting in \(M^3 = 1728\) grid-search configurations.
 
 \begin{table}[t]

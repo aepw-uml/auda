@@ -1,1 +1,26 @@
 \subsection{Datasets}
+
+The AUDA analytical database contains over 28{,}000 extracted records across 195 countries and regions.
+There are 39 different groups of features, including demographic features, such as population and GDP, waste management features such as plastic waste generation and mismanaged plastic waste, and plastic consumption features such as total resin consumption and polymer polyethylene terephthalate (PET) consumption.
+
+It is worth noting that although the records are human-reviewed, they are still subject to measurement errors, reporting inconsistencies across countries and regions, and the use of different statistical methods by different organizations.
+Additionally, many groups do not have enough data points to be used for modeling.
+
+We selected datasets that contained the outcome and predictor variables required for the correlation and feature-importance analyses, or sufficiently long time series for the interpolation and forecasting analyses.
+For datasets constructed from the AUDA database, we used all records in the database with non-null values for the required predictors and target. In other words, they were not selected as samples from a larger eligible set.
+Table~\ref{tab:datasets} summarizes the datasets used in the analyses; its sample counts describe these analysis datasets, not the full AUDA database.
+
+\input{4_case_studies/tables/datasets.tex}
+
+This study primarily uses datasets in the AUDA analytical database, as summarized in Table~\ref{tab:datasets}.
+The \texttt{PWDriverFeatureSet} dataset is an unlabeled dataset comprising population, GDP, urban population, plastic waste generation, mismanaged plastic waste, and the proportion of plastic waste that is properly managed.
+The \texttt{PWGPredictors} dataset includes year, GDP, population, urban population, rural population, urban population ratio, the rural population ratio, and GDP per capita as predictors for plastic waste generation.
+The \texttt{YearTRC (Japan)} and \texttt{YearTRC (United States)} datasets represent annual trends in total resin consumption for Japan and the United States, respectively.
+The \texttt{GlobalPlasticsProduction} dataset is obtained from \textit{Our World in Data} and includes available annual global production observations from 1960 onward~\cite{owid_global_plastics_production}; the 1974 observation is absent.
+The \texttt{YearPWG (Japan)} dataset captures the annual trend in plastic waste generation in Japan.
+
+Dataset classes such as \texttt{YearTRC} and \texttt{YearPWG} provide time-series data for a specified country and its associated group.
+For example, the \texttt{YearTRC (Japan)} dataset consists of data points associated with both Japan and the \texttt{TRC} group in the database.
+This approach allows us to create datasets for various environmental indicators and countries.
+However, the AUDA analytical database is sparse, so many potential datasets contain too few data points for analysis.
+We use the datasets described above as case studies to compare the performance of various models.

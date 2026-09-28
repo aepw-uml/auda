@@ -10,19 +10,19 @@ denote an evaluation function that maps a training set and a validation set to a
 
 The following defines the time-series cross-validation procedure used in this study.
 
-Let \(K\) denote the number of folds.
+Let \(K\) denote the number of validation folds.
 We require the samples to be ordered chronologically by their observation times.
 That is, for any \(1 \le i < j \le n\), sample \(x_i\) is observed before sample \(x_j\).
-The ordered samples are partitioned into \(K\) consecutive folds, denoted by \(F_1, F_2, \dots, F_K\), with approximately equal sizes.
-Each fold must contain at least one sample.
+The ordered samples are partitioned into \(K + 1\) consecutive blocks, denoted by \(B_1, B_2, \dots, B_K, B_{K + 1}\), with approximately equal sizes.
+Each block must contain at least one sample; the first block serves as the initial training window.
 
-For each validation fold \(F_i\), where \(i = 2, \dots, K\), the model is trained using all preceding folds, \(\bigcup_{j=1}^{i-1} F_j\), and evaluated on \(F_i\).
-The mean performance metric across the \(K-1\) validation folds is defined as
+For each validation fold \(B_i\), where \(i = 2, \dots, K+1\), the model is trained using all preceding blocks, \(\bigcup_{j=1}^{i-1} B_j\), and evaluated on \(B_i\).
+The mean performance metric across the \(K\) validation folds is defined as
 \[
-	\bar{m} = \frac{1}{K-1} \sum_{i=2}^{K} \mathcal{M} \left( \bigcup_{j=1}^{i-1} F_j, F_i \right).
+	\bar{m} = \frac{1}{K} \sum_{i=2}^{K + 1} \mathcal{M} \left( \bigcup_{j=1}^{i-1} B_j, B_i \right).
 \]
 
-In the implementation, \(K\) defaults to 4.
+The implementation uses \texttt{time\_series\_cross\_validation}, which partitions observation indices with \texttt{numpy.array\_split}; we use \(K=4\) validation folds.
 
 The following defines the repeated random holdout validation procedure used in this study.
 
@@ -49,7 +49,7 @@ The mean performance metric across all \(T\) iterations is then defined as
 	\bar{m} = \frac{1}{T} \sum_{t=1}^{T} m_t.
 \]
 
-In the implementation, the default validation rate is \(r=0.2\) and \(T\) defaults to 4.
+% In the implementation, the default validation rate is \(r=0.2\) and \(T\) defaults to 4.
 The interpolation test set contains only interior observations, with the first and last observations retained in the training set.
 During hyperparameter selection, however, validation masks are sampled from all observations in the training set, including its endpoints.
 This retains more possible validation subsets in very small training sets, but some validation splits may involve extrapolation.

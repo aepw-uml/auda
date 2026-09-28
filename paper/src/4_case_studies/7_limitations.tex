@@ -1,1 +1,23 @@
 \subsection{Limitations}
+
+The results reported in this study are subject to several limitations, most of which stem from the scarcity of country-level plastic waste data and issues regarding their sources.
+
+First, several series we model are extremely short.
+\texttt{YearTRC (Japan)} and \texttt{YearTRC (United States)} each contain nine annual observations.
+\texttt{YearPWG (Japan)} contains 26 observations and is evaluated at four forecast origins, with only two observations in each test window.
+These windows belong to the same series and provide limited evidence about performance on other datasets.
+These small samples limit the complexity of models that can be fit reliably and constrain the strength of conclusions about long-run trends.
+With so few test points, an unusual observation or outlier can dominate the reported metrics, and the resulting model rankings are correspondingly unstable.
+Therefore, the per-experiment rankings throughout Section~4 should be read as indicative rather than definitive.
+
+Second, some evaluation metrics are unreliable on datasets of this size.
+With very few test observations, \(R^2\) is highly sensitive to their values, particularly when the observed values vary little.
+For this reason, we omit \(R^2\) from the smallest tasks and rely primarily on error-based metrics such as WAPE.
+
+Third, this study does not account for the organizations and reports from which individual data points are derived.
+Because different reports may adopt different methodologies, techniques, and definitions, and because environmental data are inherently noisy, the pooled heterogeneous data exhibit inconsistencies.
+We therefore treat this study as a preliminary investigation into data-driven modeling of plastic waste, and we leave the development of models that can accommodate these inconsistencies to future work.
+
+Finally, reproducibility is limited to downstream analyses using the released frozen datasets and code.
+The upstream data pipeline is not publicly accessible because access to the PRISM platform and its underlying source records is restricted.
+Consequently, external researchers cannot independently repeat the extraction and validation of records from the original heterogeneous documents.

@@ -19,7 +19,7 @@ function reproduce() {
         --use_isolation_forest=1 --anomaly_contamination=0.2
 
     # Experiment 2 - Importance analysis
-    auda workflow run PWGPredictors FeatureImportances --contamination=0.2 \
+    auda workflow run PWGPredictors FeatureImportances --contamination=0.05 \
         --seed=471
 
     # Experiment 3 - Imputation (TRC for the United States & TRC for Japan)
@@ -53,6 +53,10 @@ function reproduce() {
         --num_experiments=16 \
         --workflow_name=rolling_global_forecasting_random_search \
         --tune_search_type=random
+
+    # Per-origin WAPE comparison using the completed random-search results.
+    auda workflow run GlobalPlasticsProduction ForecastOriginComparison \
+        --source_workflow=rolling_global_forecasting_random_search
 
     # Single-holdout fits for illustrative plots, not rolling-origin summaries.
     auda workflow run GlobalPlasticsProduction Forecasting --seed=471 \

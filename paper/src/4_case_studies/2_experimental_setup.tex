@@ -1,1 +1,21 @@
 \subsection{Experimental Setup}
+
+All experiments were run on a DigitalOcean droplet with two AMD virtual CPU cores at 2.00 GHz and 4 GiB of memory.
+The operating system was Debian GNU/Linux 13.4 (trixie), using Linux kernel 6.12.43.
+All models were trained and evaluated on CPUs without GPU acceleration.
+All experiments were conducted using Python 3.12.11 with NumPy 2.4.4, pandas 3.0.3, scikit-learn 1.8.0, statsmodels 0.14.6, PyTorch 2.11.0, and Matplotlib 3.10.8.
+
+For each imputation run, two interior observations were randomly held out for testing, while the first and last observations were retained in the training set.
+Forecasting used rolling-origin evaluation with four origins per series, with five test observations per origin for global plastic production and two for Japanese plastic waste generation.
+At each origin, models were trained on all preceding observations and evaluated on the subsequent test window.
+
+For ridge regression, Gaussian process regression, and support vector regression, predictors and targets were standardized using parameters fitted separately on the training portion of each fold.
+ARIMA and exponential smoothing models were fitted on the original scale.
+For feature-importance analysis, isolation forest was fitted to the predictor variables before fitting the random forest.
+
+During hyperparameter tuning, forecasting models were evaluated using time-series cross-validation with \(K = 4\) validation folds.
+The chronologically ordered training data were split into \(K + 1\) blocks, with the first block serving as the initial training window.
+Each subsequent block served once as the validation window, with the model trained on all preceding blocks.
+
+Imputation models were evaluated using repeated random holdout validation with four masks.
+Each mask reserved 20\% of the training samples, with at least two samples reserved for validation, and the remaining samples were used for fitting.

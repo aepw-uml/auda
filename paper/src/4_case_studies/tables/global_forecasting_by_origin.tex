@@ -1,0 +1,19 @@
+% results/rolling_global_forecasting_random_search/origin_comparison_table
+\begin{table}[!ht]
+	\centering
+	\caption{WAPE by forecast period for global plastic production. Values are averaged over 16 runs at each origin, using random-search tuning for ridge regression and SVR. The final row gives the equally weighted mean across the four origins.}
+	\small
+	\begin{tabular}{lrrrr}
+		\toprule
+		Test years & \shortstack{Exponential\\Smoothing} & \shortstack{Theil--Sen\\Regression} & \shortstack{Ridge\\Regression} & SVR \\
+		\midrule
+		2000--2004 & 1.00\% & 1.03\% & 7.04\% & 3.70\% \\
+		2005--2009 & 3.90\% & 3.63\% & 4.08\% & 4.61\% \\
+		2010--2014 & 8.44\% & 7.68\% & 2.27\% & 16.17\% \\
+		2015--2019 & 4.25\% & 2.64\% & 6.22\% & 1.31\% \\
+		\midrule
+		Average across origins & 4.40\% & 3.75\% & 4.90\% & 6.45\% \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:global_forecasting_by_origin}
+\end{table}

@@ -1,4 +1,5 @@
 \subsection{Models}
+\label{sec:models}
 
 The models were selected to compare several ways of interpolating and forecasting the available time series, rather than to provide a comprehensive comparison of them.
 Linear and moving-average interpolation provide simple references based on nearby observations, while cubic splines represent smooth curves between observed values.
@@ -38,11 +39,11 @@ GPR is a Bayesian approach that models the underlying function as a Gaussian pro
 \begin{equation}
 	f \sim \mathcal{GP}(0, k(x, x')),
 \end{equation}
-with an RBF-plus-noise kernel
+with a kernel combining dot-product, RBF, and white-noise terms
 \begin{equation}
-	k(x, x') = \exp \left( -\frac{(x - x')^2}{2 \ell^2} \right) + \sigma^2 \delta_{x, x'},
+	k(x, x') = \sigma_0^2 + xx' + \exp \left( -\frac{(x - x')^2}{2 \ell^2} \right) + \sigma^2 \delta_{x, x'},
 \end{equation}
-where $\ell$ controls temporal smoothness and $\sigma^2$ absorbs observation noise.
+where \(x\) and \(x'\) are standardized year values, \(\sigma_0^2 + xx'\) is the dot-product term, \(\ell\) controls the smoothness of the RBF term, and \(\sigma^2\) is the observation-noise variance.
 
 SVR is a regression method that finds a hyperplane in a high-dimensional space that best fits the data while allowing for some margin of error. The optimization problem for SVR can be formulated as
 \begin{equation}

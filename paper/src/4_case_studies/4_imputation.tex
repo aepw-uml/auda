@@ -1,3 +1,67 @@
 \subsection{Imputation}
 
+The AUDA analysis table is highly sparse due to substantial missing data across countries, regions, and years.
+Therefore, we conduct two imputation case studies using the \texttt{YearTRC (Japan)} and \texttt{YearTRC (United States)} datasets.
+
+The experiment evaluates reconstruction of artificially masked observed values.
+It compares simple interpolation baselines with statistical and machine-learning imputation models.
+Baseline models include linear interpolation, moving average interpolation, and cubic spline interpolation, which are commonly used for filling gaps in time series. Statistical and machine learning models include ridge regression, GPR, SVR, and Theil--Sen regression.
+
+Because both datasets have only 9 data points, each run uses only two held-out observations for testing.
+
+\input{4_case_studies/tables/imputation_japan_trc.tex}
+\input{4_case_studies/tables/imputation_united_states_trc.tex}
+\input{4_case_studies/plots/imputation_plots.tex}
+
+Tables~\ref{tab:imputation_japan_trc} and~\ref{tab:imputation_united_states_trc} summarize mean performance over 16 runs.
+The corresponding run-to-run standard deviations are reported in Appendix~\ref{sec:appendix_d}.
+
+For \texttt{YearTRC (Japan)}, cubic spline interpolation achieved the lowest mean MAE, RMSE, and WAPE among the evaluated methods.
+SVR had the lowest mean WAPE among the machine learning models (\(1.58\%\)), compared with \(1.48\%\) for cubic spline interpolation and \(1.59\%\) for linear interpolation.
+For \texttt{YearTRC (United States)}, GPR achieved the lowest mean MAE, RMSE, and WAPE, with a WAPE of \(1.12\%\), followed by Theil--Sen regression at \(1.17\%\).
+
+Figure~\ref{fig:imputation_plots} shows example fitted curves from individual runs, each with two observations withheld for testing.
+These examples show how the selected models interpolate between observed values, but do not summarize performance across all 16 runs.
+The plots should therefore be considered alongside the averaged test metrics rather than used to establish a model ranking.
+
+Each series contains only nine observations, and repeated masking reuses the same underlying data rather than providing independent datasets.
+Variation between runs reflects changes in the held-out observations, inner validation masks, and random-search configurations.
+The evaluation concerns randomly masked interior observations, not missing endpoints or extended gaps.
+These results do not establish a generally preferable method for small time series.
+
 \subsubsection{Experiment: Hyperparameter Selection Sensitivity}
+
+We set up an environment to evaluate the sensitivity of the hyperparameter-selection procedure to the standard-error tolerance coefficient \(c_{\mathrm{SE}}\) and the complexity ordering in the case study \texttt{YearTRC (United States)}.
+We perform a sweep over \(c_{\mathrm{SE}} \in \{0, 0.01, 0.1, 0.5, 1\}\) and compare the selected models with the minimum mean validation-error configurations in terms of validation WAPE.
+At \(c_{\mathrm{SE}} = 0\), candidates are determined by exact floating-point comparisons with the minimum mean validation error; no numerical tie tolerance is applied.
+If more than one candidate remains, the implementation selects the lexicographically smallest complexity tuple in the order specified in Table~\ref{tab:complexity-ordering}.
+When \(c_{\mathrm{SE}} = 1\), the threshold corresponds to the standard 1-SE rule.
+We record the number of candidate configurations that fall within the selection threshold, the percentage of selection units where the selected configuration changes, the minimum validation WAPE, and the validation WAPE of the final selected configuration.
+The penalty is their difference.
+The complexity rank of a configuration is its position when all evaluated configurations are ordered from simplest to most complex. We record the complexity rank of the selected configuration.
+
+We also evaluate the sensitivity to the complexity ordering by comparing the selected configurations when the signs of the complexity-ordering keys are flipped.
+In the case study, we repeatedly perform 16 imputation runs and record the mean of results.
+In this experiment, we evaluate the sensitivity of the hyperparameter selection on the two tunable models: ridge regression and SVR. Therefore, there are 32 selection units for this experiment.
+
+\input{4_case_studies/plots/selection_sensitivity_to_se_tolerance.tex}
+\input{4_case_studies/tables/selection_sensitivity.tex}
+
+The sweep results in Figure~\ref{fig:selection_sensitivity_to_se_tolerance} and Table~\ref{tab:selection_sensitivity} show that \(c_{\mathrm{SE}} = 0.1\) changes model selection in more than half of the selection units for each model while adding a small WAPE penalty (\(0.01\%\) for ridge regression, and \(0.07\%\) for SVR).
+When \(c_{\mathrm{SE}} = 0.01\), the WAPE penalties for both models are \(0.00\%\) at the precision reported in the table.
+Larger coefficients continue to select simpler configurations, but \(c_{\mathrm{SE}} = 0.5\) and \(c_{\mathrm{SE}} = 1\) lead to larger validation-performance penalties, particularly for SVR, where the WAPE penalty increases to \(0.47\%\) and \(1.11\%\), respectively.
+At \(c_{\mathrm{SE}} = 0\), selection is determined by the minimum mean validation error, with the complexity ordering used only to resolve ties.
+When \(c_{\mathrm{SE}} = 0.01\), the mean numbers of candidate configurations for ridge regression and SVR are \(3.31\) and \(11.12\), respectively.
+
+At \(c_{\mathrm{SE}} = 0.01\), the selected configuration differs from the minimum mean validation-error configuration in a substantial fraction of selection units while producing a \(0.00\%\) average WAPE penalty at the precision reported in Table~\ref{tab:selection_sensitivity}.
+In this study, \(c_{\mathrm{SE}} = 0.01\) was used as an empirical compromise between validation error and model simplicity.
+
+\input{4_case_studies/tables/complexity_ordering_robustness.tex}
+
+The results in Table~\ref{tab:complexity_ordering_robustness} illustrate that flipping the signs of the complexity-ordering keys changed the selected configuration in \(62.50--93.75\%\) of selection units.
+This confirms that the complexity ordering actively influences the selection.
+Nevertheless, the mean WAPE degradation is negligible (\(<0.01\%\)), indicating that configurations within the selection threshold have nearly identical validation WAPE in this sensitivity analysis.
+
+The complexity-ordering sensitivity analysis shows that changing the ordering can alter the selected configuration even when the associated validation WAPE changes very little.
+Thus, the complexity ordering is an explicit design choice that determines which configuration is selected from the candidate set defined by \(c_{\mathrm{SE}}\).
+While this sensitivity analysis evaluates that trade-off, it does not demonstrate that the rule prevents hyperparameter overfitting.
