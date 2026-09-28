@@ -52,6 +52,7 @@ class RollingOriginTest(unittest.TestCase):
         """Checks all inner tuning folds stay before the forecast cutoff."""
 
         experiment = get_ridge_regression_forecasting()
+        assert self.dataset.y is not None
         experiment.setup(
             self.dataset.X[:10], self.dataset.y[:10], forecast_train_size='8'
         )
@@ -85,7 +86,8 @@ class RollingOriginTest(unittest.TestCase):
         ):
             experiment.tune()
         experiment.train()
-        self.assertEqual(seen, [2, 4, 6])
+        self.assertEqual(seen, [2, 4, 6, 7])
+        assert experiment.X_test is not None
         self.assertEqual(experiment.X_test[:, 0].tolist(), [2008, 2009])
         self.assertEqual(experiment.model.x_scaler_.mean_[0], 2003.5)
 
@@ -106,8 +108,12 @@ class RollingOriginTest(unittest.TestCase):
                 side_effect=baseline_task,
             ):
                 RollingOriginForecastingWorkflow().run(
-                    self.dataset, self.schema, initial_train_size='8',
-                    horizon='2', step='2', num_experiments='2',
+                    self.dataset,
+                    self.schema,
+                    initial_train_size='8',
+                    horizon='2',
+                    step='2',
+                    num_experiments='2',
                     workflow_name=temporary,
                 )
             path = Path(temporary)

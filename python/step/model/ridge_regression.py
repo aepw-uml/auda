@@ -28,7 +28,7 @@ class RidgeRegression(Regression):
         super().__init__(hyperparameters, **kwargs)
 
         self.hyperparameters: dict[str, Any] = {
-            'degree': int(hyperparameters.get('degree', 2)),
+            'degree': int(round(float(hyperparameters.get('degree', 2)))),
             'alpha': float(hyperparameters.get('alpha', 1.0)),
         }
         self.fit_intercept: bool = fit_intercept

@@ -61,6 +61,12 @@ def run_workflow(ctx: Context, dataset_name: str, workflow: str) -> None:
             )
 
             RollingOriginForecastingWorkflow().run(dataset, schema, **context)
+        case 'ForecastOriginComparison':
+            from workflow.forecast_origin_comparison_workflow import (
+                ForecastOriginComparisonWorkflow,
+            )
+
+            ForecastOriginComparisonWorkflow().run(dataset, schema, **context)
         case 'MultipleForecasting':
             from workflow.multiple_forecasting_workflow import (
                 MultipleForecastingWorkflow,

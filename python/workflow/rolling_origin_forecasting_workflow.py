@@ -4,10 +4,11 @@ import csv
 import json
 from dataclasses import asdict
 from pathlib import Path
-from typing import override
+from typing import cast, override
 
 import numpy as np
 from common.dataset import Dataset, DatasetSchema
+from common.experiment.forecasting_experiment import ForecastingExperiment
 from common.experiment.persistence import (
     save_gpr_fit_details,
     save_hyperparameter_table,
@@ -40,9 +41,13 @@ def rolling_origins(
 
     X, y = dataset.X, dataset.y
     if (
-        X.ndim != 2 or X.shape[1] != 1 or y is None
-        or y.ndim != 1 or len(X) != len(y)
-        or not np.isfinite(X).all() or not np.isfinite(y).all()
+        X.ndim != 2
+        or X.shape[1] != 1
+        or y is None
+        or y.ndim != 1
+        or len(X) != len(y)
+        or not np.isfinite(X).all()
+        or not np.isfinite(y).all()
     ):
         raise ValueError('Rolling origins require finite univariate data.')
     if not np.all(np.diff(X[:, 0]) > 0):
@@ -50,7 +55,8 @@ def rolling_origins(
     if initial_train_size < 8 or horizon < 1 or step < 1:
         raise ValueError(
             'initial_train_size must be >= 8; horizon and step must be >= 1. '
-            'Eight observations provide at least two per inner CV block.'
+            'Eight observations provide at least two in the initial CV '
+            'training block; validation blocks may contain one observation.'
         )
     origins = list(range(initial_train_size, len(y) - horizon + 1, step))
     if len(origins) < 2:
@@ -112,8 +118,8 @@ class RollingOriginForecastingWorkflow(Workflow):
             run_context = dict(context)
             run_context['forecast_train_size'] = str(train_size)
             prefix = Dataset(
-                dataset.X[:train_size + horizon],
-                dataset.y[:train_size + horizon],
+                dataset.X[: train_size + horizon],
+                dataset.y[: train_size + horizon],
             )
             tasks, means = run_forecasting_tasks(
                 repetitions, prefix, schema, run_context, seed=seed
@@ -125,53 +131,78 @@ class RollingOriginForecastingWorkflow(Workflow):
             origin_time = float(dataset.X[train_size - 1, 0])
             for model_name, metrics in means.items():
                 origin_metrics.setdefault(model_name, []).append(metrics)
-                origin_rows.append({
-                    'origin': origin_index, 'origin_time': origin_time,
-                    'train_size': train_size, 'model': model_name,
-                    **asdict(metrics),
-                })
+                origin_rows.append(
+                    {
+                        'origin': origin_index,
+                        'origin_time': origin_time,
+                        'train_size': train_size,
+                        'model': model_name,
+                        **asdict(metrics),
+                    }
+                )
             for run_index, task in enumerate(tasks, start=1):
                 for experiment in task.experiments:
                     metadata = {
-                        'origin': origin_index, 'origin_time': origin_time,
-                        'train_size': train_size, 'run': run_index,
-                        'seed': experiment.seed, 'model': experiment.name,
+                        'origin': origin_index,
+                        'origin_time': origin_time,
+                        'train_size': train_size,
+                        'run': run_index,
+                        'seed': experiment.seed,
+                        'model': experiment.name,
                     }
-                    metric_rows.append({
-                        **metadata, **asdict(experiment.get_metrics()),
-                        'hyperparameters': json.dumps(
-                            experiment.hyperparameters
-                        ),
-                    })
-                    predictions = experiment.get_model().predict(
-                        experiment.X_test
+                    metric_rows.append(
+                        {
+                            **metadata,
+                            **asdict(experiment.get_metrics()),
+                            'hyperparameters': json.dumps(
+                                experiment.hyperparameters
+                            ),
+                        }
+                    )
+                    forecast_experiment = cast(
+                        ForecastingExperiment, experiment
+                    )
+                    X_test, _ = forecast_experiment.get_test_set()
+                    predictions = forecast_experiment.get_model().predict(
+                        X_test
                     )
                     for offset, prediction in enumerate(predictions):
                         test_index = train_size + offset
                         test_time = float(dataset.X[test_index, 0])
-                        prediction_rows.append({
-                            **metadata, 'horizon_step': offset + 1,
-                            'test_time': test_time,
-                            'elapsed_time': test_time - origin_time,
-                            'observed': float(dataset.y[test_index]),
-                            'predicted': float(prediction),
-                        })
+                        prediction_rows.append(
+                            {
+                                **metadata,
+                                'horizon_step': offset + 1,
+                                'test_time': test_time,
+                                'elapsed_time': test_time - origin_time,
+                                'observed': float(dataset.y[test_index]),
+                                'predicted': float(prediction),
+                            }
+                        )
         means = {
             name: average_regression_metrics(values)
             for name, values in origin_metrics.items()
         }
         save_metric_table(means, destination)
-        save_metric_table({
-            name: std_regression_metrics(values)
-            for name, values in origin_metrics.items()
-        }, destination / 'origin_std')
+        save_metric_table(
+            {
+                name: std_regression_metrics(values)
+                for name, values in origin_metrics.items()
+            },
+            destination / 'origin_std',
+        )
         save_rows(destination / 'run_metrics.csv', metric_rows)
         save_rows(destination / 'origin_metrics.csv', origin_rows)
         save_rows(destination / 'predictions.csv', prediction_rows)
         manifest = {
-            'initial_train_size': initial, 'horizon': horizon, 'step': step,
-            'num_origins': len(origins), 'num_experiments': repetitions,
-            'seed': seed, 'context': context, 'schema': asdict(schema),
+            'initial_train_size': initial,
+            'horizon': horizon,
+            'step': step,
+            'num_origins': len(origins),
+            'num_experiments': repetitions,
+            'seed': seed,
+            'context': context,
+            'schema': asdict(schema),
             'aggregation': (
                 'Mean across seeds within origin, then across origins.'
             ),

@@ -2,17 +2,17 @@ from typing import Any, Self, override
 
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import RBF, WhiteKernel
+from sklearn.gaussian_process.kernels import DotProduct, RBF, WhiteKernel
 from step.model.model import Regression
 
 
 class GaussianProcessRegression(Regression):
-    """Gaussian process regressor with an RBF kernel and additive noise.
+    """Gaussian process regressor with linear, RBF, and noise components.
 
-    The model learns a smooth latent function with an RBF kernel while a
-    white-noise term captures observation noise. Scikit-learn optimizes the
-    kernel by maximizing log-marginal likelihood on the supplied training
-    data. AUDA does not externally search or apply the 1-SE rule to GPR.
+    A DotProduct component supports linear trends, RBF models smooth local
+    variation, and WhiteKernel models observation noise. Scikit-learn
+    optimizes the kernel by maximizing log-marginal likelihood on the supplied
+    training data. AUDA does not externally search or apply the 1-SE rule.
 
     Attributes:
         hyperparameters: Model configuration containing ``length_scale`` and
@@ -29,9 +29,8 @@ class GaussianProcessRegression(Regression):
         Args:
             hyperparameters: Model configuration containing ``length_scale``
                 and ``noise_level`` initialization values, plus optional
-                ``n_restarts_optimizer`` (default zero) and ``random_state``
-                (default 42). Zero restarts performs one optimization from
-                the initial kernel; additional restarts use the fixed seed.
+                ``n_restarts_optimizer`` (default 20) and ``random_state``
+                (default 42). The restarts use the fixed seed.
             **kwargs: Additional keyword arguments forwarded to the base class.
         """
 
@@ -40,7 +39,7 @@ class GaussianProcessRegression(Regression):
             'length_scale': float(hyperparameters.get('length_scale', 1.0)),
             'noise_level': float(hyperparameters.get('noise_level', 1e-2)),
             'n_restarts_optimizer': int(
-                hyperparameters.get('n_restarts_optimizer', 0)
+                hyperparameters.get('n_restarts_optimizer', 20)
             ),
             'random_state': int(hyperparameters.get('random_state', 42)),
         }
@@ -75,7 +74,10 @@ class GaussianProcessRegression(Regression):
                 'Gaussian process regression noise_level must be non-negative.'
             )
 
-        kernel = RBF(
+        kernel = DotProduct(
+            sigma_0=1.0,
+            sigma_0_bounds=(1e-5, 1e5),
+        ) + RBF(
             length_scale=length_scale,
             length_scale_bounds=(1e-10, 1e3),
         ) + WhiteKernel(
@@ -95,14 +97,21 @@ class GaussianProcessRegression(Regression):
 
         self.parameters['kernel'] = self.regressor_.kernel_
         self.parameters['length_scale'] = float(
-            self.regressor_.kernel_.k1.length_scale
+            self.regressor_.kernel_.k1.k2.length_scale
         )
         self.parameters['noise_level'] = float(
             self.regressor_.kernel_.k2.noise_level
         )
+        self.parameters['initial_sigma_0'] = 1.0
+        self.parameters['sigma_0'] = float(
+            self.regressor_.kernel_.k1.k1.sigma_0
+        )
+        self.parameters['sigma_0_bounds'] = kernel.k1.k1.sigma_0_bounds
         self.parameters['initial_length_scale'] = length_scale
         self.parameters['initial_noise_level'] = noise_level
-        self.parameters['length_scale_bounds'] = kernel.k1.length_scale_bounds
+        self.parameters['length_scale_bounds'] = (
+            kernel.k1.k2.length_scale_bounds
+        )
         self.parameters['noise_level_bounds'] = kernel.k2.noise_level_bounds
         self.parameters['optimizer'] = self.regressor_.optimizer
         self.parameters['n_restarts_optimizer'] = (

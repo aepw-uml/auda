@@ -60,7 +60,7 @@ class PWDriverFeatureSet(DatasetFetcher):
                 'Urban Population',
                 'Plastic Waste Generation',
                 'Plastic Mismanaged',
-                'Plastic Generation Management %',
+                'Plastic Waste Collected (%)',
             ],
             feature_units=[
                 '',
