@@ -28,6 +28,8 @@ class CorrelationMatrixPlotter(Plotter):
 
         # Mask the upper triangle (because the matrix is symmetric)
         mask = np.triu(np.ones_like(df, dtype=bool), k=1)
+        annotation_labels = np.char.mod('%.2f', corr)
+        annotation_labels = np.char.replace(annotation_labels, '-', '−')
 
         # Figure size that scales with number of features
         n = len(feature_names)
@@ -57,8 +59,8 @@ class CorrelationMatrixPlotter(Plotter):
             square=False,
             cbar=True,
             cbar_kws={'label': '', 'shrink': 0.9},
-            annot=True,
-            fmt='.2f',
+            annot=annotation_labels,
+            fmt='',
             annot_kws={'fontsize': 7},
             linewidths=0.5,
             linecolor='white',
