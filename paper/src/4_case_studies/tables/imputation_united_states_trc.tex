@@ -1,10 +1,9 @@
 % results/multiple_imputation_united_states/metric_table
-\begin{table}[!ht]
-	\centering
-	\caption{\centering Imputation performance for artificially masked total resin consumption in the United States using the \texttt{YearTRC (United States)} dataset, averaged over 16 runs with test \(n=2\) per run.}
-	\begin{tabular}{@{}lccc@{}}
+\begin{table}[H]
+	\caption{Imputation performance for artificially masked total resin consumption in the United States using the \texttt{YearTRC (United States)} dataset, averaged over 16 runs with test \(n=2\) per run.}
+	\begin{tabularx}{\textwidth}{lCCC}
 		\toprule
-		\textbf{Experiment}            & \textbf{MAE}                   & \textbf{RMSE}                  & \textbf{WAPE}       \\
+		\textbf{Experiment} & \textbf{MAE} & \textbf{RMSE} & \textbf{WAPE} \\
 		\midrule
 		Linear Interpolation & \(1.749 \times 10^{5}\) & \(1.962 \times 10^{5}\) & 1.19\% \\
 		Moving Average Interpolation & \(3.054 \times 10^{5}\) & \(3.229 \times 10^{5}\) & 2.06\% \\
@@ -13,7 +12,11 @@
 		Ridge Regression & \(1.902 \times 10^{5}\) & \(2.144 \times 10^{5}\) & 1.29\% \\
 		\textbf{GPR} & \(\mathbf{1.638 \times 10^{5}}\) & \(\mathbf{1.832 \times 10^{5}}\) & \textbf{1.12\%} \\
 		SVR & \(2.067 \times 10^{5}\) & \(2.243 \times 10^{5}\) & 1.41\% \\
-		\hline
-	\end{tabular}
+		\bottomrule
+	\end{tabularx}
+	\smallskip
+	{\footnotesize
+	Note: Bold values indicate the lowest mean error for each metric; the corresponding method name is also shown in bold.\par
+	}
 	\label{tab:imputation_united_states_trc}
 \end{table}

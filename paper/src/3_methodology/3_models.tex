@@ -68,5 +68,5 @@ At each split, the impurity decrease is calculated as
 \begin{equation}
 	\Delta I = I_P - \frac{n_L}{n}I_L - \frac{n_R}{n}I_R,
 \end{equation}
-where \(I_P\) is the impurity of the parent node, \(I_L\) and \(I_R\) are the impurities of the left and right child nodes, respectively, and \(n_L\) and \(n_R\) are the number of samples in the left and right child nodes, respectively, and \(n = n_L + n_R\).
+where \(I_P\) is the impurity of the parent node; \(I_L\) and \(I_R\) are the impurities of the left and right child nodes, respectively; and \(n_L\) and \(n_R\) are the number of samples in the left and right child nodes, respectively; and \(n = n_L + n_R\).
 The importance of a feature is then computed by summing the weighted impurity decreases over all splits where the feature is used, averaging this quantity across all trees in the forest, and normalizing the importances.

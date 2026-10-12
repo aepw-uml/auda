@@ -1,23 +1,26 @@
 % results/rolling_global_forecasting_grid_search/metric_table
-\begin{table}[!ht]
-	\centering
+\begin{table}[H]
 	\caption{
-		\centering Temporal forecasting performance for global plastic production using grid-search tuning for tunable models, averaged first over 16 runs at each origin and then over four forecast origins, with 5 test observations per origin. The \textsuperscript{*} marker denotes the SVR variant with \(\gamma\) tuning enabled.
+	Temporal forecasting performance for global plastic production using grid-search tuning for tunable models, averaged first over 16 runs at each origin and then over four forecast origins, with 5 test observations per origin. The \textsuperscript{*} marker denotes the SVR variant with \(\gamma\) tuning enabled.
 	}
-	\begin{tabular}{@{}lccccc@{}}
+	\begin{tabularx}{\textwidth}{lccccc}
 		\toprule
-		\textbf{Experiment}    & \textbf{MAE}                   & \textbf{RMSE}                  & $\mathbf{R^2}$     & \textbf{WAPE}       & \textbf{sMAPE}      \\
+		\textbf{Experiment} & \textbf{MAE} & \textbf{RMSE} & $\mathbf{R^2}$ & \textbf{WAPE} & \textbf{sMAPE} \\
 		\midrule
-		Naive Persistence & \(3.990 \times 10^{7}\) & \(4.399 \times 10^{7}\) & -5.015 & 12.41\% & 13.07\% \\
-		Drift Baseline & \(2.267 \times 10^{7}\) & \(2.568 \times 10^{7}\) & -0.934 & 6.84\% & 6.99\% \\
-		Exponential Smoothing & \(1.495 \times 10^{7}\) & \(1.694 \times 10^{7}\) & -0.202 & 4.40\% & 4.42\% \\
+		Naive Persistence & \(3.990 \times 10^{7}\) & \(4.399 \times 10^{7}\) & $-$5.015 & 12.41\% & 13.07\% \\
+		Drift Baseline & \(2.267 \times 10^{7}\) & \(2.568 \times 10^{7}\) & $-$0.934 & 6.84\% & 6.99\% \\
+		Exponential Smoothing & \(1.495 \times 10^{7}\) & \(1.694 \times 10^{7}\) & $-$0.202 & 4.40\% & 4.42\% \\
 		\textbf{Theil--Sen Regression} & \(\mathbf{1.244 \times 10^{7}}\) & \(\mathbf{1.396 \times 10^{7}}\) & \textbf{0.090} & \textbf{3.75\%} & \textbf{3.75\%} \\
-		ARIMA Regression & \(1.593 \times 10^{7}\) & \(1.869 \times 10^{7}\) & -0.540 & 4.70\% & 4.71\% \\
-		Ridge Regression & \(2.086 \times 10^{7}\) & \(2.176 \times 10^{7}\) & -0.369 & 6.37\% & 6.53\% \\
-		GPR & \(1.856 \times 10^{7}\) & \(2.076 \times 10^{7}\) & -0.558 & 5.29\% & 5.37\% \\
-		SVR & \(1.930 \times 10^{7}\) & \(2.249 \times 10^{7}\) & -1.900 & 6.06\% & 6.35\% \\
-		SVR\textsuperscript{*} & \(1.789 \times 10^{7}\) & \(1.948 \times 10^{7}\) & -0.654 & 6.17\% & 6.38\% \\
-		\hline
-	\end{tabular}
+		ARIMA Regression & \(1.593 \times 10^{7}\) & \(1.869 \times 10^{7}\) & $-$0.540 & 4.70\% & 4.71\% \\
+		Ridge Regression & \(2.086 \times 10^{7}\) & \(2.176 \times 10^{7}\) & $-$0.369 & 6.37\% & 6.53\% \\
+		GPR & \(1.856 \times 10^{7}\) & \(2.076 \times 10^{7}\) & $-$0.558 & 5.29\% & 5.37\% \\
+		SVR & \(1.930 \times 10^{7}\) & \(2.249 \times 10^{7}\) & $-$1.900 & 6.06\% & 6.35\% \\
+		SVR\textsuperscript{*} & \(1.789 \times 10^{7}\) & \(1.948 \times 10^{7}\) & $-$0.654 & 6.17\% & 6.38\% \\
+		\bottomrule
+	\end{tabularx}
+	\smallskip
+	{\footnotesize
+	Note: Bold values indicate the lowest mean MAE, RMSE, WAPE, and sMAPE and the highest mean \(R^2\); the corresponding method name is also shown in bold.\par
+	}
 	\label{tab:global_forecasting_grid_search_metrics}
 \end{table}

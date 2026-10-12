@@ -1,10 +1,9 @@
 % results/multiple_imputation_japan/metric_table
-\begin{table}[!ht]
-	\centering
-	\caption{\centering Imputation performance for artificially masked total resin consumption in Japan using the \texttt{YearTRC (Japan)} dataset, averaged over 16 runs with test \(n=2\) per run.}
-	\begin{tabular}{@{}lccc@{}}
+\begin{table}[H]
+	\caption{ Imputation performance for artificially masked total resin consumption in Japan using the \texttt{YearTRC (Japan)} dataset, averaged over 16 runs with test \(n=2\) per run.}
+	\begin{tabularx}{\textwidth}{lCCC}
 		\toprule
-		\textbf{Experiment}                 & \textbf{MAE}                   & \textbf{RMSE}                  & \textbf{WAPE}       \\
+		\textbf{Experiment} & \textbf{MAE} & \textbf{RMSE} & \textbf{WAPE} \\
 		\midrule
 		Linear Interpolation & \(5.932 \times 10^{4}\) & \(6.677 \times 10^{4}\) & 1.59\% \\
 		Moving Average Interpolation & \(6.308 \times 10^{4}\) & \(7.014 \times 10^{4}\) & 1.69\% \\
@@ -13,7 +12,11 @@
 		Ridge Regression & \(7.586 \times 10^{4}\) & \(7.854 \times 10^{4}\) & 2.03\% \\
 		GPR & \(6.695 \times 10^{4}\) & \(7.955 \times 10^{4}\) & 1.80\% \\
 		SVR & \(5.881 \times 10^{4}\) & \(6.331 \times 10^{4}\) & 1.58\% \\
-		\hline
-	\end{tabular}
+		\bottomrule
+	\end{tabularx}
+	\smallskip
+	{\footnotesize
+	Note: Bold values indicate the lowest mean error for each metric; the corresponding method name is also shown in bold.\par
+	}
 	\label{tab:imputation_japan_trc}
 \end{table}

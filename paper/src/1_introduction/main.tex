@@ -2,7 +2,7 @@
 
 Plastic waste has become one of the most critical environmental challenges of the twenty-first century, with global waste volumes expected to increase substantially in the coming decades.
 Recent studies estimate that global plastic production exceeded 430 million tonnes (Mt) in 2022~\cite{houssini2025complexities} and will increase to approximately 735.4--832.4~Mt by 2050~\cite{dokl2024global}.
-Correspondingly, the OECD projects that annual plastic waste generation will increase from 353~Mt in 2019 to 1{,}014~Mt by 2060~\cite{oecd2022PlasticWaste2060}.
+Correspondingly, the OECD projects that annual plastic waste generation will increase from 353~Mt in 2019 to 1014~Mt by 2060~\cite{oecd2022PlasticWaste2060}.
 The mismanagement of plastic waste further exacerbates environmental degradation.
 While between 60 and 99~Mt of mismanaged plastic waste entered the environment in 2015, one report projected that this amount could nearly triple by 2060~\cite{lebreton2019future}.
 These trends highlight the urgent need for robust, data-driven forecasting tools to support proactive planning and evidence-based intervention strategies.
@@ -19,9 +19,9 @@ Nevertheless, applying analytical models to these records remains challenging be
 This limits the evidence available for comparing interpolation and forecasting methods and makes model selection results difficult to interpret.
 This study examines these practical limitations through selected case studies.
 
-This paper presents AUDA (AEPW x UMass Lowell Data Analysis), a data modeling tool for analyzing data migrated from PRISM.
+This paper presents AUDA (AEPW \(\times\) UMass Lowell Data Analysis), a data modeling tool for analyzing data migrated from PRISM.
 It aims to document this analytical process and illustrate its use through selected case studies on plastic production, waste generation, and resin consumption.
-AUDA transforms human-reviewed PRISM records into a country-year analytical database and provides reusable workflows for constructing modeling datasets, filtering anomalous observations, imputing missing values, forecasting temporal trends, and evaluating model performance.
+AUDA transforms human-reviewed PRISM records into a country--year analytical database and provides reusable workflows for constructing modeling datasets, filtering anomalous observations, imputing missing values, forecasting temporal trends, and evaluating model performance.
 Using AUDA, we conduct a series of experiments on plastic waste and related driver variables, including demographic, socioeconomic, waste-management, resin-consumption, and polymer-specific indicators.
 In addition, this paper serves as a preliminary study examining the use of an analytical workflow on selected sparse and heterogeneous plastic-related datasets.
 The case studies presented in this paper examine only descriptive relationships and predictive performance; they do not estimate the effects of policy interventions or establish causal relationships.
@@ -32,6 +32,6 @@ We introduce a standard-error tolerance coefficient, \(c_{\mathrm{SE}}\), to adj
 We treat this coefficient as an exploratory sensitivity setting rather than a correction to the standard-error estimate.
 
 In brief, this paper makes two main contributions.
-First, we present AUDA and use it to construct and analyze country-year datasets from human-reviewed PRISM records.
+First, we present AUDA and use it to construct and analyze country--year datasets from human-reviewed PRISM records.
 We illustrate its use through selected case studies covering descriptive analysis, missing-value interpolation, and temporal forecasting of plastic-related indicators.
 Second, we explore how a standard-error tolerance coefficient and alternative complexity orderings affect hyperparameter selection in an interpolation case study.

@@ -1,19 +1,20 @@
 % results/complexity_ordering_robustness_united_states/summary_table
 \begin{table}[!ht]
 	\centering
+	\small
 	\caption{\centering WAPE degradation under flipped selections.}
-	\begin{tabular}{lccccc}
+	\begin{tabularx}{\textwidth}{lCCCCC}
 		\toprule
-		Experiment       &
-		\shortstack{Changed                                            \\Rate} &
-		\shortstack{Mean                                               \\Original\\WAPE} &
-		\shortstack{Mean                                               \\Flipped\\WAPE} &
-		\shortstack{Mean                                               \\WAPE\\Degradation} &
-		\shortstack{Max                                                \\WAPE\\Degradation} \\
+		\textbf{Experiment} &
+		\shortstack{\textbf{Changed} \\\textbf{Rate}} &
+		\shortstack{\textbf{Mean} \\\textbf{Original}\\\textbf{WAPE}} &
+		\shortstack{\textbf{Mean} \\\textbf{Flipped}\\\textbf{WAPE}} &
+		\shortstack{\textbf{Mean} \\\textbf{WAPE}\\\textbf{Degradation}} &
+		\shortstack{\textbf{Max} \\\textbf{WAPE}\\\textbf{Degradation}} \\
 		\midrule
 		Ridge Regression & 62.50\% & 1.26\% & 1.26\% & 0.00\% & 0.00\% \\
 		SVR & 93.75\% & 3.31\% & 3.31\% & 0.00\% & 0.01\% \\
 		\bottomrule
-	\end{tabular}
+	\end{tabularx}
 	\label{tab:complexity_ordering_robustness}
 \end{table}
